@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "976058875224",
+    "project_id": "chantiertrack-561bf",
+    "storage_bucket": "chantiertrack-561bf.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976058875224:android:967f47b3c4ab470ce0f92d",
+        "android_client_info": {
+          "package_name": "com.example.chantier_track"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBNN8v8NVgWBqY2A8eiQ4IXCGRj8nvHM8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

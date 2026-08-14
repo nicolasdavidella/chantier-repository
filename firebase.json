@@ -1,0 +1,41 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "chantiertrack-561bf",
+          "appId": "1:976058875224:android:967f47b3c4ab470ce0f92d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "chantiertrack-561bf",
+          "configurations": {
+            "android": "1:976058875224:android:967f47b3c4ab470ce0f92d",
+            "ios": "1:976058875224:ios:1e882014ebd1d839e0f92d",
+            "macos": "1:976058875224:ios:1e882014ebd1d839e0f92d",
+            "web": "1:976058875224:web:57e9c16ce1597f0ee0f92d",
+            "windows": "1:976058875224:web:db53e86374a6a9a1e0f92d"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true
+  }
+}

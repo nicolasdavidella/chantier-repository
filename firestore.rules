@@ -1,0 +1,222 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==============================================================================
+    // FONCTIONS UTILITAIRES (UTILITIES)
+    // ==============================================================================
+    
+    // Vérifie si l'utilisateur est connecté
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Récupère les données du document utilisateur de la personne connectée
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+    
+    // Vérifie le rôle de l'utilisateur
+    function isRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+    
+    function isAdmin() {
+      return isRole('admin');
+    }
+    
+    function isClient() {
+      return isRole('client');
+    }
+    
+    function isEntreprise() {
+      return isRole('entreprise');
+    }
+    
+    function isChefChantier() {
+      return isRole('chef_chantier');
+    }
+
+    // ==============================================================================
+    // RÈGLES PAR COLLECTION
+    // ==============================================================================
+
+    // ------------------------------------------------------------------------------
+    // USERS (Utilisateurs)
+    // ------------------------------------------------------------------------------
+    match /users/{userId} {
+      // Un utilisateur peut lire et modifier son propre profil.
+      // Un admin peut lire tous les profils et modifier certains champs (ex: désactivation).
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // Seul l'utilisateur (à l'inscription) peut créer son profil
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAdmin();
+    }
+    
+    // ------------------------------------------------------------------------------
+    // ENTREPRISES (Profils d'entreprises)
+    // ------------------------------------------------------------------------------
+    match /entreprises/{entrepriseId} {
+      // Tout utilisateur connecté peut lire les profils des entreprises (pour la recherche)
+      allow read: if isAuthenticated();
+      // Seul le propriétaire de l'entreprise ou un admin peut modifier le profil
+      // L'admin gère notamment le champ "certifie" ou "valide"
+      allow update: if isAuthenticated() && (request.auth.uid == entrepriseId || isAdmin());
+      allow create: if isAuthenticated() && request.auth.uid == entrepriseId;
+    }
+
+    // ------------------------------------------------------------------------------
+    // PROJETS
+    // ------------------------------------------------------------------------------
+    match /projets/{projectId} {
+      // Fonction utilitaire pour vérifier si l'utilisateur est le client du projet
+      function isProjectClient() {
+        return resource.data.clientId == request.auth.uid;
+      }
+      // Fonction utilitaire pour vérifier si l'utilisateur est l'entreprise assignée
+      function isProjectEntreprise() {
+        return resource.data.entrepriseId == request.auth.uid;
+      }
+      // Fonction utilitaire pour vérifier si le projet cherche une entreprise
+      function isProjectPublic() {
+        return resource.data.statut == 'recherche_entreprise';
+      }
+
+      // LECTURE: 
+      // - Le client propriétaire
+      // - L'entreprise sélectionnée
+      // - Un chef de chantier (si on suppose qu'il y a un tableau de chefs assignés, sinon on le filtre via ses tâches)
+      // - Les entreprises si le projet est en recherche (seulement les infos publiques, mais géré côté client pour filtrer, ici on autorise la lecture)
+      // - Les administrateurs
+      allow read: if isAuthenticated() && (
+        isProjectClient() || 
+        isProjectEntreprise() || 
+        (isEntreprise() && isProjectPublic()) || 
+        isAdmin()
+      );
+
+      // CRÉATION: Un client peut créer un projet (il doit s'assigner en tant que clientId)
+      allow create: if isClient() && request.resource.data.clientId == request.auth.uid;
+      
+      // MODIFICATION: 
+      // - Le client propriétaire
+      // - L'entreprise sélectionnée (pour mettre à jour l'avancement global ou accepter le projet)
+      allow update: if isAuthenticated() && (isProjectClient() || isProjectEntreprise() || isAdmin());
+      
+      // SUPPRESSION: Seul le client ou l'admin
+      allow delete: if isAuthenticated() && (isProjectClient() || isAdmin());
+      
+      // ==============================================================================
+      // SOUS-COLLECTIONS D'UN PROJET
+      // ==============================================================================
+
+      // ------------------------------------------------------------------------------
+      // TÂCHES (Tasks)
+      // ------------------------------------------------------------------------------
+      match /taches/{taskId} {
+        // Lecture : Client, Entreprise sélectionnée, ou Admin. 
+        // Chef de chantier : s'il est responsable de la tâche.
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projets/$(projectId)).data.clientId == request.auth.uid ||
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid ||
+          isAdmin() ||
+          (isChefChantier() && resource.data.chefChantierId == request.auth.uid)
+        );
+
+        // Modification : 
+        // - Le client / l'entreprise du projet (pour replanifier)
+        // - Le chef de chantier assigné (pour changer le statut d'une tâche qui lui est assignée)
+        allow update: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projets/$(projectId)).data.clientId == request.auth.uid ||
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid ||
+          (isChefChantier() && resource.data.chefChantierId == request.auth.uid)
+        );
+        
+        allow create: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid ||
+          get(/databases/$(database)/documents/projets/$(projectId)).data.clientId == request.auth.uid
+        );
+      }
+
+      // ------------------------------------------------------------------------------
+      // RAPPORTS D'AVANCEMENT
+      // ------------------------------------------------------------------------------
+      match /rapports/{reportId} {
+        // Lecture : Client, Entreprise du projet, Admin
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projets/$(projectId)).data.clientId == request.auth.uid ||
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid ||
+          isAdmin()
+        );
+        
+        // Création : Seulement le chef de chantier (qui rapporte) ou l'entreprise
+        allow create: if isAuthenticated() && (
+          isChefChantier() || 
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid
+        );
+      }
+
+      // ------------------------------------------------------------------------------
+      // DÉPENSES
+      // ------------------------------------------------------------------------------
+      match /depenses/{depenseId} {
+        // Lecture : Client, Entreprise, Admin
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projets/$(projectId)).data.clientId == request.auth.uid ||
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid ||
+          isAdmin()
+        );
+        
+        // Création : Seulement le chef de chantier pour déclarer la dépense initiale
+        // Note: Les Cloud Functions utilisent le SDK Admin qui contourne ces règles.
+        allow create: if isChefChantier();
+        
+        // Modification : Bloquée pour les utilisateurs classiques pour éviter la triche sur les montants.
+        // Seule une Cloud Function (Admin SDK) ou un administrateur peut modifier ou valider une dépense.
+        allow update: if isAdmin();
+      }
+
+      // ------------------------------------------------------------------------------
+      // ALERTES IA (Insights / Anomalies)
+      // ------------------------------------------------------------------------------
+      match /alertes_ia/{alerteId} {
+        // Lecture : Client du projet, Entreprise du projet, Admin
+        allow read: if isAuthenticated() && (
+          get(/databases/$(database)/documents/projets/$(projectId)).data.clientId == request.auth.uid ||
+          get(/databases/$(database)/documents/projets/$(projectId)).data.entrepriseId == request.auth.uid ||
+          isAdmin()
+        );
+        
+        // Création/Modification : STRICTEMENT INTERDIT au client/entreprise/chef de chantier.
+        // Seules les Cloud Functions (backend) analysant les données peuvent générer ou modifier des alertes.
+        allow write: if false; 
+      }
+    }
+    
+    // ------------------------------------------------------------------------------
+    // CONVERSATIONS (Messagerie)
+    // ------------------------------------------------------------------------------
+    match /conversations/{conversationId} {
+      // Lecture/Modification : Uniquement si l'UID de l'utilisateur fait partie du tableau des participants.
+      allow read, update: if isAuthenticated() && request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated() && request.auth.uid in request.resource.data.participants;
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        allow create: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+      }
+    }
+    
+    // ------------------------------------------------------------------------------
+    // NOTIFICATIONS
+    // ------------------------------------------------------------------------------
+    match /notifications/{notificationId} {
+      // Un utilisateur ne peut lire, marquer comme lu ou supprimer que ses propres notifications.
+      allow read, update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // La création se fait généralement par les Cloud Functions (Admin SDK), pas directement par l'utilisateur.
+      allow create: if false;
+    }
+  }
+}
