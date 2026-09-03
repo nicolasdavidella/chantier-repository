@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/chat_providers.dart';
+import '../../../auth/providers/auth_provider.dart';
+import '../../providers/chat_providers.dart';
 import '../widgets/chat_bubble.dart';
 
 class ChatDetailScreen extends ConsumerStatefulWidget {
@@ -37,10 +38,13 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final text = _messageController.text.trim();
     if (text.isEmpty && type == 'texte') return;
 
-    ref.read(chatServiceProvider).sendMessage(
+    final user = ref.read(authStateProvider).value;
+    if (user == null) return;
+
+    ref.read(chatRepositoryProvider).sendMessage(
           widget.conversationId,
           type == 'image' ? 'https://images.unsplash.com/photo-1541888081622-1db116fb837a?w=400' : text,
-          'u_current',
+          user.uid,
           type: type,
         );
 
@@ -89,7 +93,8 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final message = messages[index];
-                    final isMe = message.expediteurId == 'u_current';
+                    final user = ref.read(authStateProvider).value;
+                    final isMe = message.expediteurId == user?.uid;
                     return ChatBubble(message: message, isMe: isMe);
                   },
                 );

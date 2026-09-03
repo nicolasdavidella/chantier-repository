@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/admin_providers.dart';
+import 'package:chantier_track/features/admin/providers/admin_providers.dart';
 
 class ActivityLogsScreen extends ConsumerWidget {
   const ActivityLogsScreen({super.key});

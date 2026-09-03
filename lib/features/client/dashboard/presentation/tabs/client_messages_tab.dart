@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/l10n/app_localizations.dart';
 
 class ClientMessagesTab extends ConsumerWidget {
   const ClientMessagesTab({super.key});
@@ -12,7 +13,7 @@ class ClientMessagesTab extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Messages'),
+        title: Text(AppLocalizations.of(context)?.messagesTab ?? 'Messages'),
         centerTitle: false,
         actions: [
           IconButton(

@@ -24,6 +24,10 @@ class UserRepository {
     return null;
   }
   
+  Future<void> updateUser(UserModel user) async {
+    await _firestore.collection('users').doc(user.uid).update(user.toJson());
+  }
+  
   Future<void> createEntreprise(EntrepriseModel entreprise) async {
     await _firestore.collection('entreprises').doc(entreprise.id).set(entreprise.toJson());
   }

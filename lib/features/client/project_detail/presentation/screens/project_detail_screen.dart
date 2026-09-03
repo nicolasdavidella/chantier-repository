@@ -88,7 +88,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   return PdfExportService.generateProgressReport(
                     project: widget.project,
                     rapports: [
-                      RapportAvancementModel(id: '1', projectId: widget.project.id, chefChantierId: 'c1', dateRapport: DateTime.now(), pourcentageGlobal: 40, commentaire: 'Gros oeuvre achevé', listeTachesUpdate: [], photos: []),
+                      RapportAvancementModel(id: '1', projectId: widget.project.id, chefChantierId: 'c1', date: DateTime.now(), pourcentageAvancement: 40, description: 'Gros oeuvre achevé', tachesConcernees: [], photos: [], videos: []),
                     ],
                   );
                 },
@@ -101,7 +101,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   return PdfExportService.generateFinancialReport(
                     project: widget.project,
                     depenses: [
-                      DepenseModel(id: '1', projectId: widget.project.id, chefChantierId: 'c1', montant: 500000, categorie: 'Matériaux', dateDepense: DateTime.now(), description: 'Ciment', justificatifUrl: '', statutValidation: 'valide'),
+                      DepenseModel(id: '1', projectId: widget.project.id, declarantId: 'c1', montant: 500000, categorie: 'Matériaux', dateDeclaration: DateTime.now(), description: 'Ciment', justificatifUrl: '', statut: 'valide'),
                     ],
                   );
                 },

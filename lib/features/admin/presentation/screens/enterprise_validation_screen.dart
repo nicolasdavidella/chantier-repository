@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/entreprise_model.dart';
-import '../providers/admin_providers.dart';
+import 'package:chantier_track/features/admin/providers/admin_providers.dart';
 
 class EnterpriseValidationScreen extends ConsumerWidget {
   const EnterpriseValidationScreen({super.key});
@@ -42,10 +42,9 @@ class EnterpriseValidationScreen extends ConsumerWidget {
                   child: ExpansionTile(
                     leading: CircleAvatar(
                       backgroundColor: theme.colorScheme.primaryContainer,
-                      backgroundImage: entreprise.logoUrl != null ? NetworkImage(entreprise.logoUrl!) : null,
-                      child: entreprise.logoUrl == null ? const Icon(Icons.business) : null,
+                      child: const Icon(Icons.business),
                     ),
-                    title: Text(entreprise.nom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(entreprise.raisonSociale, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Text(entreprise.specialites.join(', ')),
                     children: [
                       Padding(
@@ -53,8 +52,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _buildInfoRow('Email', entreprise.email),
-                            _buildInfoRow('Téléphone', entreprise.telephone ?? 'Non renseigné'),
+                            _buildInfoRow('Description', entreprise.description),
                             _buildInfoRow('Zones', entreprise.zoneIntervention.join(', ')),
                             AppSpacing.vMd,
                             const Text('Documents Soumis', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -118,7 +116,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirmer la validation'),
-        content: Text('Voulez-vous vraiment valider l\'entreprise "${entreprise.nom}" ? Elle pourra désormais soumettre des devis.'),
+        content: Text('Voulez-vous vraiment valider l\'entreprise "${entreprise.raisonSociale}" ? Elle pourra désormais soumettre des devis.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text('Annuler')),
           FilledButton(
@@ -126,7 +124,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(pendingEnterprisesProvider.notifier).validateEnterprise(entreprise.id);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Entreprise ${entreprise.nom} validée')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Entreprise ${entreprise.raisonSociale} validée')));
             },
             child: const Text('Valider'),
           ),
@@ -143,7 +141,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('Voulez-vous rejeter l\'entreprise "${entreprise.nom}" ?'),
+            Text('Voulez-vous rejeter l\'entreprise "${entreprise.raisonSociale}" ?'),
             AppSpacing.vMd,
             const TextField(
               decoration: InputDecoration(
@@ -161,7 +159,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
             onPressed: () {
               ref.read(pendingEnterprisesProvider.notifier).rejectEnterprise(entreprise.id);
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Entreprise ${entreprise.nom} rejetée')));
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Entreprise ${entreprise.raisonSociale} rejetée')));
             },
             child: const Text('Rejeter'),
           ),

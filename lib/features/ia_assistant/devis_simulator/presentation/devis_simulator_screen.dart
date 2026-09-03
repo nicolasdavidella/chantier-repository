@@ -5,7 +5,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/ia_providers.dart';
+import 'package:chantier_track/features/ia_assistant/providers/ia_providers.dart';
 
 class DevisSimulatorScreen extends ConsumerStatefulWidget {
   const DevisSimulatorScreen({super.key});

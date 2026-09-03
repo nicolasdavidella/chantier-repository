@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/chat_providers.dart';
+import '../../auth/providers/auth_provider.dart';
 import 'chat_detail_screen.dart';
 
 class ConversationsListScreen extends ConsumerWidget {
@@ -25,20 +26,23 @@ class ConversationsListScreen extends ConsumerWidget {
           if (conversations.isEmpty) {
             return const Center(child: Text('Aucune conversation.'));
           }
+          final user = ref.read(authStateProvider).value;
+          final currentUserId = user?.uid ?? '';
+
           return ListView.separated(
             itemCount: conversations.length,
             separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final conv = conversations[index];
               // Find the other participant's name
-              final otherUserId = conv.participantsIds.firstWhere((id) => id != 'u_current', orElse: () => '');
+              final otherUserId = conv.participantsIds.firstWhere((id) => id != currentUserId, orElse: () => '');
               final otherUserName = conv.participantNames[otherUserId] ?? 'Inconnu';
               final otherUserAvatar = conv.participantAvatars[otherUserId];
-              final unreadCount = conv.unreadCount['u_current'] ?? 0;
+              final unreadCount = conv.unreadCount[currentUserId] ?? 0;
 
               return ListTile(
                 onTap: () {
-                  ref.read(chatServiceProvider).markAsRead(conv.id, 'u_current');
+                  ref.read(chatRepositoryProvider).markAsRead(conv.id, currentUserId);
                   Navigator.push(
                     context,
                     MaterialPageRoute(

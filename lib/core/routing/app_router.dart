@@ -13,6 +13,7 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/entreprise_details_screen.dart';
 import '../../features/client/dashboard/presentation/client_dashboard_screen.dart';
 import '../../features/client/create_project/presentation/project_creation_wizard.dart';
+import '../../features/client/project_detail/presentation/screens/project_detail_screen.dart';
 import '../../features/client/search_entreprises/presentation/screens/entreprise_profile_screen.dart';
 import '../../features/client/search_entreprises/presentation/screens/compare_entreprises_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
@@ -23,21 +24,24 @@ import '../../features/analytics/presentation/screens/entreprise_analytics_scree
 import '../../data/models/entreprise_model.dart';
 import '../../data/models/project_model.dart';
 import '../../features/entreprise/dashboard/presentation/screens/entreprise_dashboard_screen.dart';
+import '../../features/entreprise/dashboard/presentation/screens/project_planning_screen.dart';
+import '../../features/entreprise/dashboard/presentation/screens/task_management_screen.dart';
+import '../../features/entreprise/dashboard/presentation/screens/documents_reports_screen.dart';
 import '../../features/entreprise/project_management/presentation/screens/entreprise_project_detail_screen.dart';
+import '../../features/entreprise/offres/presentation/screens/offres_screen.dart';
+import '../../features/entreprise/offres/presentation/screens/offre_detail_screen.dart';
 import '../../features/admin/presentation/screens/admin_shell_screen.dart';
+import '../../features/admin/presentation/screens/admin_login_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
 
   return GoRouter(
-    initialLocation: '/admin',
+    initialLocation: '/splash',
     redirect: (context, state) {
-      // Pour le développement : on désactive la redirection d'authentification 
-      // pour vous permettre d'accéder directement au Dashboard Client et naviguer librement.
-      return null;
-      /*
       final isSplash = state.matchedLocation == '/splash';
       final isLoggingIn = state.matchedLocation == '/login';
+      final isAdminLoggingIn = state.matchedLocation == '/admin_login';
       final isRoleSelection = state.matchedLocation == '/role_selection';
       final isSignup = state.matchedLocation == '/signup';
       final isPhoneAuth = state.matchedLocation == '/phone_auth';
@@ -45,7 +49,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isOnboarding = state.matchedLocation == '/onboarding';
       final isShowcase = state.matchedLocation == '/showcase';
 
-      final isAuthScreen = isLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isForgotPassword || isOnboarding;
+      final isAuthScreen = isLoggingIn || isAdminLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isForgotPassword || isOnboarding;
 
       if (authState.isLoading || authState.hasError) return null;
 
@@ -57,12 +61,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Utilisateur connecté qui essaie d'aller sur login/signup : on le ramène au splash qui dispatche
-      if (isAuthenticated && (isLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isOnboarding)) {
+      if (isAuthenticated && (isLoggingIn || isAdminLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isOnboarding)) {
         return '/splash';
       }
 
       return null;
-      */
     },
     routes: [
       GoRoute(
@@ -127,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AdminShellScreen(),
       ),
       GoRoute(
+        path: '/admin_login',
+        builder: (context, state) => const AdminLoginScreen(),
+      ),
+      GoRoute(
         path: '/chef_chantier',
         builder: (context, state) => Scaffold(appBar: AppBar(title: const Text('Chef de chantier'))),
       ),
@@ -140,6 +147,33 @@ final routerProvider = Provider<GoRouter>((ref) {
             name: 'entreprise_project_detail',
             pageBuilder: (context, state) => _buildPageWithTransition(EntrepriseProjectDetailScreen(project: state.extra as ProjectModel), state),
           ),
+          GoRoute(
+            path: 'project_planning',
+            name: 'project_planning',
+            pageBuilder: (context, state) => _buildPageWithTransition(const ProjectPlanningScreen(), state),
+          ),
+          GoRoute(
+            path: 'task_management',
+            name: 'task_management',
+            pageBuilder: (context, state) => _buildPageWithTransition(const TaskManagementScreen(), state),
+          ),
+          GoRoute(
+            path: 'documents_reports',
+            name: 'documents_reports',
+            pageBuilder: (context, state) => _buildPageWithTransition(const DocumentsReportsScreen(), state),
+          ),
+          GoRoute(
+            path: 'offres',
+            name: 'offres',
+            pageBuilder: (context, state) => _buildPageWithTransition(const OffresScreen(), state),
+            routes: [
+              GoRoute(
+                path: 'detail',
+                name: 'offre_detail',
+                pageBuilder: (context, state) => _buildPageWithTransition(OffreDetailScreen(projet: state.extra as ProjectModel), state),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -147,6 +181,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'client_dashboard',
         builder: (context, state) => const ClientDashboardScreen(),
         routes: [
+          GoRoute(
+            path: 'project_detail',
+            name: 'client_project_detail',
+            pageBuilder: (context, state) => _buildPageWithTransition(ProjectDetailScreen(project: state.extra as ProjectModel), state),
+          ),
           GoRoute(
             path: 'create_project',
             name: 'create_project',

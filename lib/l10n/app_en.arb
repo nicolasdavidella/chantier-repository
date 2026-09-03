@@ -1,0 +1,38 @@
+{
+  "@@locale": "en",
+  "appTitle": "ChantierTrack",
+  "loginTitle": "Login",
+  "loginSubtitle": "Welcome back!",
+  "emailLabel": "Email address",
+  "emailHint": "example@email.com",
+  "emailEmptyError": "Please enter your email",
+  "emailInvalidError": "Invalid email",
+  "passwordLabel": "Password",
+  "passwordHint": "••••••••",
+  "passwordEmptyError": "Please enter your password",
+  "loginButton": "Sign In",
+  "forgotPassword": "Forgot password?",
+  "orText": "OR",
+  "phoneLogin": "Phone Login",
+  "noAccount": "Don't have an account?",
+  "signUp": "Sign Up",
+  "adminAccess": "Admin Access",
+  
+  "dashboardTitle": "Dashboard",
+  "projectsTab": "Projects",
+  "messagesTab": "Messages",
+  "settingsTab": "Settings",
+  "profileLabel": "Profile",
+  "heroTitle": "Track your sites\neasily",
+  "heroSubtitle": "Find the best contractors to build\nyour construction projects.",
+  "createProjectBtn": "Create a project",
+  "searchHint": "Search for a company or project...",
+  
+  "settingsTitle": "Settings",
+  "language": "Language",
+  "languageFrench": "French",
+  "languageEnglish": "English",
+  "logout": "Log out",
+  
+  "welcomeMessage": "Hello, {name}"
+}

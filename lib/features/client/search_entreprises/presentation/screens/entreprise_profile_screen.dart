@@ -7,6 +7,9 @@ import '../../../../../data/models/entreprise_model.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../../../../data/models/avis_model.dart';
 import '../../../../reviews/presentation/widgets/review_card.dart';
+import '../../../../auth/providers/auth_provider.dart';
+import '../../../../chat/providers/chat_providers.dart';
+import '../../../../chat/presentation/screens/chat_detail_screen.dart';
 
 class EntrepriseProfileScreen extends ConsumerWidget {
   final EntrepriseModel entreprise;
@@ -16,60 +19,33 @@ class EntrepriseProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    
+    // Colors from the design
+    const Color darkBlue = Color(0xFF0F2C59);
+    const Color accentBlue = Color(0xFF1A5D98);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: CustomScrollView(
         slivers: [
-          SliverAppBar(
-            expandedHeight: 250,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Hero(
-                tag: 'entreprise_cover_${entreprise.id}',
-                child: entreprise.realisations.isNotEmpty
-                    ? PageView.builder(
-                        itemCount: entreprise.realisations.length,
-                        itemBuilder: (context, index) {
-                          return CachedNetworkImage(
-                            imageUrl: entreprise.realisations[index],
-                            fit: BoxFit.cover,
-                            errorWidget: (context, error, stackTrace) => const Icon(Icons.business),
-                          );
-                        },
-                      )
-                    : Container(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        child: const Center(child: Icon(Icons.business, size: 64, color: Colors.grey)),
-                      ),
-              ),
-            ),
-            actions: [
-              if (entreprise.certifie)
-                Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
-                  child: Chip(
-                    label: const Text('Certifié', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
-                    backgroundColor: Colors.green,
-                    side: BorderSide.none,
-                    avatar: const Icon(Icons.verified, color: Colors.white, size: 16),
-                  ),
-                )
-            ],
+          // New Hero Section based on the provided image
+          SliverToBoxAdapter(
+            child: _buildHeroSection(context, darkBlue, accentBlue),
           ),
+          
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.xl),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Reviews & Rating Summary
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Expanded(
-                        child: Text(
-                          entreprise.raisonSociale,
-                          style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-                        ),
+                      Text(
+                        'Avis & Statistiques',
+                        style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: darkBlue),
                       ),
                       Row(
                         children: [
@@ -77,7 +53,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                           AppSpacing.hXs,
                           Text(
                             entreprise.noteMoyenne.toString(),
-                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+                            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: darkBlue),
                           ),
                           Text(
                             ' (${entreprise.nombreAvis})',
@@ -93,39 +69,41 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _buildStatColumn(context, Icons.work_history, '${entreprise.anneesExperience} ans', 'Expérience'),
-                      _buildStatColumn(context, Icons.map, entreprise.zoneIntervention.join(', '), 'Zone'),
+                      _buildStatColumn(context, Icons.work_history, '${entreprise.anneesExperience} ans', 'Expérience', darkBlue),
+                      _buildStatColumn(context, Icons.map, entreprise.zoneIntervention.isNotEmpty ? entreprise.zoneIntervention.first : 'N/A', 'Zone', darkBlue),
                       if (entreprise.prixMoyen != null)
-                        _buildStatColumn(context, Icons.payments, entreprise.prixMoyen!, 'Prix moyen'),
+                        _buildStatColumn(context, Icons.payments, entreprise.prixMoyen!, 'Prix moyen', darkBlue),
                     ],
                   ).animate().fadeIn().slideY(begin: 0.2, curve: Curves.easeOut),
                   
                   AppSpacing.vXxl,
-                  Text('À propos', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('À propos de nous', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: darkBlue)),
                   AppSpacing.vSm,
                   Text(
                     entreprise.description,
-                    style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurfaceVariant, height: 1.5),
+                    style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey.shade800, height: 1.5),
                   ),
                   
                   AppSpacing.vXxl,
-                  Text('Spécialités', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('Nos Spécialités', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: darkBlue)),
                   AppSpacing.vSm,
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
                     children: entreprise.specialites.map((s) => Chip(
-                      label: Text(s),
-                      backgroundColor: theme.colorScheme.secondaryContainer.withValues(alpha: 0.3),
+                      label: Text(s, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                      backgroundColor: accentBlue.withOpacity(0.8),
                       side: BorderSide.none,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     )).toList(),
                   ),
                   
                   AppSpacing.vXxl,
-                  Text('Derniers avis clients', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+                  Text('Derniers avis clients', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: darkBlue)),
                   AppSpacing.vLg,
                   ListView.separated(
                     shrinkWrap: true,
+                    padding: EdgeInsets.zero,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: 3,
                     separatorBuilder: (context, index) => const Divider(height: 32),
@@ -142,31 +120,243 @@ class EntrepriseProfileScreen extends ConsumerWidget {
         ],
       ),
       bottomNavigationBar: SafeArea(
-        child: Padding(
+        child: Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
-          child: AppButton(
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Redirection vers la création de devis...')),
-              );
-              // In a real flow, this would go to a quote request screen pre-filled with this enterprise ID.
-            },
-            text: 'Demander un devis',
-            icon: Icons.request_quote,
-          ).animate().slideY(begin: 1.0, curve: Curves.easeOutBack, duration: 500.ms),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  onPressed: () async {
+                    final user = ref.read(authStateProvider).value;
+                    if (user == null) return;
+                    
+                    try {
+                      // Call getOrCreateConversation
+                      final conv = await ref.read(chatRepositoryProvider).getOrCreateConversation(
+                        currentUserId: user.uid,
+                        targetUserId: entreprise.id,
+                        currentUserName: user.displayName ?? 'Client',
+                        targetUserName: entreprise.raisonSociale,
+                        currentUserAvatar: user.photoURL,
+                        targetUserAvatar: null,
+                      );
+                      
+                      if (context.mounted) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ChatDetailScreen(
+                              conversationId: conv.id,
+                              otherUserName: entreprise.raisonSociale,
+                            ),
+                          ),
+                        );
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+                      }
+                    }
+                  },
+                  text: 'Discuter',
+                  icon: Icons.chat_bubble_outline,
+                  isOutlined: true,
+                ).animate().slideY(begin: 1.0, curve: Curves.easeOutBack, duration: 500.ms),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: AppButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Redirection vers la création de devis...')),
+                    );
+                  },
+                  text: 'Devis',
+                  icon: Icons.request_quote,
+                ).animate().slideY(begin: 1.0, curve: Curves.easeOutBack, duration: 600.ms),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStatColumn(BuildContext context, IconData icon, String value, String label) {
+  Widget _buildHeroSection(BuildContext context, Color darkBlue, Color accentBlue) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        children: [
+          // Top AppBar equivalent
+          SafeArea(
+            bottom: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back, color: darkBlue),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                  const Spacer(),
+                  if (entreprise.certifie)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade600,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.verified, color: Colors.white, size: 14),
+                          SizedBox(width: 4),
+                          Text('Certifié', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+
+          // Logo and Name
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.apartment, size: 32, color: darkBlue),
+                const SizedBox(width: 12),
+                Text(
+                  entreprise.raisonSociale.toUpperCase(),
+                  style: TextStyle(
+                    color: darkBlue,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+          
+          // Headline
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              children: [
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 36,
+                      fontWeight: FontWeight.w900,
+                      color: darkBlue,
+                      height: 1.1,
+                    ),
+                    children: [
+                      const TextSpan(text: 'La Précision\n'),
+                      const TextSpan(text: 'est notre '),
+                      TextSpan(
+                        text: 'signature',
+                        style: TextStyle(
+                          color: accentBlue,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Chaque structure que nous réalisons est\nconçue avec rigueur, soin et un standard\nqui parle avant même que nous.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade800,
+                    fontWeight: FontWeight.w500,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          const SizedBox(height: 32),
+          
+          // Human-centric Image (Construction workers)
+          SizedBox(
+            height: 280,
+            width: double.infinity,
+            child: CachedNetworkImage(
+              // URL to a nice Unsplash image of real construction workers building a wall
+              imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356f12?auto=format&fit=crop&w=800&q=80',
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(color: Colors.grey.shade200),
+              errorWidget: (context, error, stackTrace) => Container(color: Colors.grey.shade200, child: const Icon(Icons.engineering, size: 64, color: Colors.grey)),
+            ),
+          ),
+          
+          // Contact Footer Banner
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+            color: darkBlue,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildContactItem(Icons.phone, '+225 07 78 59 22 13'),
+                Container(width: 1, height: 30, color: Colors.white30),
+                _buildContactItem(Icons.email_outlined, '${entreprise.raisonSociale.toLowerCase().replaceAll(' ', '')}@contact.com'),
+                Container(width: 1, height: 30, color: Colors.white30),
+                _buildContactItem(Icons.language, 'www.${entreprise.raisonSociale.toLowerCase().replaceAll(' ', '')}.com'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContactItem(IconData icon, String text) {
+    return Expanded(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: Colors.white, size: 16),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white, fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatColumn(BuildContext context, IconData icon, String value, String label, Color color) {
     final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(icon, color: theme.colorScheme.primary, size: 28),
+        Icon(icon, color: color, size: 28),
         AppSpacing.vXs,
-        Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
+        Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color)),
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600)),
       ],
     );
   }

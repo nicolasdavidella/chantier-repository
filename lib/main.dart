@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:chantier_track/l10n/app_localizations.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/providers/settings_provider.dart';
@@ -59,9 +61,21 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final currentThemeMode = ref.watch(themeModeProvider);
+    final currentLanguage = ref.watch(languageProvider);
 
     return MaterialApp.router(
       title: 'ChantierTrack',
+      locale: Locale(currentLanguage),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('fr', ''), // Français
+        Locale('en', ''), // Anglais
+      ],
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: currentThemeMode,

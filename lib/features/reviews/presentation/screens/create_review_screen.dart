@@ -4,7 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/avis_model.dart';
-import 'widgets/animated_star_rating.dart';
+import '../widgets/animated_star_rating.dart';
 
 class CreateReviewScreen extends ConsumerStatefulWidget {
   final String projectId;

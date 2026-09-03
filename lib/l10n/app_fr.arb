@@ -1,0 +1,48 @@
+{
+  "@@locale": "fr",
+  "appTitle": "ChantierTrack",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "loginTitle": "Connexion",
+  "loginSubtitle": "Content de vous revoir !",
+  "emailLabel": "Adresse e-mail",
+  "emailHint": "exemple@email.com",
+  "emailEmptyError": "Veuillez entrer votre e-mail",
+  "emailInvalidError": "E-mail invalide",
+  "passwordLabel": "Mot de passe",
+  "passwordHint": "••••••••",
+  "passwordEmptyError": "Veuillez entrer votre mot de passe",
+  "loginButton": "Se connecter",
+  "forgotPassword": "Mot de passe oublié ?",
+  "orText": "OU",
+  "phoneLogin": "Connexion par téléphone",
+  "noAccount": "Pas encore de compte ?",
+  "signUp": "S'inscrire",
+  "adminAccess": "Accès Administrateur",
+  
+  "dashboardTitle": "Tableau de Bord",
+  "projectsTab": "Projets",
+  "messagesTab": "Messages",
+  "settingsTab": "Paramètres",
+  "profileLabel": "Profil",
+  "heroTitle": "Suivez vos chantiers\nfacilement",
+  "heroSubtitle": "Trouvez les meilleurs prestataires pour réaliser\nvos projets de construction.",
+  "createProjectBtn": "Créer un projet",
+  "searchHint": "Rechercher une entreprise ou un projet...",
+  
+  "settingsTitle": "Paramètres",
+  "language": "Langue",
+  "languageFrench": "Français",
+  "languageEnglish": "Anglais",
+  "logout": "Se déconnecter",
+  
+  "welcomeMessage": "Bonjour, {name}",
+  "@welcomeMessage": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
+}

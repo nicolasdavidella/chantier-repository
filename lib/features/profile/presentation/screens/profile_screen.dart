@@ -6,12 +6,14 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/user_model.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/data/auth_repository.dart';
+import '../../../auth/data/user_repository.dart';
 import 'package:go_router/go_router.dart';
 
 import 'widgets/profile_header.dart';
 import 'widgets/editable_info_section.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/security_section.dart';
+import '../../../../core/services/storage_service.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -21,6 +23,7 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isUploadingPhoto = false;
 
   Future<void> _handleLogout() async {
     final confirm = await showDialog<bool>(
@@ -118,8 +121,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Center(
               child: ProfileHeader(
                 user: user,
-                onPhotoUpdated: (url) {
-                  // Logique pour mettre à jour l'URL côté Firestore
+                isUploading: _isUploadingPhoto,
+                onPhotoSelected: (file) async {
+                  setState(() => _isUploadingPhoto = true);
+                  try {
+                    final storage = ref.read(storageServiceProvider);
+                    final data = await file.readAsBytes();
+                    final url = await storage.uploadData('profile_pictures/${user.uid}/avatar.jpg', data, contentType: file.mimeType);
+                    
+                    final updatedUser = user.copyWith(photoUrl: url);
+                    await ref.read(userRepositoryProvider).updateUser(updatedUser);
+                    
+                    // Invalider le provider pour recharger le profil
+                    ref.invalidate(currentUserProfileProvider);
+                    
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo de profil mise à jour !')));
+                    }
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+                    }
+                  } finally {
+                    if (mounted) setState(() => _isUploadingPhoto = false);
+                  }
                 },
               ),
             ),

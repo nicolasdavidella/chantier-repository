@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/settings_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../providers/dashboard_providers.dart';
 import 'widgets/project_card.dart';
@@ -15,6 +16,7 @@ import '../../../profile/presentation/screens/profile_screen.dart';
 
 import 'tabs/client_projects_tab.dart';
 import 'tabs/client_messages_tab.dart';
+import 'package:chantier_track/l10n/app_localizations.dart';
 
 class ClientDashboardScreen extends ConsumerStatefulWidget {
   const ClientDashboardScreen({super.key});
@@ -79,14 +81,16 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
 
   Widget _buildNavItem(int index, dynamic icon) {
     final isSelected = _currentIndex == index;
+    final primaryColor = const Color(0xFFD4783B);
+    
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(100),
+          color: isSelected ? primaryColor : Colors.transparent,
+          shape: BoxShape.circle,
         ),
         child: FaIcon(
           icon,
@@ -98,300 +102,450 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
   }
 }
 
-class ClientHomeTab extends ConsumerWidget {
+class ClientHomeTab extends ConsumerStatefulWidget {
   const ClientHomeTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final profileState = ref.watch(currentUserProfileProvider);
-    final projectsState = ref.watch(clientProjectsProvider);
+  ConsumerState<ClientHomeTab> createState() => _ClientHomeTabState();
+}
 
+class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
+  final Color primaryColor = const Color(0xFF8B78FF); // Purple from image
+  final Color bgColor = const Color(0xFFF8F8FA);
+  final Color textColor = const Color(0xFF2E2E2E);
+  final Color textLight = const Color(0xFFA0A0A0);
+  
+  String selectedCategory = 'Gros Œuvre';
+  final List<String> categories = ['Gros Œuvre', 'Plomberie', 'Électricité', 'Peinture', 'Menuiserie'];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: bgColor,
       body: SafeArea(
-        bottom: false,
-        child: RefreshIndicator(
-          color: theme.colorScheme.primary,
-          onRefresh: () async {
-            ref.invalidate(clientProjectsProvider);
-          },
-          child: CustomScrollView(
-            physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
-            slivers: [
-              // EN-TÊTE (Header)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Hamburger Menu Icon
+                  Icon(Icons.notes, color: textColor, size: 28),
+                  // Location Dropdown
+                  Row(
                     children: [
-                      // Menu Icon (Placeholder for drawer or settings)
-                      const FaIcon(FontAwesomeIcons.barsStaggered, size: 24),
-                      
-                      // Notification & Avatar
-                      Row(
-                        children: [
-                          Stack(
-                            children: [
-                              const FaIcon(FontAwesomeIcons.bell, size: 24),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Container(
-                                  width: 10,
-                                  height: 10,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.redAccent,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                              ),
-                            ],
+                      Text(
+                        'Douala, CM',
+                        style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(Icons.keyboard_arrow_down, color: textColor),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      // Language Toggle
+                      InkWell(
+                        onTap: () {
+                          final currentLang = ref.read(languageProvider);
+                          ref.read(languageProvider.notifier).setLanguage(currentLang == 'fr' ? 'en' : 'fr');
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          const SizedBox(width: 16),
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundColor: theme.colorScheme.surface,
-                            backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=11'),
+                          child: Text(
+                            ref.watch(languageProvider).toUpperCase(),
+                            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      // Notification with red dot
+                      Stack(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            child: const Icon(Icons.notifications_none, size: 26),
+                          ),
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 32),
+              
+              // 2. Search Bar
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
                         ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              
-              // TEXTE D'ACCROCHE
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  child: Text(
-                    'Découvrez vos\nnouveaux chantiers !',
-                    style: theme.textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
-                    ),
-                  ),
-                ),
-              ),
-              
-              // SEARCH BAR & FILTERS
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
-                                blurRadius: 10,
-                                offset: const Offset(0, 4),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, color: textLight),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: AppLocalizations.of(context)?.searchHint ?? 'Rechercher un artisan...',
+                                hintStyle: TextStyle(color: textLight, fontSize: 14),
+                                border: InputBorder.none,
                               ),
-                            ],
-                          ),
-                          child: const TextField(
-                            decoration: InputDecoration(
-                              icon: FaIcon(FontAwesomeIcons.magnifyingGlass, size: 16, color: Colors.grey),
-                              hintText: 'Rechercher un projet...',
-                              border: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              fillColor: Colors.transparent,
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E1E1E),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const FaIcon(FontAwesomeIcons.sliders, color: Colors.white, size: 18),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-              
-              // CHIPS (En cours, Terminés)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 24, bottom: 16),
-                  child: SizedBox(
-                    height: 40,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      children: [
-                        _buildPillChip('En cours', true),
-                        const SizedBox(width: 12),
-                        _buildPillChip('Terminés', false),
-                        const SizedBox(width: 12),
-                        _buildPillChip('Brouillons', false),
+                  const SizedBox(width: 16),
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: primaryColor,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryColor.withOpacity(0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
+                    child: const Icon(Icons.tune, color: Colors.white),
                   ),
-                ),
+                ],
               ),
-
-              // LISTE HORIZONTALE (Discover)
-              projectsState.when(
-                data: (projects) {
-                  if (projects.isEmpty) {
-                    return SliverToBoxAdapter(
-                      child: DashboardEmptyState(
-                        onAddProject: () {
-                          context.go('/client/create_project');
-                        },
-                      ),
-                    );
-                  }
-
-                  return SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 320,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: projects.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
-                            child: SizedBox(
-                              width: 280,
-                              child: ProjectCard(project: projects[index]),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                },
-                loading: () => const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 24),
-                    child: ProjectCardSkeleton(),
-                  ),
-                ),
-                error: (err, _) => const SliverToBoxAdapter(child: SizedBox()),
-              ),
+              const SizedBox(height: 32),
               
-              // SECTION "Récents" ou "À proximité"
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 16),
-                  child: Text(
-                    'Activités Récentes',
-                    style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              
-              // LISTE VERTICALE
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 24, right: 24, bottom: 16),
+              // 3. Categories (Pill Tabs)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                clipBehavior: Clip.none,
+                child: Row(
+                  children: categories.map((cat) {
+                    final isSelected = selectedCategory == cat;
+                    return GestureDetector(
+                      onTap: () => setState(() => selectedCategory = cat),
                       child: Container(
-                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         decoration: BoxDecoration(
-                          color: theme.colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
+                          color: isSelected ? primaryColor : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: isSelected ? [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 10,
+                              color: primaryColor.withOpacity(0.3),
+                              blurRadius: 8,
                               offset: const Offset(0, 4),
-                            ),
+                            )
+                          ] : [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            )
                           ],
                         ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                image: const DecorationImage(
-                                  image: NetworkImage('https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=300&auto=format&fit=crop'),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Villa Horizon', style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold)),
-                                  const SizedBox(height: 4),
-                                  Text('12 500 000 FCFA', style: theme.textTheme.labelMedium?.copyWith(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
-                                ],
-                              ),
-                            ),
-                            const FaIcon(FontAwesomeIcons.heart, size: 18, color: Colors.grey),
-                          ],
+                        child: Text(
+                          cat,
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : textLight,
+                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                     );
-                  },
-                  childCount: 3,
+                  }).toList(),
                 ),
               ),
+              const SizedBox(height: 32),
               
-              const SliverToBoxAdapter(child: SizedBox(height: 100)), // Spacer for bottom nav
+              // 4. Near you section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.location_on, color: textColor, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Près de vous',
+                        style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  Text('Voir tout', style: TextStyle(color: textLight, fontSize: 14)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                clipBehavior: Clip.none,
+                child: Row(
+                  children: [
+                    _buildNearYouCard(
+                      'Bâtisseurs Pros', 
+                      'Douala, Akwa', 
+                      '2.5 km', 
+                      4.5, 
+                      'https://images.unsplash.com/photo-1541888081622-15f7956894c4?auto=format&fit=crop&w=400&q=80'
+                    ),
+                    const SizedBox(width: 20),
+                    _buildNearYouCard(
+                      'Élite Construction', 
+                      'Douala, Bonanjo', 
+                      '3.2 km', 
+                      4.8, 
+                      'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=400&q=80'
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 32),
+              
+              // 5. Recommend For you section
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Recommandés pour vous',
+                    style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  Text('Voir tout', style: TextStyle(color: textLight, fontSize: 14)),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _buildRecommendCard(
+                'Plomberie Express', 
+                'Douala, Deido', 
+                '5 Artisans', 
+                '2 Chantiers', 
+                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=200&q=80'
+              ),
+              const SizedBox(height: 16),
+              _buildRecommendCard(
+                'Menuiserie Moderne', 
+                'Douala, Bonamoussadi', 
+                '3 Artisans', 
+                '1 Chantier', 
+                'https://images.unsplash.com/photo-1622675363311-3e1904dc1885?auto=format&fit=crop&w=200&q=80'
+              ),
+              
+              const SizedBox(height: 100), // Padding for bottom nav bar
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go('/client/create_project'),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        shape: const CircleBorder(),
-        child: const FaIcon(FontAwesomeIcons.plus, size: 20),
+    );
+  }
+
+  Widget _buildNearYouCard(String title, String location, String distance, double rating, String imageUrl) {
+    return Container(
+      width: 240,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  imageUrl,
+                  height: 140,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                bottom: 12,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.white, size: 12),
+                      const SizedBox(width: 4),
+                      Text(
+                        distance,
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    title,
+                    style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.star, color: Colors.amber, size: 16),
+                    const SizedBox(width: 4),
+                    Text('$rating', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 4),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Text(
+              location,
+              style: TextStyle(color: textLight, fontSize: 13),
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
       ),
     );
   }
 
-  Widget _buildPillChip(String label, bool isSelected) {
+  Widget _buildRecommendCard(String title, String location, String stat1, String stat2, String imageUrl) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(100),
-        border: isSelected ? null : Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-        boxShadow: isSelected ? [
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
-        ] : null,
-      ),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black87,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            fontSize: 14,
           ),
-        ),
+        ],
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.network(
+              imageUrl,
+              width: 90,
+              height: 90,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.amber, size: 14),
+                        SizedBox(width: 2),
+                        Text('4.5', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  location,
+                  style: TextStyle(color: textLight, fontSize: 13),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 4,
+                  children: [
+                    _buildStatIcon(Icons.people_outline, stat1),
+                    _buildStatIcon(Icons.business_center_outlined, stat2),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _buildStatIcon(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, color: textLight, size: 14),
+        const SizedBox(width: 4),
+        Text(text, style: TextStyle(color: textLight, fontSize: 12)),
+      ],
+    );
+  }
 }
+
 

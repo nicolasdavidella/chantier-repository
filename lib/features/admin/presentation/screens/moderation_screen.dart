@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/admin_providers.dart';
+import 'package:chantier_track/features/admin/providers/admin_providers.dart';
 
 class ModerationScreen extends ConsumerWidget {
   const ModerationScreen({super.key});
@@ -69,7 +69,7 @@ class ModerationScreen extends ConsumerWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(review.clientNom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                  Text('Client ID: ${review.clientId}', style: const TextStyle(fontWeight: FontWeight.bold)),
                                   Row(
                                     children: List.generate(
                                       5,

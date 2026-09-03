@@ -160,23 +160,27 @@ class _StatItem extends StatelessWidget {
       children: [
         Icon(icon, color: color, size: 24),
         AppSpacing.hSm,
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _AnimatedCounter(
-              value: value,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: color,
-                fontWeight: FontWeight.bold,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _AnimatedCounter(
+                value: value,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            Text(
-              label,
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.onPrimary.withOpacity(0.8),
+              Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onPrimary.withOpacity(0.8),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

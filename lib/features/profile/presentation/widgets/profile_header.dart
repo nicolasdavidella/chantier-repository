@@ -115,7 +115,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
                   border: Border.all(color: theme.scaffoldBackgroundColor, width: 3),
                 ),
                 child: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
-              ).animate().scale(delay: 300.ms, type: CurveType.easeOutBack),
+              ).animate().scale(delay: 300.ms, curve: Curves.easeOutBack),
             ),
           ],
         ).animate().slideY(begin: 0.2).fadeIn(),

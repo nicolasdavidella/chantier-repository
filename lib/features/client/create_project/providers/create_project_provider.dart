@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../../data/models/project_model.dart';
+import '../../../../core/services/storage_service.dart';
 
 class ProjectFormData {
   final String titre;
@@ -121,11 +123,20 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
       final authUser = ref.read(authStateProvider).value;
       if (authUser == null) throw Exception("Non authentifié");
 
-      // In a real app, upload XFile documents to Firebase Storage here and get URLs
-      final uploadedDocsUrls = current.documents.map((d) => d.name).toList();
+      final projectId = FirebaseFirestore.instance.collection('projets').doc().id;
+      final storageService = ref.read(storageServiceProvider);
+      
+      List<String> uploadedDocsUrls = [];
+      for (var doc in current.documents) {
+        // Use readAsBytes and uploadData to support Web properly
+        final data = await doc.readAsBytes();
+        final fileName = '${DateTime.now().millisecondsSinceEpoch}_${doc.name}';
+        final url = await storageService.uploadData('projects/$projectId/documents/$fileName', data, contentType: doc.mimeType);
+        uploadedDocsUrls.add(url);
+      }
 
       final newProject = ProjectModel(
-        id: FirebaseFirestore.instance.collection('projects').doc().id,
+        id: projectId,
         clientId: authUser.uid,
         titre: current.titre,
         description: current.description,
@@ -144,7 +155,7 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
         listeDocuments: uploadedDocsUrls,
       );
 
-      await FirebaseFirestore.instance.collection('projects').doc(newProject.id).set(newProject.toJson());
+      await FirebaseFirestore.instance.collection('projets').doc(newProject.id).set(newProject.toJson());
 
       // Reset state on success
       state = AsyncData(ProjectFormData());
