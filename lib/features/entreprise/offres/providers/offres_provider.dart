@@ -9,10 +9,13 @@ final offresProvider = StreamProvider.autoDispose<List<ProjectModel>>((ref) {
   return firestore
       .collection('projets')
       .where('statut', isEqualTo: 'en_recherche_entreprise')
-      .orderBy('dateDebut', descending: true)
       .snapshots()
-      .map((snapshot) =>
-          snapshot.docs.map((doc) => ProjectModel.fromJson(doc.data())).toList());
+      .map((snapshot) {
+    final projets = snapshot.docs.map((doc) => ProjectModel.fromJson(doc.data())).toList();
+    // Tri local pour éviter d'avoir besoin d'un index composite Firebase
+    projets.sort((a, b) => b.dateDebut.compareTo(a.dateDebut));
+    return projets;
+  });
 });
 
 class CandidatureController extends StateNotifier<AsyncValue<void>> {
