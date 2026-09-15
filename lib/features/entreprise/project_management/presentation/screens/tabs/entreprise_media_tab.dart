@@ -12,14 +12,14 @@ class EntrepriseMediaTab extends ConsumerStatefulWidget {
 
 class _EntrepriseMediaTabState extends ConsumerState<EntrepriseMediaTab> {
   final List<String> _mediaUrls = [
-    'https://images.unsplash.com/photo-1541888081622-1db116fb837a',
-    'https://images.unsplash.com/photo-1504307651254-35680f356dfd',
+    'https://picsum.photos/seed/media-chantier-1/500/500',
+    'https://picsum.photos/seed/media-chantier-2/500/500',
   ];
 
   void _uploadMedia() {
     // Mock upload
     setState(() {
-      _mediaUrls.insert(0, 'https://images.unsplash.com/photo-1590486803833-1c5dc8ddd4c8');
+      _mediaUrls.insert(0, 'https://picsum.photos/seed/media-nouveau/500/500');
     });
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo publiée avec succès !')));
   }

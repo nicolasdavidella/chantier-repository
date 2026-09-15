@@ -44,11 +44,12 @@ class AppTheme {
       // Card Theme
       cardTheme: CardThemeData(
         color: colorScheme.surface,
-        elevation: 0,
+        elevation: 2, // Soft shadow
+        shadowColor: Colors.black.withOpacity(0.05),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24), // Very rounded
+          borderRadius: BorderRadius.circular(16), // Flat/moderate radius
           side: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.3),
+            color: colorScheme.outline,
             width: 1,
           ),
         ),
@@ -69,7 +70,7 @@ class AppTheme {
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(100), // Pill shape
+            borderRadius: BorderRadius.circular(12), // Standard moderate radius
           ),
         ),
       ),
@@ -86,7 +87,7 @@ class AppTheme {
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: AppSpacing.borderRadiusMd,
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
@@ -94,47 +95,38 @@ class AppTheme {
       // InputDecoration Theme for TextFields
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        fillColor: colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 18,
+          horizontal: 16,
+          vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(100), // Pill shape
-          borderSide: BorderSide.none, // Flat look
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outline, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(100),
-          borderSide: BorderSide(
-            color: colorScheme.outline.withValues(alpha: 0.3),
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.outline, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(100),
-          borderSide: BorderSide(
-            color: colorScheme.primary,
-            width: 1.5,
-          ),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(100),
-          borderSide: BorderSide(
-            color: colorScheme.error,
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: colorScheme.error, width: 1),
         ),
         hintStyle: textTheme.bodyLarge?.copyWith(
-          color: isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
+          color: colorScheme.onSurface.withOpacity(0.5),
         ),
       ),
       
       // Dialog Theme
       dialogTheme: DialogThemeData(
         backgroundColor: colorScheme.surface,
-        elevation: 24,
+        elevation: 8,
         shape: RoundedRectangleBorder(
-          borderRadius: AppSpacing.borderRadiusLg,
+          borderRadius: BorderRadius.circular(16),
         ),
       ),
       
@@ -144,7 +136,7 @@ class AppTheme {
         elevation: 0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(AppSpacing.radiusLg),
+            top: Radius.circular(20),
           ),
         ),
       ),
@@ -153,6 +145,7 @@ class AppTheme {
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
     );

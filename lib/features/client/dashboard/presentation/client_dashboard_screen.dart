@@ -1,23 +1,32 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/settings_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../auth/providers/auth_provider.dart';
-import '../providers/dashboard_providers.dart';
-import 'widgets/project_card.dart';
-import 'widgets/dashboard_empty_state.dart';
-import '../../../../core/widgets/shimmer_loader.dart';
 import '../../search_entreprises/presentation/screens/search_entreprises_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
-
 import 'tabs/client_projects_tab.dart';
 import 'tabs/client_messages_tab.dart';
-import 'package:chantier_track/l10n/app_localizations.dart';
+import '../../../../data/models/entreprise_model.dart';
+import '../../../../data/repositories/entreprise_repository.dart';
 
+
+// ─────────────────────────────────────────────
+// Providers Firestore
+// ─────────────────────────────────────────────
+final _nearbyEntreprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
+  final repo = ref.watch(entrepriseRepositoryProvider);
+  return repo.watchAll();
+});
+
+final _recommendedEntreprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
+  final repo = ref.watch(entrepriseRepositoryProvider);
+  return repo.watchRecommended(limit: 5);
+});
+
+// ─────────────────────────────────────────────
+// Main Dashboard Screen
+// ─────────────────────────────────────────────
 class ClientDashboardScreen extends ConsumerStatefulWidget {
   const ClientDashboardScreen({super.key});
 
@@ -28,80 +37,78 @@ class ClientDashboardScreen extends ConsumerStatefulWidget {
 class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _pages = [
-    const ClientHomeTab(),
-    const ClientProjectsTab(),
-    const SearchEntreprisesScreen(),
-    const ClientMessagesTab(),
-    const ProfileScreen(),
+  static const List<Widget> _pages = [
+    ClientHomeTab(),
+    ClientProjectsTab(),
+    SearchEntreprisesScreen(),
+    ClientMessagesTab(),
+    ProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Scaffold(
       extendBody: true,
-      backgroundColor: theme.colorScheme.background,
+      backgroundColor: const Color(0xFFF4F6F9),
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _pages[_currentIndex],
       ),
-      bottomNavigationBar: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-          child: Container(
-            height: 70,
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E), // Black pill
-              borderRadius: BorderRadius.circular(100),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 30,
-                  offset: const Offset(0, 10),
-                )
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(0, FontAwesomeIcons.house),
-                _buildNavItem(1, FontAwesomeIcons.barsProgress),
-                _buildNavItem(2, FontAwesomeIcons.magnifyingGlass),
-                _buildNavItem(3, FontAwesomeIcons.message),
-                _buildNavItem(4, FontAwesomeIcons.user),
-              ],
-            ),
-          ).animate().slideY(begin: 1, duration: 500.ms, curve: Curves.easeOutCubic),
-        ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1A1A),
+            borderRadius: BorderRadius.circular(40),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _navItem(0, Icons.home_rounded),
+              _navItem(1, Icons.view_agenda_rounded),
+              _navItem(2, Icons.search_rounded),
+              _navItem(3, Icons.chat_bubble_rounded),
+              _navItem(4, Icons.person_rounded),
+            ],
+          ),
+        ).animate().slideY(begin: 1, duration: 500.ms, curve: Curves.easeOutCubic),
       ),
     );
   }
 
-  Widget _buildNavItem(int index, dynamic icon) {
+  Widget _navItem(int index, IconData icon) {
     final isSelected = _currentIndex == index;
-    final primaryColor = const Color(0xFFD4783B);
-    
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       behavior: HitTestBehavior.opaque,
-      child: Container(
-        padding: const EdgeInsets.all(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        width: 48,
+        height: 48,
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor : Colors.transparent,
+          color: isSelected ? const Color(0xFFE8601A) : Colors.transparent,
           shape: BoxShape.circle,
         ),
-        child: FaIcon(
+        child: Icon(
           icon,
           color: isSelected ? Colors.white : Colors.white54,
-          size: 20,
+          size: 22,
         ),
       ),
     );
   }
 }
 
+// ─────────────────────────────────────────────
+// Home Tab — Entreprise Discovery
+// ─────────────────────────────────────────────
 class ClientHomeTab extends ConsumerStatefulWidget {
   const ClientHomeTab({super.key});
 
@@ -110,423 +117,419 @@ class ClientHomeTab extends ConsumerStatefulWidget {
 }
 
 class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
-  final Color primaryColor = const Color(0xFF8B78FF); // Purple from image
-  final Color bgColor = const Color(0xFFF8F8FA);
-  final Color textColor = const Color(0xFF2E2E2E);
-  final Color textLight = const Color(0xFFA0A0A0);
-  
-  String selectedCategory = 'Gros Œuvre';
-  final List<String> categories = ['Gros Œuvre', 'Plomberie', 'Électricité', 'Peinture', 'Menuiserie'];
-
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(currentUserProfileProvider).value;
+    final userName = user?.nom ?? 'Client';
+
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: const Color(0xFFF4F6F9),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+          padding: const EdgeInsets.only(bottom: 100),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Hamburger Menu Icon
-                  Icon(Icons.notes, color: textColor, size: 28),
-                  // Location Dropdown
-                  Row(
-                    children: [
-                      Text(
-                        'Douala, CM',
-                        style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.keyboard_arrow_down, color: textColor),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      // Language Toggle
-                      InkWell(
-                        onTap: () {
-                          final currentLang = ref.read(languageProvider);
-                          ref.read(languageProvider.notifier).setLanguage(currentLang == 'fr' ? 'en' : 'fr');
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            ref.watch(languageProvider).toUpperCase(),
-                            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+              // ── Header ──
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bonjour, $userName',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1A1A1A),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      // Notification with red dot
-                      Stack(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            child: const Icon(Icons.notifications_none, size: 26),
-                          ),
-                          Positioned(
-                            right: 8,
-                            top: 8,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Colors.redAccent,
-                                shape: BoxShape.circle,
-                              ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: const [
+                            Icon(Icons.location_on, color: Color(0xFF0F6E56), size: 14),
+                            SizedBox(width: 4),
+                            Text(
+                              'Douala, CM',
+                              style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
                             ),
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              
-              // 2. Search Bar
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.search, color: textLight),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              decoration: InputDecoration(
-                                hintText: AppLocalizations.of(context)?.searchHint ?? 'Rechercher un artisan...',
-                                hintStyle: TextStyle(color: textLight, fontSize: 14),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: primaryColor,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primaryColor.withOpacity(0.3),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                          ],
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.tune, color: Colors.white),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 32),
-              
-              // 3. Categories (Pill Tabs)
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                clipBehavior: Clip.none,
-                child: Row(
-                  children: categories.map((cat) {
-                    final isSelected = selectedCategory == cat;
-                    return GestureDetector(
-                      onTap: () => setState(() => selectedCategory = cat),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: isSelected ? primaryColor : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: isSelected ? [
-                            BoxShadow(
-                              color: primaryColor.withOpacity(0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            )
-                          ] : [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.02),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                        ),
-                        child: Text(
-                          cat,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : textLight,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                            fontSize: 14,
-                          ),
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: const Color(0xFFE6F3F0),
+                      child: Text(
+                        userName.isNotEmpty ? userName[0].toUpperCase() : 'C',
+                        style: const TextStyle(
+                          color: Color(0xFF0F6E56),
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
-              ),
-              const SizedBox(height: 32),
-              
-              // 4. Near you section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.location_on, color: textColor, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Près de vous',
-                        style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                  Text('Voir tout', style: TextStyle(color: textLight, fontSize: 14)),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                physics: const BouncingScrollPhysics(),
-                clipBehavior: Clip.none,
-                child: Row(
-                  children: [
-                    _buildNearYouCard(
-                      'Bâtisseurs Pros', 
-                      'Douala, Akwa', 
-                      '2.5 km', 
-                      4.5, 
-                      'https://images.unsplash.com/photo-1541888081622-15f7956894c4?auto=format&fit=crop&w=400&q=80'
-                    ),
-                    const SizedBox(width: 20),
-                    _buildNearYouCard(
-                      'Élite Construction', 
-                      'Douala, Bonanjo', 
-                      '3.2 km', 
-                      4.8, 
-                      'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=400&q=80'
                     ),
                   ],
-                ),
+                ).animate().fadeIn(duration: 400.ms),
               ),
-              const SizedBox(height: 32),
-              
-              // 5. Recommend For you section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Recommandés pour vous',
-                    style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  Text('Voir tout', style: TextStyle(color: textLight, fontSize: 14)),
-                ],
+              const SizedBox(height: 24),
+
+              // ── Entreprises à proximité ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'À proximité',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        'Voir tout',
+                        style: TextStyle(
+                          color: Color(0xFF0F6E56),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 100.ms),
               ),
-              const SizedBox(height: 16),
-              _buildRecommendCard(
-                'Plomberie Express', 
-                'Douala, Deido', 
-                '5 Artisans', 
-                '2 Chantiers', 
-                'https://images.unsplash.com/photo-1581094794329-c8112a89af12?auto=format&fit=crop&w=200&q=80'
+              const SizedBox(height: 12),
+
+              // ── Horizontal scroll Firestore ──
+              Consumer(
+                builder: (context, ref, _) {
+                  final nearby = ref.watch(_nearbyEntreprisesProvider);
+                  return SizedBox(
+                    height: 230,
+                    child: nearby.when(
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (e, _) => Center(child: Text('Erreur: $e', style: const TextStyle(color: Colors.red))),
+                      data: (list) => list.isEmpty
+                          ? const Center(child: Text('Aucune entreprise', style: TextStyle(color: Color(0xFF6B7280))))
+                          : ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(horizontal: 20),
+                              itemCount: list.length,
+                              separatorBuilder: (context, index) => const SizedBox(width: 12),
+                              itemBuilder: (context, i) {
+                                return _NearbyCard(entreprise: list[i])
+                                    .animate()
+                                    .slideX(begin: 0.2, delay: Duration(milliseconds: 100 * i), duration: 400.ms)
+                                    .fadeIn();
+                              },
+                            ),
+                    ),
+                  );
+                },
               ),
-              const SizedBox(height: 16),
-              _buildRecommendCard(
-                'Menuiserie Moderne', 
-                'Douala, Bonamoussadi', 
-                '3 Artisans', 
-                '1 Chantier', 
-                'https://images.unsplash.com/photo-1622675363311-3e1904dc1885?auto=format&fit=crop&w=200&q=80'
+              const SizedBox(height: 28),
+
+              // ── Recommandés pour vous ──
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Recommandés pour vous',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {},
+                      child: const Text(
+                        'Voir tout',
+                        style: TextStyle(
+                          color: Color(0xFF0F6E56),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ).animate().fadeIn(delay: 300.ms),
               ),
-              
-              const SizedBox(height: 100), // Padding for bottom nav bar
+              const SizedBox(height: 8),
+
+              // ── Recommended list Firestore ──
+              Consumer(
+                builder: (context, ref, _) {
+                  final recommended = ref.watch(_recommendedEntreprisesProvider);
+                  return recommended.when(
+                    loading: () => const Center(child: CircularProgressIndicator()),
+                    error: (e, _) => Center(child: Text('Erreur: $e', style: const TextStyle(color: Colors.red))),
+                    data: (list) => list.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            child: Text('Aucune entreprise recommandée', style: TextStyle(color: Color(0xFF6B7280))),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            itemCount: list.length,
+                            separatorBuilder: (context, index) => const SizedBox(height: 12),
+                            itemBuilder: (context, i) {
+                              return _RecommendedCard(entreprise: list[i])
+                                  .animate()
+                                  .slideY(begin: 0.1, delay: Duration(milliseconds: 100 * i + 350), duration: 400.ms)
+                                  .fadeIn();
+                            },
+                          ),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildNearYouCard(String title, String location, String distance, double rating, String imageUrl) {
+// ─────────────────────────────────────────────
+// Nearby horizontal card
+// ─────────────────────────────────────────────
+class _NearbyCard extends StatelessWidget {
+  final EntrepriseModel entreprise;
+  const _NearbyCard({required this.entreprise});
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = entreprise.realisations.isNotEmpty ? entreprise.realisations.first : '';
     return Container(
-      width: 240,
-      padding: const EdgeInsets.all(12),
+      width: 160,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  imageUrl,
-                  height: 140,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ),
-              Positioned(
-                bottom: 12,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: primaryColor.withOpacity(0.9),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.location_on, color: Colors.white, size: 12),
-                      const SizedBox(width: 4),
-                      Text(
-                        distance,
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          // Image
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: Stack(
               children: [
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                imageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(height: 120, color: const Color(0xFFE6F3F0)),
+                        errorWidget: (context, url, error) => Container(
+                          height: 120, color: const Color(0xFFE6F3F0),
+                          child: const Icon(Icons.business, color: Color(0xFF0F6E56)),
+                        ),
+                      )
+                    : Container(
+                        height: 120,
+                        color: const Color(0xFFE6F3F0),
+                        child: const Center(child: Icon(Icons.business, color: Color(0xFF0F6E56), size: 40)),
+                      ),
+                // Zone badge
+                if (entreprise.zoneIntervention.isNotEmpty)
+                  Positioned(
+                    bottom: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF6C63FF),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.location_on, color: Colors.white, size: 11),
+                          const SizedBox(width: 3),
+                          Text(
+                            entreprise.zoneIntervention.first,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.amber, size: 16),
-                    const SizedBox(width: 4),
-                    Text('$rating', style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
-                  ],
-                ),
               ],
             ),
           ),
-          const SizedBox(height: 4),
+          // Info
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              location,
-              style: TextStyle(color: textLight, fontSize: 13),
-            ),
-          ),
-          const SizedBox(height: 8),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRecommendCard(String title, String location, String stat1, String stat2, String imageUrl) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Image.network(
-              imageUrl,
-              width: 90,
-              height: 90,
-              fit: BoxFit.cover,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Expanded(
                       child: Text(
-                        title,
-                        style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold),
+                        entreprise.raisonSociale,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                          color: Color(0xFF1A1A1A),
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.amber, size: 14),
-                        SizedBox(width: 2),
-                        Text('4.5', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-                      ],
+                    const SizedBox(width: 4),
+                    const Icon(Icons.star, color: Color(0xFFF59E0B), size: 13),
+                    const SizedBox(width: 2),
+                    Text(
+                      entreprise.noteMoyenne.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  location,
-                  style: TextStyle(color: textLight, fontSize: 13),
+                  entreprise.zoneIntervention.join(', '),
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 4,
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Recommended list card
+// ─────────────────────────────────────────────
+class _RecommendedCard extends StatelessWidget {
+  final EntrepriseModel entreprise;
+  const _RecommendedCard({required this.entreprise});
+
+  @override
+  Widget build(BuildContext context) {
+    final imageUrl = entreprise.realisations.isNotEmpty ? entreprise.realisations.first : '';
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Image
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: imageUrl.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(width: 72, height: 72, color: const Color(0xFFE6F3F0)),
+                    errorWidget: (context, url, error) => Container(
+                      width: 72, height: 72, color: const Color(0xFFE6F3F0),
+                      child: const Icon(Icons.business, color: Color(0xFF0F6E56)),
+                    ),
+                  )
+                : Container(
+                    width: 72, height: 72, color: const Color(0xFFE6F3F0),
+                    child: const Center(child: Icon(Icons.business, color: Color(0xFF0F6E56), size: 36)),
+                  ),
+          ),
+          const SizedBox(width: 14),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    _buildStatIcon(Icons.people_outline, stat1),
-                    _buildStatIcon(Icons.business_center_outlined, stat2),
+                    Expanded(
+                      child: Text(
+                        entreprise.raisonSociale,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const Icon(Icons.star, color: Color(0xFFF59E0B), size: 14),
+                    const SizedBox(width: 3),
+                    Text(
+                      entreprise.noteMoyenne.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  entreprise.zoneIntervention.join(', '),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(Icons.star_outline, color: Color(0xFF6B7280), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${entreprise.nombreAvis} Avis',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                    ),
+                    const SizedBox(width: 12),
+                    const Icon(Icons.work_outline, color: Color(0xFF6B7280), size: 14),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${entreprise.anneesExperience} ans exp.',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                    ),
                   ],
                 ),
               ],
@@ -536,16 +539,4 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
       ),
     );
   }
-
-  Widget _buildStatIcon(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: textLight, size: 14),
-        const SizedBox(width: 4),
-        Text(text, style: TextStyle(color: textLight, fontSize: 12)),
-      ],
-    );
-  }
 }
-
-

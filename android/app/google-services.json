@@ -23,6 +23,44 @@
           "other_platform_oauth_client": []
         }
       }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976058875224:android:38ac63c0ce28463ce0f92d",
+        "android_client_info": {
+          "package_name": "com.example.chantier_track.dev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBNN8v8NVgWBqY2A8eiQ4IXCGRj8nvHM8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976058875224:android:9e6279a78a1e2728e0f92d",
+        "android_client_info": {
+          "package_name": "com.example.chantier_track.stg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBNN8v8NVgWBqY2A8eiQ4IXCGRj8nvHM8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
     }
   ],
   "configuration_version": "1"

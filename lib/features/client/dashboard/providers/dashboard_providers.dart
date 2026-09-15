@@ -1,58 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/project_model.dart';
+import '../../../../data/repositories/project_repository.dart';
+import '../../../auth/providers/auth_provider.dart';
 
-// Provider that returns mock projects to test UI
-final clientProjectsProvider = FutureProvider<List<ProjectModel>>((ref) async {
-  // Simulate network delay for pull-to-refresh
-  await Future.delayed(const Duration(seconds: 1));
+// Stream des projets du client connecté (temps réel Firestore)
+final clientProjectsProvider = StreamProvider<List<ProjectModel>>((ref) {
+  final authState = ref.watch(authStateProvider);
+  final uid = authState.value?.uid;
+  if (uid == null) return const Stream.empty();
 
-  return [
-    ProjectModel(
-      id: 'p1',
-      clientId: 'c1',
-      titre: 'Villa Océane - Kribi',
-      description: 'Construction d\'une villa R+1 avec piscine',
-      localisation: {'ville': 'Kribi'},
-      budgetPrevisionnel: 45000000,
-      budgetActuel: 12500000,
-      dateDebut: DateTime.now().subtract(const Duration(days: 30)),
-      dateFinPrevue: DateTime.now().add(const Duration(days: 120)),
-      statut: 'en_cours',
-      listePlans: [],
-      listeDocuments: [],
-    ),
-    ProjectModel(
-      id: 'p2',
-      clientId: 'c1',
-      titre: 'Rénovation Appartement',
-      description: 'Réfection totale plomberie et électricité',
-      localisation: {'ville': 'Douala'},
-      budgetPrevisionnel: 8500000,
-      budgetActuel: 7800000,
-      dateDebut: DateTime.now().subtract(const Duration(days: 60)),
-      dateFinPrevue: DateTime.now().add(const Duration(days: 5)),
-      statut: 'en_cours',
-      listePlans: [],
-      listeDocuments: [],
-    ),
-  ];
+  final repo = ref.watch(projectRepositoryProvider);
+  return repo.watchClientProjects(uid);
 });
 
-// Calculate total budget from all active projects
+// Compter les projets actifs
+final activeProjectsCountProvider = Provider<int>((ref) {
+  final projects = ref.watch(clientProjectsProvider).value ?? [];
+  return projects.where((p) => p.statut == 'en_cours').length;
+});
+
+// Budget total de tous les projets du client
 final totalBudgetProvider = Provider<double>((ref) {
   final projects = ref.watch(clientProjectsProvider).value ?? [];
   return projects.fold(0.0, (sum, p) => sum + p.budgetPrevisionnel);
 });
 
-// Count active projects
-final activeProjectsCountProvider = Provider<int>((ref) {
-  final projects = ref.watch(clientProjectsProvider).value ?? [];
-  return projects.length;
-});
-
-// Temporary stat provider for tasks progress of a project
-final projectProgressProvider = Provider.family<double, String>((ref, projectId) {
-  if (projectId == 'p1') return 0.35; // 35%
-  if (projectId == 'p2') return 0.85; // 85%
-  return 0.0;
+// Progression d'un projet (budgetActuel / budgetPrevisionnel)
+final projectProgressProvider = Provider.family<double, ProjectModel>((ref, project) {
+  if (project.budgetPrevisionnel == 0) return 0.0;
+  return (project.budgetActuel / project.budgetPrevisionnel).clamp(0.0, 1.0);
 });

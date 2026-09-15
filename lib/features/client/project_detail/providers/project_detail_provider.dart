@@ -97,8 +97,8 @@ final projectReportsProvider = Provider.family<List<ProjectReportModel>, String>
       description: 'La dalle du rez-de-chaussée a été coulée avec succès. Le temps de séchage est respecté.',
       avancementPercent: 35.0,
       photos: [
-        'https://images.unsplash.com/photo-1541888081622-152e008fa732?q=80&w=600&auto=format&fit=crop',
-        'https://images.unsplash.com/photo-1503387762-592deb58ef4e?q=80&w=600&auto=format&fit=crop',
+        'https://picsum.photos/seed/dalle-rdc/600/400',
+        'https://picsum.photos/seed/coffrage/600/400',
       ],
     ),
     ProjectReportModel(
@@ -108,7 +108,7 @@ final projectReportsProvider = Provider.family<List<ProjectReportModel>, String>
       description: 'Les fondations sont achevées, prêtes pour l\'élévation des murs.',
       avancementPercent: 20.0,
       photos: [
-        'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=600&auto=format&fit=crop',
+        'https://picsum.photos/seed/fondations-fin/600/400',
       ],
     ),
     ProjectReportModel(

@@ -89,7 +89,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // Title
                 const Text(
-                  'Log in',
+                  'Se connecter',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.w600,
@@ -127,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: InputDecoration(
-                    hintText: 'Your email',
+                    hintText: 'Votre adresse e-mail',
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
@@ -148,7 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // Password Label
                 const Text(
-                  'Password',
+                  'Mot de passe',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -160,7 +160,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   controller: _passwordController,
                   obscureText: _obscurePassword,
                   decoration: InputDecoration(
-                    hintText: 'Enter your password',
+                    hintText: 'Entrez votre mot de passe',
                     hintStyle: TextStyle(color: Colors.grey.shade400, fontWeight: FontWeight.normal),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                     border: OutlineInputBorder(
@@ -208,7 +208,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         const SizedBox(width: 8),
                         const Text(
-                          'Remember me',
+                          'Se souvenir de moi',
                           style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
                         ),
                       ],
@@ -217,7 +217,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: () => context.push('/forgot_password'),
                       style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: Size.zero),
                       child: const Text(
-                        'Forgot password?',
+                        'Mot de passe oublié ?',
                         style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87),
                       ),
                     ),
@@ -238,7 +238,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: _isLoading 
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                       : const Text(
-                          'Log in',
+                          'Se connecter',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 16,
@@ -256,7 +256,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        'Or Login with',
+                        'Ou se connecter avec',
                         style: TextStyle(color: Colors.grey.shade400, fontSize: 14),
                       ),
                     ),
@@ -282,13 +282,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      "Pas encore de compte ? ",
                       style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () => context.push('/role_selection'),
                       child: const Text(
-                        "Sign up",
+                        "S'inscrire",
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 14,

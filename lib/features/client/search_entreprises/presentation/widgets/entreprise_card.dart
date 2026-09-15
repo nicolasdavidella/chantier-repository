@@ -146,15 +146,20 @@ class EntrepriseCard extends ConsumerWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.location_on, size: 16, color: Colors.grey),
-                          const SizedBox(width: 4),
-                          Text(
-                            entreprise.zoneIntervention.join(', '),
-                            style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
-                          ),
-                        ],
+                      Expanded(
+                        child: Row(
+                          children: [
+                            const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                entreprise.zoneIntervention.join(', '),
+                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       Row(
                         children: [

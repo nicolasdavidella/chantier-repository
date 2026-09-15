@@ -120,7 +120,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                             InkWell(
                               onTap: () => context.push('/profile'),
                               child: const CircleAvatar(
-                                backgroundImage: NetworkImage('https://images.unsplash.com/photo-1541888081622-1db116fb837a?auto=format&fit=crop&w=150&q=80'),
+                            backgroundImage: NetworkImage('https://ui-avatars.com/api/?name=Chef+Chantier&background=1A2B4A&color=fff&size=150'),
                                 radius: 20,
                               ),
                             ),
@@ -135,15 +135,15 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                         children: [
                           _buildTopMenuIcon(Icons.work_outline, 'Appels\nd\'Offres', onTap: () => context.pushNamed('offres')),
                           const SizedBox(width: 8),
-                          _buildTopMenuIcon(Icons.calendar_month, 'Project\nPlanning', onTap: () => context.pushNamed('project_planning')),
+                          _buildTopMenuIcon(Icons.calendar_month, 'Planning\nProjet', onTap: () => context.pushNamed('project_planning')),
                           const SizedBox(width: 8),
-                          _buildTopMenuIcon(Icons.task_alt, 'Task\nManagement', onTap: () => context.pushNamed('task_management')),
+                          _buildTopMenuIcon(Icons.task_alt, 'Gestion\nTâches', onTap: () => context.pushNamed('task_management')),
                           const SizedBox(width: 8),
-                          _buildTopMenuIcon(Icons.attach_money, 'Budget\nTracking', color: accentColor),
+                          _buildTopMenuIcon(Icons.attach_money, 'Suivi\nBudget', color: accentColor),
                           const SizedBox(width: 8),
-                          _buildTopMenuIcon(Icons.camera_alt_outlined, 'Site\nPhotos'),
+                          _buildTopMenuIcon(Icons.camera_alt_outlined, 'Photos\nChantier'),
                           const SizedBox(width: 8),
-                          _buildTopMenuIcon(Icons.description_outlined, 'Documents\n& Reports', onTap: () => context.pushNamed('documents_reports')),
+                          _buildTopMenuIcon(Icons.description_outlined, 'Documents\n& Rapports', onTap: () => context.pushNamed('documents_reports')),
                         ],
                       ),
                     ),
@@ -183,15 +183,15 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                       children: [
                         _buildTopMenuIcon(Icons.work_outline, 'Appels\nd\'Offres', onTap: () => context.pushNamed('offres')),
                         const SizedBox(width: 8),
-                        _buildTopMenuIcon(Icons.calendar_month, 'Project\nPlanning', onTap: () => context.pushNamed('project_planning')),
+                        _buildTopMenuIcon(Icons.calendar_month, 'Planning\nProjet', onTap: () => context.pushNamed('project_planning')),
                         const SizedBox(width: 8),
-                        _buildTopMenuIcon(Icons.task_alt, 'Task\nManagement', onTap: () => context.pushNamed('task_management')),
+                        _buildTopMenuIcon(Icons.task_alt, 'Gestion\nTâches', onTap: () => context.pushNamed('task_management')),
                         const SizedBox(width: 8),
-                        _buildTopMenuIcon(Icons.attach_money, 'Budget\nTracking', color: accentColor),
+                        _buildTopMenuIcon(Icons.attach_money, 'Suivi\nBudget', color: accentColor),
                         const SizedBox(width: 8),
-                        _buildTopMenuIcon(Icons.camera_alt_outlined, 'Site\nPhotos'),
+                        _buildTopMenuIcon(Icons.camera_alt_outlined, 'Photos\nChantier'),
                         const SizedBox(width: 8),
-                        _buildTopMenuIcon(Icons.description_outlined, 'Documents\n& Reports', onTap: () => context.pushNamed('documents_reports')),
+                        _buildTopMenuIcon(Icons.description_outlined, 'Documents\n& Rapports', onTap: () => context.pushNamed('documents_reports')),
                         const SizedBox(width: 24),
                         InkWell(
                           onTap: () {
@@ -222,7 +222,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                         InkWell(
                           onTap: () => context.push('/profile'),
                           child: const CircleAvatar(
-                            backgroundImage: NetworkImage('https://images.unsplash.com/photo-1541888081622-1db116fb837a?auto=format&fit=crop&w=150&q=80'),
+                            backgroundImage: NetworkImage('https://ui-avatars.com/api/?name=Chef+Chantier&background=1A2B4A&color=fff&size=150'),
                             radius: 20,
                           ),
                         ),
@@ -234,12 +234,12 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
 
               // Title Section
               Text(
-                AppLocalizations.of(context)?.dashboardTitle ?? 'Construction Project Dashboard',
+                AppLocalizations.of(context)?.dashboardTitle ?? 'Tableau de Bord Projet',
                 style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               const Text(
-                'Track. Manage. Deliver.',
+                'Suivre. Gérer. Livrer.',
                 style: TextStyle(color: Colors.grey, fontSize: 16),
               ),
               const SizedBox(height: 32),
@@ -367,14 +367,14 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
 
   Widget _buildProjectOverview(DashboardData data, Color cardColor, Color borderColor, Color accentColor) {
     return _buildCard(
-      'Project Overview',
+      'Vue d\'ensemble',
       Icons.assessment_outlined,
       cardColor,
       borderColor,
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Overall Progress', style: TextStyle(color: Colors.grey, fontSize: 14)),
+          const Text('Avancement global', style: TextStyle(color: Colors.grey, fontSize: 14)),
           const SizedBox(height: 8),
           Text('${(data.overallProgress * 100).toInt()}%', style: const TextStyle(color: Colors.white, fontSize: 36, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
@@ -389,16 +389,16 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatDetail('Tasks Completed', '${data.tasksCompleted}'),
-              _buildStatDetail('Tasks Remaining', '${data.tasksRemaining}'),
+              _buildStatDetail('Tâches terminées', '${data.tasksCompleted}'),
+              _buildStatDetail('Tâches restantes', '${data.tasksRemaining}'),
             ],
           ),
           const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildStatDetail('Project Duration', data.projectDuration),
-              _buildStatDetail('Completion Target', data.completionTarget),
+              _buildStatDetail('Durée projet', data.projectDuration),
+              _buildStatDetail('Livraison prévue', data.completionTarget),
             ],
           ),
         ],
@@ -419,25 +419,25 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
 
   Widget _buildGanttChart(Color cardColor, Color borderColor, Color accentColor) {
     return _buildCard(
-      'Gantt Chart',
+      'Planning Gantt',
       Icons.bar_chart,
       cardColor,
       borderColor,
       Column(
         children: [
-          // Timeline header
+          // En-tête de la timeline
           const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
-              width: 500, // Fixed width to allow scrolling if needed
+              width: 500,
               child: Column(
                 children: [
                   Row(
                     children: [
                       SizedBox(width: 140),
-                      Expanded(child: Text('Week', style: TextStyle(color: Colors.grey, fontSize: 12))),
-                      Expanded(child: Text('May', style: TextStyle(color: Colors.grey, fontSize: 12))),
-                      Expanded(child: Text('June', style: TextStyle(color: Colors.grey, fontSize: 12))),
+                      Expanded(child: Text('Semaine', style: TextStyle(color: Colors.grey, fontSize: 12))),
+                      Expanded(child: Text('Mai', style: TextStyle(color: Colors.grey, fontSize: 12))),
+                      Expanded(child: Text('Juin', style: TextStyle(color: Colors.grey, fontSize: 12))),
                     ],
                   ),
                   SizedBox(height: 16),
@@ -447,19 +447,19 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 16),
-          // Bars
+          // Barres
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: SizedBox(
               width: 500,
               child: Column(
                 children: [
-                  _buildGanttRow('Site Preparation', 0.0, 0.4, Colors.blue),
-                  _buildGanttRow('Foundation', 0.3, 0.6, Colors.orange),
+                  _buildGanttRow('Préparation terrain', 0.0, 0.4, Colors.blue),
+                  _buildGanttRow('Fondations', 0.3, 0.6, Colors.orange),
                   _buildGanttRow('Structure', 0.5, 0.7, Colors.green),
-                  _buildGanttRow('MEP Rough-in', 0.65, 0.8, Colors.yellow),
-                  _buildGanttRow('Interior Finishes', 0.75, 0.95, Colors.purple),
-                  _buildGanttRow('Final Walkthrough', 0.9, 1.0, Colors.pink),
+                  _buildGanttRow('Réseaux bruts', 0.65, 0.8, Colors.yellow),
+                  _buildGanttRow('Finitions intérieures', 0.75, 0.95, Colors.purple),
+                  _buildGanttRow('Réception finale', 0.9, 1.0, Colors.pink),
                 ],
               ),
             ),
@@ -469,7 +469,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
       trailing: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(color: const Color(0xFF2A2A2A), borderRadius: BorderRadius.circular(6)),
-        child: const Text('Today', style: TextStyle(color: Colors.white, fontSize: 12)),
+        child: const Text('Aujourd\'hui', style: TextStyle(color: Colors.white, fontSize: 12)),
       ),
     );
   }
@@ -513,7 +513,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
 
   Widget _buildTaskBoard(DashboardData data, Color cardColor, Color borderColor) {
     return _buildCard(
-      'Contractor Task Board',
+      'Tableau des Tâches',
       Icons.view_kanban_outlined,
       cardColor,
       borderColor,
@@ -524,22 +524,22 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
           children: [
             SizedBox(
               width: 250,
-              child: _buildKanbanColumn('To Do', data.tasks.where((t) => t.status == 'To Do').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
+              child: _buildKanbanColumn('À faire', data.tasks.where((t) => t.status == 'To Do').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
             ),
             const SizedBox(width: 16),
             SizedBox(
               width: 250,
-              child: _buildKanbanColumn('In Progress', data.tasks.where((t) => t.status == 'In Progress').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
+              child: _buildKanbanColumn('En cours', data.tasks.where((t) => t.status == 'In Progress').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
             ),
             const SizedBox(width: 16),
             SizedBox(
               width: 250,
-              child: _buildKanbanColumn('Review', data.tasks.where((t) => t.status == 'Review').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
+              child: _buildKanbanColumn('Révision', data.tasks.where((t) => t.status == 'Review').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
             ),
             const SizedBox(width: 16),
             SizedBox(
               width: 250,
-              child: _buildKanbanColumn('Done', data.tasks.where((t) => t.status == 'Done').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
+              child: _buildKanbanColumn('Terminé', data.tasks.where((t) => t.status == 'Done').map((t) => _buildKanbanTask(t.title, t.tag, t.avatarUrl, t.assignee)).toList()),
             ),
           ],
         ),
@@ -592,7 +592,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
 
   Widget _buildBudgetTracker(DashboardData data, Color cardColor, Color borderColor, Color accentColor) {
     return _buildCard(
-      'Budget Tracker',
+      'Suivi Budgétaire',
       Icons.pie_chart_outline,
       cardColor,
       borderColor,
@@ -604,9 +604,9 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
             runSpacing: 16,
             alignment: WrapAlignment.spaceBetween,
             children: [
-              _buildStatDetail('Total Budget', _formatCurrency(data.budget.totalBudget)),
-              _buildStatDetail('Spent', _formatCurrency(data.budget.spent)),
-              _buildStatDetail('Remaining', _formatCurrency(data.budget.remaining)),
+              _buildStatDetail('Budget total', _formatCurrency(data.budget.totalBudget)),
+              _buildStatDetail('Dépensé', _formatCurrency(data.budget.spent)),
+              _buildStatDetail('Restant', _formatCurrency(data.budget.remaining)),
             ],
           ),
           const SizedBox(height: 32),
@@ -638,7 +638,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text('${(data.budget.spentPercentage * 100).toInt()}%', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                                const Text('Spent', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                                const Text('Dépensé', style: TextStyle(color: Colors.grey, fontSize: 10)),
                               ],
                             ),
                           ),
@@ -678,7 +678,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text('${(data.budget.spentPercentage * 100).toInt()}%', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                              const Text('Spent', style: TextStyle(color: Colors.grey, fontSize: 10)),
+                              const Text('Dépensé', style: TextStyle(color: Colors.grey, fontSize: 10)),
                             ],
                           ),
                         ),
@@ -716,7 +716,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
 
   Widget _buildSitePhotos(DashboardData data, Color cardColor, Color borderColor, WidgetRef ref) {
     return _buildCard(
-      'Site Photos',
+      'Photos de Chantier',
       Icons.photo_library_outlined,
       cardColor,
       borderColor,
@@ -729,7 +729,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                 child: _buildPhotoItem(p['url']!, p['date']!, p['caption']!),
               )),
           
-          // New Photo Button
+          // Bouton Nouvelle Photo
           SizedBox(
             width: 150,
             child: InkWell(
@@ -747,7 +747,7 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
                   children: [
                     Icon(Icons.add, color: Colors.grey),
                     SizedBox(height: 8),
-                    Text('New Photo', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text('Nouvelle Photo', style: TextStyle(color: Colors.grey, fontSize: 12)),
                   ],
                 ),
               ),

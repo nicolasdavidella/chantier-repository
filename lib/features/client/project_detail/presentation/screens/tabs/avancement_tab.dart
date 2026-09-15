@@ -21,21 +21,21 @@ class AvancementTab extends StatelessWidget {
         'title': 'Coulage de la dalle',
         'description': 'La dalle du rez-de-chaussée a été coulée avec succès. Temps de séchage estimé à 21 jours.',
         'percentage': 35,
-        'image': 'https://images.unsplash.com/photo-1541888081622-1db116fb837a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'
+        'image': 'https://picsum.photos/seed/dalle-chantier/500/350'
       },
       {
         'date': '25 Juillet 2026',
         'title': 'Élévation des murs',
         'description': 'Murs extérieurs terminés. Les réservations pour les menuiseries sont faites.',
         'percentage': 25,
-        'image': 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'
+        'image': 'https://picsum.photos/seed/elevation-murs/500/350'
       },
       {
         'date': '10 Juin 2026',
         'title': 'Fondations achevées',
         'description': 'Les semelles filantes ont été coulées et le vide sanitaire est monté.',
         'percentage': 15,
-        'image': 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'
+        'image': 'https://picsum.photos/seed/fondations-done/500/350'
       },
     ];
 

@@ -48,7 +48,7 @@ class ActiveProjectsSection extends ConsumerWidget {
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
-                    project.listePlans.isNotEmpty ? project.listePlans.first : 'https://images.unsplash.com/photo-1503387762-592deb58ef4e',
+                    project.listePlans.isNotEmpty ? project.listePlans.first : 'https://picsum.photos/seed/projet-actif/60/60',
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,

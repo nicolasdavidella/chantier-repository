@@ -73,7 +73,7 @@ final activeProjectsProvider = Provider<List<ProjectModel>>((ref) {
       dateDebut: DateTime.now().subtract(const Duration(days: 60)),
       dateFinPrevue: DateTime.now().add(const Duration(days: 200)),
       statut: 'en_cours',
-      listePlans: ['https://images.unsplash.com/photo-1541888081622-1db116fb837a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'],
+      listePlans: ['https://picsum.photos/seed/immeuble-r4/500/350'],
       listeDocuments: [],
     ),
     ProjectModel(
@@ -88,7 +88,7 @@ final activeProjectsProvider = Provider<List<ProjectModel>>((ref) {
       dateDebut: DateTime.now().subtract(const Duration(days: 120)),
       dateFinPrevue: DateTime.now().add(const Duration(days: 10)),
       statut: 'en_cours',
-      listePlans: ['https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'],
+      listePlans: ['https://picsum.photos/seed/maison-moderne/500/350'],
       listeDocuments: [],
     ),
   ];
@@ -159,17 +159,17 @@ class DashboardDataNotifier extends Notifier<DashboardData> {
         },
       ),
       tasks: [
-        DashboardTask(title: 'Coulage Dalle', tag: 'Fondations', status: 'To Do', assignee: 'Jean D.', avatarUrl: 'https://randomuser.me/api/portraits/men/32.jpg'),
-        DashboardTask(title: 'Élévation Murs', tag: 'Structure', status: 'In Progress', assignee: 'Marc L.', avatarUrl: 'https://randomuser.me/api/portraits/men/44.jpg'),
-        DashboardTask(title: 'Charpente', tag: 'Structure', status: 'In Progress', assignee: 'Paul B.', avatarUrl: 'https://randomuser.me/api/portraits/men/45.jpg'),
-        DashboardTask(title: 'Pose Fenêtres', tag: 'Extérieur', status: 'Review', assignee: 'Sarah W.', avatarUrl: 'https://randomuser.me/api/portraits/women/44.jpg'),
-        DashboardTask(title: 'Terrassement', tag: 'Préparation', status: 'Done', assignee: 'Robert C.', avatarUrl: 'https://randomuser.me/api/portraits/men/22.jpg'),
+        DashboardTask(title: 'Coulage Dalle', tag: 'Fondations', status: 'To Do', assignee: 'Jean D.', avatarUrl: 'https://ui-avatars.com/api/?name=Jean+D&background=4F6BED&color=fff&size=64'),
+        DashboardTask(title: 'Élévation Murs', tag: 'Structure', status: 'In Progress', assignee: 'Marc L.', avatarUrl: 'https://ui-avatars.com/api/?name=Marc+L&background=22C55E&color=fff&size=64'),
+        DashboardTask(title: 'Charpente', tag: 'Structure', status: 'In Progress', assignee: 'Paul B.', avatarUrl: 'https://ui-avatars.com/api/?name=Paul+B&background=F59E0B&color=fff&size=64'),
+        DashboardTask(title: 'Pose Fenêtres', tag: 'Extérieur', status: 'Review', assignee: 'Sarah W.', avatarUrl: 'https://ui-avatars.com/api/?name=Sarah+W&background=EC4899&color=fff&size=64'),
+        DashboardTask(title: 'Terrassement', tag: 'Préparation', status: 'Done', assignee: 'Robert C.', avatarUrl: 'https://ui-avatars.com/api/?name=Robert+C&background=8B5CF6&color=fff&size=64'),
       ],
       photos: [
-        {'url': 'https://images.unsplash.com/photo-1541888081622-1db116fb837a?auto=format&fit=crop&w=300&q=80', 'date': '20 Mai 2025', 'caption': 'Fondations'},
-        {'url': 'https://images.unsplash.com/photo-1504307651254-35680f356f12?auto=format&fit=crop&w=300&q=80', 'date': '27 Mai 2025', 'caption': 'Murs en briques'},
-        {'url': 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=300&q=80', 'date': '3 Juin 2025', 'caption': 'Structure Métallique'},
-        {'url': 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=300&q=80', 'date': '10 Juin 2025', 'caption': 'Charpente Toiture'},
+        {'url': 'https://picsum.photos/seed/fondations/300/200', 'date': '20 Mai 2025', 'caption': 'Fondations'},
+        {'url': 'https://picsum.photos/seed/briques/300/200', 'date': '27 Mai 2025', 'caption': 'Murs en briques'},
+        {'url': 'https://picsum.photos/seed/structure/300/200', 'date': '3 Juin 2025', 'caption': 'Structure Métallique'},
+        {'url': 'https://picsum.photos/seed/charpente/300/200', 'date': '10 Juin 2025', 'caption': 'Charpente Toiture'},
       ],
     );
   }

@@ -43,7 +43,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
 
     ref.read(chatRepositoryProvider).sendMessage(
           widget.conversationId,
-          type == 'image' ? 'https://images.unsplash.com/photo-1541888081622-1db116fb837a?w=400' : text,
+          type == 'image' ? 'https://picsum.photos/seed/chat-photo/400/300' : text,
           user.uid,
           type: type,
         );

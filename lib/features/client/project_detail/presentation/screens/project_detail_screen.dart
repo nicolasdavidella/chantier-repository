@@ -42,7 +42,13 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Félicitations ! 🎉'),
+        title: Row(
+          children: const [
+            Icon(Icons.check_circle_rounded, color: Color(0xFF0F6E56), size: 22),
+            SizedBox(width: 8),
+            Text('Félicitations !'),
+          ],
+        ),
         content: const Text('Votre projet est terminé. Prenez un moment pour évaluer le travail réalisé.'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Plus tard')),

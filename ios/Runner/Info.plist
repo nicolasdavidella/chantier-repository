@@ -68,5 +68,37 @@
 		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
+
+		<!-- ===== PERMISSIONS DE CONFIDENTIALITÉ ===== -->
+
+		<!-- Localisation GPS (geolocator) -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>ChantierTrack utilise votre position pour localiser et créer vos chantiers sur la carte.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>ChantierTrack utilise votre position pour vous envoyer des alertes liées à vos chantiers.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>ChantierTrack utilise votre position en arrière-plan pour les alertes de chantier.</string>
+
+		<!-- Caméra & Galerie (image_picker) -->
+		<key>NSCameraUsageDescription</key>
+		<string>ChantierTrack utilise la caméra pour photographier l'avancement des travaux et les documents.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>ChantierTrack accède à votre galerie pour importer des photos de chantier et des documents.</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>ChantierTrack enregistre les photos de chantier dans votre galerie.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>ChantierTrack peut utiliser le microphone pour les vidéos de chantier.</string>
+
+		<!-- Biométrie / Face ID (local_auth) -->
+		<key>NSFaceIDUsageDescription</key>
+		<string>ChantierTrack utilise Face ID pour sécuriser l'accès à votre compte.</string>
+
+		<!-- Modes d'exécution en arrière-plan (firebase_messaging) -->
+		<key>UIBackgroundModes</key>
+		<array>
+			<string>fetch</string>
+			<string>remote-notification</string>
+		</array>
+
 	</dict>
 </plist>

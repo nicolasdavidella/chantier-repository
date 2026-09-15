@@ -8,7 +8,7 @@ class TaskManagementScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        title: const Text('Task Management'),
+        title: const Text('Gestion des Tâches'),
         backgroundColor: const Color(0xFF1E1E1E),
         foregroundColor: Colors.white,
       ),

@@ -30,7 +30,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
         await Future.delayed(const Duration(seconds: 2));
         
         // Dans une vraie app, on récupérerait l'URL de téléchargement
-        final fakeUrl = 'https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80';
+        final fakeUrl = 'https://picsum.photos/seed/profile-user/300/300';
         
         widget.onPhotoUpdated(fakeUrl);
         

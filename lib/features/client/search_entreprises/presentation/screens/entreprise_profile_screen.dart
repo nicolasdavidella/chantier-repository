@@ -302,7 +302,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
             width: double.infinity,
             child: CachedNetworkImage(
               // URL to a nice Unsplash image of real construction workers building a wall
-              imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356f12?auto=format&fit=crop&w=800&q=80',
+              imageUrl: 'https://picsum.photos/seed/chantier-ouvriers/800/280',
               fit: BoxFit.cover,
               placeholder: (context, url) => Container(color: Colors.grey.shade200),
               errorWidget: (context, error, stackTrace) => Container(color: Colors.grey.shade200, child: const Icon(Icons.engineering, size: 64, color: Colors.grey)),

@@ -23,7 +23,7 @@ class ProjectCard extends ConsumerWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
           image: const DecorationImage(
-            image: NetworkImage('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=800&auto=format&fit=crop'), // Modern House Placeholder
+            image: NetworkImage('https://picsum.photos/seed/construction-house/800/500'),
             fit: BoxFit.cover,
           ),
         ),

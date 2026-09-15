@@ -105,7 +105,7 @@ class _AddReportScreenState extends ConsumerState<AddReportScreen> {
                 border: Border.all(color: _photoTaken ? Colors.green : theme.colorScheme.outline, width: 2),
                 image: _photoTaken 
                     ? const DecorationImage(
-                        image: NetworkImage('https://images.unsplash.com/photo-1541888081622-1db116fb837a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'), 
+                        image: NetworkImage('https://picsum.photos/seed/rapport-photo/500/350'), 
                         fit: BoxFit.cover,
                       ) 
                     : null,

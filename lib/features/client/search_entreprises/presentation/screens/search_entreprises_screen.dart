@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import 'package:chantier_track/core/widgets/shimmer_loader.dart';
+
 import '../../providers/search_entreprises_provider.dart';
 import '../widgets/entreprise_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
@@ -93,29 +93,35 @@ class _SearchEntreprisesScreenState extends ConsumerState<SearchEntreprisesScree
           ),
         ),
       ),
-      body: entreprises.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.search_off, size: 64, color: Colors.grey),
-                  AppSpacing.vMd,
-                  Text('Aucune entreprise trouvée.', style: theme.textTheme.titleMedium),
-                  AppSpacing.vXs,
-                  Text('Essayez de modifier vos filtres.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey)),
-                ],
+      body: entreprises.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(
+          child: Text('Erreur: $err', style: TextStyle(color: theme.colorScheme.error)),
+        ),
+        data: (entreprisesList) => entreprisesList.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                    AppSpacing.vMd,
+                    Text('Aucune entreprise trouvée.', style: theme.textTheme.titleMedium),
+                    AppSpacing.vXs,
+                    Text('Essayez de modifier vos filtres.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                itemCount: entreprisesList.length,
+                itemBuilder: (context, index) {
+                  return EntrepriseCard(entreprise: entreprisesList[index])
+                      .animate()
+                      .fadeIn(delay: (50 * index).ms)
+                      .slideY(begin: 0.2);
+                },
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              itemCount: entreprises.length,
-              itemBuilder: (context, index) {
-                return EntrepriseCard(entreprise: entreprises[index])
-                    .animate()
-                    .fadeIn(delay: (50 * index).ms)
-                    .slideY(begin: 0.2);
-              },
-            ),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: comparisonList.isNotEmpty
           ? FloatingActionButton.extended(

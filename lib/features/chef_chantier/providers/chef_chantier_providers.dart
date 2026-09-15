@@ -17,7 +17,7 @@ final chefProjectsProvider = Provider<List<ProjectModel>>((ref) {
       dateDebut: DateTime.now().subtract(const Duration(days: 30)),
       dateFinPrevue: DateTime.now().add(const Duration(days: 150)),
       statut: 'en_cours',
-      listePlans: ['https://images.unsplash.com/photo-1541888081622-1db116fb837a?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=60'],
+      listePlans: ['https://picsum.photos/seed/villa-ocean/500/350'],
       listeDocuments: [],
     )
   ];

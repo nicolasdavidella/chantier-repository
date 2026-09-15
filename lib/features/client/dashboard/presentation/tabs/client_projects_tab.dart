@@ -213,7 +213,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
           dateDebut: DateTime.now().subtract(const Duration(days: 30)),
           dateFinPrevue: DateTime.now().add(const Duration(days: 150)),
           statut: 'en_cours',
-          listePlans: ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1000&auto=format&fit=crop'],
+          listePlans: ['https://picsum.photos/seed/projet-villa/1000/700'],
           listeDocuments: [],
         ),
         ProjectModel(

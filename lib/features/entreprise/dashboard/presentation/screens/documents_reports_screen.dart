@@ -8,7 +8,7 @@ class DocumentsReportsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111111),
       appBar: AppBar(
-        title: const Text('Documents & Reports'),
+        title: const Text('Documents & Rapports'),
         backgroundColor: const Color(0xFF1E1E1E),
         foregroundColor: Colors.white,
       ),
