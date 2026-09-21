@@ -14,6 +14,7 @@ import 'widgets/editable_info_section.dart';
 import 'widgets/settings_section.dart';
 import 'widgets/security_section.dart';
 import '../../../../core/services/storage_service.dart';
+import 'certification_request_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -154,6 +155,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             
             if (user.role == 'entreprise') ...[
               AppSpacing.vXxl,
+              _buildCertificationSection(context), // Added certification section
+              AppSpacing.vXxl,
               _buildActivitySection(context),
             ],
             
@@ -188,6 +191,69 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildCertificationSection(BuildContext context) {
+    final theme = Theme.of(context);
+    // In a real app, this would check the current status from the EntrepriseModel
+    // final profileState = ref.watch(currentUserProfileProvider);
+    // final status = profileState.value?.statutCertification ?? 'non_demande';
+    
+    // For demonstration, we'll assume it's 'non_demande' or 'en_attente'
+    // If it was 'approuve', we could show a green badge.
+    final status = 'non_demande'; // This should be dynamic
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Certification',
+          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        AppSpacing.vLg,
+        Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(color: theme.colorScheme.primary.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.verified, color: status == 'approuve' ? Colors.green : Colors.grey, size: 32),
+              AppSpacing.hMd,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Statut de certification',
+                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      status == 'approuve' ? 'Vérifié' : status == 'en_attente' ? 'En cours de validation' : 'Non certifié',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: status == 'approuve' ? Colors.green : status == 'en_attente' ? Colors.orange : Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (status == 'non_demande' || status == 'rejete')
+                FilledButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => const CertificationRequestScreen(),
+                    ));
+                  },
+                  icon: const Icon(Icons.arrow_forward_ios, size: 16),
+                  label: const Text('Demander'),
+                ),
+            ],
+          ),
+        ),
+      ],
+    ).animate().fadeIn().slideY(begin: 0.1);
   }
 
   Widget _buildActivitySection(BuildContext context) {

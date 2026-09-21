@@ -83,4 +83,9 @@ class ProjectRepository {
         .doc(projectId)
         .update({'statut': statut});
   }
+
+  // Supprimer un projet
+  Future<void> delete(String id) async {
+    await _firestore.collection('projects').doc(id).delete();
+  }
 }

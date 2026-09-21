@@ -19,8 +19,10 @@ class FirebaseErrors {
         return 'Le code de vérification est invalide.';
       case 'invalid-verification-id':
         return 'L\'ID de vérification est invalide.';
+      case 'invalid-credential':
+        return 'Email ou mot de passe incorrect.';
       default:
-        return 'Une erreur est survenue. Veuillez réessayer.';
+        return 'Une erreur est survenue ($code). Veuillez réessayer.';
     }
   }
 }

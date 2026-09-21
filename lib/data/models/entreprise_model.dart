@@ -16,6 +16,8 @@ class EntrepriseModel {
   final bool certifie;
   final String? prixMoyen;
   final String? delaiMoyen;
+  final String statutCertification; // 'non_demande', 'en_attente', 'approuve', 'rejete'
+  final Map<String, String>? documentsCertification;
 
   EntrepriseModel({
     required this.id,
@@ -31,6 +33,8 @@ class EntrepriseModel {
     required this.certifie,
     this.prixMoyen,
     this.delaiMoyen,
+    this.statutCertification = 'non_demande',
+    this.documentsCertification,
   });
 
   factory EntrepriseModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,10 @@ class EntrepriseModel {
       certifie: json['certifie'] as bool? ?? false,
       prixMoyen: json['prixMoyen'] as String?,
       delaiMoyen: json['delaiMoyen'] as String?,
+      statutCertification: json['statutCertification'] as String? ?? 'non_demande',
+      documentsCertification: json['documentsCertification'] != null 
+          ? Map<String, String>.from(json['documentsCertification'] as Map)
+          : null,
     );
   }
 
@@ -66,6 +74,8 @@ class EntrepriseModel {
       'certifie': certifie,
       'prixMoyen': prixMoyen,
       'delaiMoyen': delaiMoyen,
+      'statutCertification': statutCertification,
+      'documentsCertification': documentsCertification,
     };
   }
 
@@ -83,6 +93,8 @@ class EntrepriseModel {
     bool? certifie,
     String? prixMoyen,
     String? delaiMoyen,
+    String? statutCertification,
+    Map<String, String>? documentsCertification,
   }) {
     return EntrepriseModel(
       id: id ?? this.id,
@@ -98,6 +110,8 @@ class EntrepriseModel {
       certifie: certifie ?? this.certifie,
       prixMoyen: prixMoyen ?? this.prixMoyen,
       delaiMoyen: delaiMoyen ?? this.delaiMoyen,
+      statutCertification: statutCertification ?? this.statutCertification,
+      documentsCertification: documentsCertification ?? this.documentsCertification,
     );
   }
 }

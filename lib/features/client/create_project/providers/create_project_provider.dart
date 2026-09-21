@@ -123,7 +123,7 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
       final authUser = ref.read(authStateProvider).value;
       if (authUser == null) throw Exception("Non authentifié");
 
-      final projectId = FirebaseFirestore.instance.collection('projets').doc().id;
+      final projectId = FirebaseFirestore.instance.collection('projects').doc().id;
       final storageService = ref.read(storageServiceProvider);
       
       List<String> uploadedDocsUrls = [];
@@ -155,7 +155,7 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
         listeDocuments: uploadedDocsUrls,
       );
 
-      await FirebaseFirestore.instance.collection('projets').doc(newProject.id).set(newProject.toJson());
+      await FirebaseFirestore.instance.collection('projects').doc(newProject.id).set(newProject.toJson());
 
       // Reset state on success
       state = AsyncData(ProjectFormData());

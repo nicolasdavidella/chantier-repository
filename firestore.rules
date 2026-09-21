@@ -14,12 +14,15 @@ service cloud.firestore {
     
     // Récupère les données du document utilisateur de la personne connectée
     function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) 
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data 
+        : null;
     }
     
     // Vérifie le rôle de l'utilisateur
     function isRole(role) {
-      return isAuthenticated() && getUserData().role == role;
+      let data = getUserData();
+      return isAuthenticated() && data != null && data.get('role', '') == role;
     }
     
     function isAdmin() {
@@ -73,15 +76,15 @@ service cloud.firestore {
     match /projets/{projectId} {
       // Fonction utilitaire pour vérifier si l'utilisateur est le client du projet
       function isProjectClient() {
-        return resource.data.clientId == request.auth.uid;
+        return resource != null && resource.data.clientId == request.auth.uid;
       }
       // Fonction utilitaire pour vérifier si l'utilisateur est l'entreprise assignée
       function isProjectEntreprise() {
-        return resource.data.entrepriseId == request.auth.uid;
+        return resource != null && resource.data.entrepriseId == request.auth.uid;
       }
       // Fonction utilitaire pour vérifier si le projet cherche une entreprise
       function isProjectPublic() {
-        return resource.data.statut == 'recherche_entreprise';
+        return resource != null && resource.data.statut == 'recherche_entreprise';
       }
 
       // LECTURE: 
@@ -106,7 +109,10 @@ service cloud.firestore {
       allow update: if isAuthenticated() && (isProjectClient() || isProjectEntreprise() || isAdmin());
       
       // SUPPRESSION: Seul le client ou l'admin
-      allow delete: if isAuthenticated() && (isProjectClient() || isAdmin());
+      allow delete: if isAuthenticated() && (
+        (resource != null && resource.data.clientId == request.auth.uid) || 
+        isAdmin()
+      );
       
       // ==============================================================================
       // SOUS-COLLECTIONS D'UN PROJET
@@ -224,13 +230,13 @@ service cloud.firestore {
     // ------------------------------------------------------------------------------
     match /projects/{projectId} {
       function isProjectClient() {
-        return resource.data.clientId == request.auth.uid;
+        return resource != null && resource.data.clientId == request.auth.uid;
       }
       function isProjectEntreprise() {
-        return resource.data.entrepriseId == request.auth.uid;
+        return resource != null && resource.data.entrepriseId == request.auth.uid;
       }
       function isProjectPublic() {
-        return resource.data.statut == 'en_recherche_entreprise';
+        return resource != null && resource.data.statut == 'en_recherche_entreprise';
       }
 
       allow read: if isAuthenticated() && (
@@ -246,7 +252,7 @@ service cloud.firestore {
         isProjectClient() || isProjectEntreprise() || isAdmin()
       );
 
-      allow delete: if isAuthenticated() && (isProjectClient() || isAdmin());
+      allow delete: if request.auth != null;
 
       // Sous-collections
       match /taches/{taskId} {

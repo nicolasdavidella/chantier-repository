@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../auth/data/auth_repository.dart';
+import '../../../auth/providers/auth_provider.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
@@ -19,11 +23,67 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
   void _handleLogin() async {
     setState(() => _isLoading = true);
-    // Simulation of an API call for admin login
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      setState(() => _isLoading = false);
-      context.go('/admin'); // Redirect to admin dashboard
+    
+    try {
+      try {
+        await ref.read(authRepositoryProvider).signInWithEmail(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+      } catch (authErr) {
+        // En mode développement, si la connexion échoue (compte inexistant), 
+        // on tente de créer le compte automatiquement.
+        if (authErr.toString().toLowerCase().contains('incorrect')) {
+          try {
+            await ref.read(authRepositoryProvider).signUpWithEmail(
+              _emailController.text.trim(),
+              _passwordController.text.trim(),
+            );
+          } catch (signUpErr) {
+            if (signUpErr.toString().contains('déjà utilisé')) {
+              throw Exception('Mot de passe incorrect (le compte existe déjà).');
+            } else {
+              rethrow;
+            }
+          }
+        } else {
+          rethrow;
+        }
+      }
+      
+      // FOR DEV: Automatically set the user's role to 'admin' in Firestore
+      // so that they are correctly routed to the admin dashboard by the splash screen.
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        await FirebaseFirestore.instance.collection('users').doc(currentUser.uid).set({
+          'uid': currentUser.uid,
+          'nom': 'Admin',
+          'prenom': 'Système',
+          'email': currentUser.email,
+          'telephone': '+33000000000',
+          'role': 'admin',
+          'dateCreation': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
+        
+        // Force the app to re-fetch the user profile with the new role
+        ref.invalidate(currentUserProfileProvider);
+      }
+      
+      // The GoRouter redirect will automatically pick this up and send the user to /splash, 
+      // which will then route them to /admin based on their profile role.
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur de connexion : ${e.toString().replaceAll('Exception: ', '')}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

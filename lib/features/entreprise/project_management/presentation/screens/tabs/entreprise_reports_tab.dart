@@ -13,8 +13,12 @@ class EntrepriseReportsTab extends ConsumerStatefulWidget {
 }
 
 class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
-  final List<Map<String, String>> _reports = [
-    {'date': '12 Août 2026', 'desc': 'Les fondations sont terminées à 100%. Coulage du béton sec.'},
+  final List<Map<String, dynamic>> _reports = [
+    {
+      'date': '12 Août 2026',
+      'desc': 'Les fondations sont terminées à 100%. Coulage du béton sec.',
+      'hasMedia': true,
+    },
   ];
 
   void _addReport() {
@@ -52,6 +56,24 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
               icon: const Icon(Icons.auto_awesome, color: Colors.amber),
               label: const Text('Générer avec l\'IA', style: TextStyle(color: Colors.amber)),
             ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo/Vidéo ajoutée !')));
+                  },
+                  icon: const Icon(Icons.camera_alt),
+                  tooltip: 'Ajouter une photo/vidéo',
+                ),
+                IconButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Document ajouté !')));
+                  },
+                  icon: const Icon(Icons.attach_file),
+                  tooltip: 'Joindre un fichier',
+                ),
+              ],
+            ),
             const Spacer(),
             TextButton(
               onPressed: () => Navigator.pop(ctx),
@@ -64,6 +86,7 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
                     _reports.insert(0, {
                       'date': 'Aujourd\'hui',
                       'desc': textController.text,
+                      'hasMedia': false,
                     });
                   });
                 }
@@ -113,6 +136,19 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
                   ),
                   AppSpacing.vSm,
                   Text(report['desc']!),
+                  if (report['hasMedia'] == true) ...[
+                    AppSpacing.vMd,
+                    Container(
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Center(
+                        child: Icon(Icons.image, size: 48, color: Colors.grey),
+                      ),
+                    ),
+                  ]
                 ],
               ),
             ),

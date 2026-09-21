@@ -5,6 +5,7 @@ import '../../../../../data/models/project_model.dart';
 import 'tabs/avancement_tab.dart';
 import 'tabs/depenses_tab.dart';
 import 'tabs/alertes_tab.dart';
+import 'tabs/devis_tab.dart';
 import 'tabs/documents_tab.dart';
 import '../../../../ia_assistant/presentation/screens/ia_insights_screen.dart';
 import '../../../../reviews/presentation/screens/create_review_screen.dart';
@@ -28,7 +29,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    
+    final isSearching = widget.project.statut == 'en_recherche_entreprise' || widget.project.statut == 'publie';
+    _tabController = TabController(length: isSearching ? 2 : 4, vsync: this);
 
     if (widget.project.statut == 'termine' && widget.project.entrepriseId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -130,6 +133,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final project = widget.project;
+    final isSearching = project.statut == 'en_recherche_entreprise' || project.statut == 'publie';
 
     return Scaffold(
       body: NestedScrollView(
@@ -196,12 +200,17 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   unselectedLabelColor: Colors.grey,
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicatorWeight: 3,
-                  tabs: const [
-                    Tab(text: 'Avancement', icon: Icon(Icons.timeline)),
-                    Tab(text: 'Dépenses', icon: Icon(Icons.account_balance_wallet)),
-                    Tab(text: 'Alertes IA', icon: Icon(Icons.warning_amber_rounded)),
-                    Tab(text: 'Documents', icon: Icon(Icons.folder)),
-                  ],
+                  tabs: isSearching 
+                    ? const [
+                        Tab(text: 'Devis & Offres', icon: Icon(Icons.request_quote)),
+                        Tab(text: 'Documents', icon: Icon(Icons.folder)),
+                      ]
+                    : const [
+                        Tab(text: 'Avancement', icon: Icon(Icons.timeline)),
+                        Tab(text: 'Dépenses', icon: Icon(Icons.account_balance_wallet)),
+                        Tab(text: 'Alertes IA', icon: Icon(Icons.warning_amber_rounded)),
+                        Tab(text: 'Documents', icon: Icon(Icons.folder)),
+                      ],
                 ),
               ),
               pinned: true,
@@ -210,12 +219,17 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
         },
         body: TabBarView(
           controller: _tabController,
-          children: [
-            AvancementTab(projectId: project.id),
-            DepensesTab(projectId: project.id, budgetTotal: project.budgetPrevisionnel),
-            AlertesTab(projectId: project.id),
-            DocumentsTab(projectId: project.id),
-          ],
+          children: isSearching
+            ? [
+                DevisTab(projectId: project.id),
+                DocumentsTab(projectId: project.id),
+              ]
+            : [
+                AvancementTab(projectId: project.id),
+                DepensesTab(projectId: project.id, budgetTotal: project.budgetPrevisionnel),
+                AlertesTab(projectId: project.id),
+                DocumentsTab(projectId: project.id),
+              ],
         ),
       ),
     );

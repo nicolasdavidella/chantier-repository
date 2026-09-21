@@ -194,24 +194,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: Checkbox(
-                            value: _rememberMe,
-                            onChanged: (val) => setState(() => _rememberMe = val ?? false),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                            activeColor: const Color(0xFF2B2B36),
+                    Expanded(
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: Checkbox(
+                              value: _rememberMe,
+                              onChanged: (val) => setState(() => _rememberMe = val ?? false),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                              activeColor: const Color(0xFF2B2B36),
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Se souvenir de moi',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
-                        ),
-                      ],
+                          const SizedBox(width: 8),
+                          const Expanded(
+                            child: Text(
+                              'Se souvenir de moi',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black87),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     TextButton(
                       onPressed: () => context.push('/forgot_password'),

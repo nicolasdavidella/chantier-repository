@@ -123,4 +123,30 @@ Ne renvoie que le texte du rapport.
       return "Le service IA est indisponible.";
     }
   }
+
+  /// Recommends best matching enterprises for a given project description
+  Future<List<String>> matchEntreprises(String projectDescription, List<Map<String, dynamic>> availableEntreprises) async {
+    try {
+      final prompt = """
+Tu es un expert en mise en relation pour la construction.
+Voici la description d'un projet : "$projectDescription"
+
+Voici la liste des entreprises disponibles avec leurs ID, spécialités et notes :
+${availableEntreprises.map((e) => "- ID: ${e['id']}, Spécialités: ${e['specialites']}, Note: ${e['note']}").join('\n')}
+
+Renvoie UNIQUEMENT un tableau JSON (sans markdown ni backticks) contenant les ID des entreprises les plus pertinentes pour ce projet, triées par pertinence. 
+Exemple: ["ent1", "ent3"]
+""";
+
+      final response = await _model.generateContent([Content.text(prompt)]);
+      String text = response.text ?? "[]";
+      text = text.replaceAll('```json', '').replaceAll('```', '').trim();
+      
+      final List<dynamic> data = jsonDecode(text);
+      return data.map((e) => e.toString()).toList();
+    } catch (e) {
+      print("Erreur Gemini matching: $e");
+      return []; // En cas d'erreur, ne retourne aucun match spécifique
+    }
+  }
 }

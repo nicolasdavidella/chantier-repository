@@ -7,6 +7,7 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../../../auth/providers/auth_provider.dart';
 import '../../../projects/providers/client_projects_provider.dart';
 import '../../../../../data/models/project_model.dart';
+import '../../../../../data/repositories/project_repository.dart';
 import 'package:chantier_track/l10n/app_localizations.dart';
 
 class ClientProjectsTab extends ConsumerStatefulWidget {
@@ -167,12 +168,52 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
                   ],
                 ),
               ),
+              IconButton(
+                icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                onPressed: () => _confirmDeleteProject(context, ref, project),
+              ),
               const FaIcon(FontAwesomeIcons.chevronRight, size: 16),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDeleteProject(BuildContext context, WidgetRef ref, ProjectModel project) async {
+    final bool? confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: const Text('Supprimer le projet'),
+          content: Text('Voulez-vous vraiment supprimer le projet "${project.titre}" ? Cette action est irréversible.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Annuler'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+              child: const Text('Supprimer'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      try {
+        await ref.read(projectRepositoryProvider).delete(project.id);
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Projet supprimé avec succès.')));
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+        }
+      }
+    }
   }
 
   Widget _buildFilterChip(ThemeData theme, String label, bool isSelected) {
@@ -203,7 +244,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       
       final mockProjects = [
         ProjectModel(
-          id: firestore.collection('projets').doc().id,
+          id: firestore.collection('projects').doc().id,
           clientId: user.uid,
           titre: 'Villa Horizon',
           description: 'Construction d\'une villa R+1 avec piscine',
@@ -217,7 +258,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
           listeDocuments: [],
         ),
         ProjectModel(
-          id: firestore.collection('projets').doc().id,
+          id: firestore.collection('projects').doc().id,
           clientId: user.uid,
           titre: 'Rénovation Appartement',
           description: 'Rénovation complète d\'un T4',
@@ -231,7 +272,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
           listeDocuments: [],
         ),
         ProjectModel(
-          id: firestore.collection('projets').doc().id,
+          id: firestore.collection('projects').doc().id,
           clientId: user.uid,
           titre: 'Immeuble Commercial',
           description: 'Construction R+4 usage mixte',
@@ -247,7 +288,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       ];
 
       for (var p in mockProjects) {
-        await firestore.collection('projets').doc(p.id).set(p.toJson());
+        await firestore.collection('projects').doc(p.id).set(p.toJson());
       }
       
       if (mounted) {

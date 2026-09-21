@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../../data/models/devis_model.dart';
 
 // --- MODELS ---
 
@@ -177,5 +178,30 @@ final projectDocumentsProvider = Provider.family<List<ProjectDocumentModel>, Str
     ProjectDocumentModel(id: 'd2', name: 'Devis_initial_signé.pdf', type: 'pdf', dateAjout: DateTime.now().subtract(const Duration(days: 50)), size: '1.1 MB'),
     ProjectDocumentModel(id: 'd3', name: 'Plan_architectural_V2.png', type: 'image', dateAjout: DateTime.now().subtract(const Duration(days: 30)), size: '5.6 MB'),
     ProjectDocumentModel(id: 'd4', name: 'Contrat_BatiCam.doc', type: 'doc', dateAjout: DateTime.now().subtract(const Duration(days: 48)), size: '840 KB'),
+  ];
+});
+
+final projectDevisProvider = Provider.family<List<DevisModel>, String>((ref, projectId) {
+  return [
+    DevisModel(
+      id: 'dev1',
+      projectId: projectId,
+      entrepriseId: 'ent1',
+      montant: 25000000,
+      delaiEstime: '6 mois',
+      description: 'Devis complet incluant gros oeuvre, plomberie et électricité. Matériaux premium.',
+      dateEnvoi: DateTime.now().subtract(const Duration(days: 3)),
+      statut: 'en_attente',
+    ),
+    DevisModel(
+      id: 'dev2',
+      projectId: projectId,
+      entrepriseId: 'ent2',
+      montant: 21000000,
+      delaiEstime: '8 mois',
+      description: 'Proposition économique avec matériaux standards. Focus sur la structure.',
+      dateEnvoi: DateTime.now().subtract(const Duration(days: 1)),
+      statut: 'en_attente',
+    ),
   ];
 });

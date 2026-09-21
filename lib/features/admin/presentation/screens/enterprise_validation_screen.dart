@@ -57,17 +57,29 @@ class EnterpriseValidationScreen extends ConsumerWidget {
                             AppSpacing.vMd,
                             const Text('Documents Soumis', style: TextStyle(fontWeight: FontWeight.bold)),
                             AppSpacing.vSm,
-                            Row(
-                              children: [
-                                const Icon(Icons.description, color: Colors.red),
-                                AppSpacing.hXs,
-                                const Text('RCCM.pdf', style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
-                                AppSpacing.hLg,
-                                const Icon(Icons.description, color: Colors.red),
-                                AppSpacing.hXs,
-                                const Text('CNI_Gerant.pdf', style: TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
-                              ],
-                            ),
+                            if (entreprise.documentsCertification != null && entreprise.documentsCertification!.isNotEmpty)
+                              Wrap(
+                                spacing: AppSpacing.md,
+                                runSpacing: AppSpacing.sm,
+                                children: entreprise.documentsCertification!.entries.map((entry) {
+                                  return Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.description, color: Colors.red),
+                                      AppSpacing.hXs,
+                                      InkWell(
+                                        onTap: () {
+                                          // Simulate opening document
+                                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ouverture de ${entry.key}...')));
+                                        },
+                                        child: Text(entry.key, style: const TextStyle(decoration: TextDecoration.underline, color: Colors.blue)),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                              )
+                            else
+                              const Text('Aucun document soumis.', style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic)),
                             AppSpacing.vLg,
                             Row(
                               mainAxisAlignment: MainAxisAlignment.end,

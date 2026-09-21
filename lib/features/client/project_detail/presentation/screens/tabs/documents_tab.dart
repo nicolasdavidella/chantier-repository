@@ -79,7 +79,13 @@ class DocumentsTab extends StatelessWidget {
                     child: Text(doc['category']!, style: const TextStyle(fontSize: 10)),
                   ),
                   AppSpacing.hSm,
-                  Text('${doc['date']} • ${doc['size']}', style: theme.textTheme.bodySmall),
+                  Expanded(
+                    child: Text(
+                      '${doc['date']} • ${doc['size']}', 
+                      style: theme.textTheme.bodySmall,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),

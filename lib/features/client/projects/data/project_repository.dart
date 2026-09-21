@@ -14,7 +14,7 @@ class ProjectRepository {
   /// Récupère en temps réel les projets créés par un client spécifique
   Stream<List<ProjectModel>> getClientProjects(String clientId) {
     return _firestore
-        .collection('projets')
+        .collection('projects')
         .where('clientId', isEqualTo: clientId)
         .snapshots()
         .map((snapshot) {
@@ -27,7 +27,7 @@ class ProjectRepository {
 
   /// Récupère un projet spécifique en temps réel
   Stream<ProjectModel?> getProjectById(String projectId) {
-    return _firestore.collection('projets').doc(projectId).snapshots().map((doc) {
+    return _firestore.collection('projects').doc(projectId).snapshots().map((doc) {
       if (doc.exists && doc.data() != null) {
         return ProjectModel.fromJson(doc.data()!);
       }

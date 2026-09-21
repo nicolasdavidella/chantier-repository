@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/repositories/entreprise_repository.dart';
+import '../../../ia_assistant/providers/ia_providers.dart';
 
 // ─────────────────────────────────────────────
 // Filtres de recherche
@@ -107,4 +108,28 @@ final selectedEntreprisesProvider = Provider<List<EntrepriseModel>>((ref) {
   final allAsync = ref.watch(allEntreprisesStreamProvider);
   final all = allAsync.value ?? [];
   return all.where((e) => selectedIds.contains(e.id)).toList();
+});
+
+// ─────────────────────────────────────────────
+// IA Matching
+// ─────────────────────────────────────────────
+final iaMatchingProvider = FutureProvider.family<List<EntrepriseModel>, String>((ref, projectDescription) async {
+  final geminiService = ref.watch(geminiServiceProvider);
+  final allAsync = ref.watch(allEntreprisesStreamProvider);
+  final allEntreprises = allAsync.value ?? [];
+  
+  if (allEntreprises.isEmpty) return [];
+
+  final availableEntreprises = allEntreprises.map((e) => {
+    'id': e.id,
+    'specialites': e.specialites.join(', '),
+    'note': e.noteMoyenne,
+  }).toList();
+
+  final matchingIds = await geminiService.matchEntreprises(projectDescription, availableEntreprises);
+  
+  // Sort based on the order returned by Gemini
+  final matched = matchingIds.map((id) => allEntreprises.firstWhere((e) => e.id == id, orElse: () => allEntreprises.first)).toList();
+  // Remove duplicates and elements not in matchingIds
+  return matched.where((e) => matchingIds.contains(e.id)).toSet().toList();
 });

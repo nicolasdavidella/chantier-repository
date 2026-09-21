@@ -57,7 +57,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Utilisateur non connecté : on le bloque sur les écrans d'auth
       if (!isAuthenticated) {
-        return isAuthScreen || isSplash ? null : '/onboarding';
+        return isAuthScreen || isSplash ? null : '/login';
       }
 
       // Utilisateur connecté qui essaie d'aller sur login/signup : on le ramène au splash qui dispatche

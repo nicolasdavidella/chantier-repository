@@ -27,7 +27,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     try {
       final user = ref.read(authStateProvider).value;
       if (user != null) {
-        final profileState = await ref.read(currentUserProfileProvider.future);
+        var profileState = await ref.read(currentUserProfileProvider.future);
+        
+        // Retry loop to handle race conditions during account creation
+        int retries = 3;
+        while (profileState == null && retries > 0) {
+          await Future.delayed(const Duration(milliseconds: 1500));
+          ref.invalidate(currentUserProfileProvider);
+          profileState = await ref.read(currentUserProfileProvider.future);
+          retries--;
+        }
+
         if (!mounted) return;
         
         if (profileState != null) {

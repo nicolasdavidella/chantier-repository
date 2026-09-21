@@ -7,7 +7,7 @@ import '../../../auth/providers/auth_provider.dart';
 final offresProvider = StreamProvider.autoDispose<List<ProjectModel>>((ref) {
   final firestore = FirebaseFirestore.instance;
   return firestore
-      .collection('projets')
+      .collection('projects')
       .where('statut', isEqualTo: 'en_recherche_entreprise')
       .snapshots()
       .map((snapshot) {

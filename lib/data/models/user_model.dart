@@ -29,14 +29,14 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      uid: json['uid'] as String,
-      nom: json['nom'] as String,
-      prenom: json['prenom'] as String,
-      email: json['email'] as String,
-      telephone: json['telephone'] as String,
-      role: json['role'] as String,
+      uid: json['uid'] as String? ?? '',
+      nom: json['nom'] as String? ?? 'Utilisateur',
+      prenom: json['prenom'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      telephone: json['telephone'] as String? ?? '',
+      role: json['role'] as String? ?? 'client',
       photoUrl: json['photoUrl'] as String?,
-      dateCreation: (json['dateCreation'] as Timestamp).toDate(),
+      dateCreation: (json['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
       localisation: json['localisation'] as Map<String, dynamic>?,
     );
   }
