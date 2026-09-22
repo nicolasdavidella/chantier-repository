@@ -72,13 +72,8 @@ class PendingEnterprisesNotifier extends StateNotifier<List<EntrepriseModel>> {
         nombreAvis: 0,
         realisations: [],
         zoneIntervention: ['Yaoundé', 'Douala'],
-        certifie: false,
-        statutCertification: 'en_attente',
-        documentsCertification: {
-          'RCCM': 'https://example.com/docs/rccm_batiplus.pdf',
-          'Pièce d\'identité du gérant': 'https://example.com/docs/cni_batiplus.pdf',
-          'Attestation fiscale': 'https://example.com/docs/fisc_batiplus.pdf',
-        },
+        isVerified: false,
+        verificationStatus: 'UNDER_REVIEW',
       ),
       EntrepriseModel(
         id: 'e_pending_2',
@@ -91,11 +86,8 @@ class PendingEnterprisesNotifier extends StateNotifier<List<EntrepriseModel>> {
         nombreAvis: 0,
         realisations: [],
         zoneIntervention: ['Bafoussam'],
-        certifie: false,
-        statutCertification: 'en_attente',
-        documentsCertification: {
-          'RCCM': 'https://example.com/docs/rccm_toiture.pdf',
-        },
+        isVerified: false,
+        verificationStatus: 'UNDER_REVIEW',
       ),
     ];
   }

@@ -36,7 +36,7 @@ dependencies:
   local_auth: ^2.2.0
   pdf: ^3.11.1
   printing: ^5.13.0
-  share_plus: 13.3.0
+  share_plus: any
   font_awesome_flutter: ^11.0.0
   google_generative_ai: ^0.4.3
   flutter_dotenv: ^5.1.0

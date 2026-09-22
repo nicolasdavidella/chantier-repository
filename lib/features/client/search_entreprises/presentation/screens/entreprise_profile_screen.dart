@@ -209,7 +209,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                   const Spacer(),
-                  if (entreprise.certifie)
+                  if (entreprise.isVerified)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(

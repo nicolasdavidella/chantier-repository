@@ -41,14 +41,14 @@ void main() {
 
   group('ProjectCalculator - calculateRecommendationScore', () {
     test('calcule le score max pour 5 étoiles et 20+ projets', () {
-      final e = EntrepriseModel(id: '1', userId: '', raisonSociale: '', description: '', specialites: [], anneesExperience: 5, noteMoyenne: 5.0, nombreAvis: 10, realisations: List.filled(25, 'url'), zoneIntervention: [], certifie: true);
+      final e = EntrepriseModel(id: '1', userId: '', raisonSociale: '', description: '', specialites: [], anneesExperience: 5, noteMoyenne: 5.0, nombreAvis: 10, realisations: List.filled(25, 'url'), zoneIntervention: [], isVerified: true);
       
       final score = ProjectCalculator.calculateRecommendationScore(e);
       expect(score, 100.0);
     });
 
     test('calcule correctement pour un profil moyen', () {
-      final e = EntrepriseModel(id: '1', userId: '', raisonSociale: '', description: '', specialites: [], anneesExperience: 2, noteMoyenne: 2.5, nombreAvis: 5, realisations: List.filled(10, 'url'), zoneIntervention: [], certifie: true);
+      final e = EntrepriseModel(id: '1', userId: '', raisonSociale: '', description: '', specialites: [], anneesExperience: 2, noteMoyenne: 2.5, nombreAvis: 5, realisations: List.filled(10, 'url'), zoneIntervention: [], isVerified: true);
       
       // note 2.5/5 -> 50% de 70 = 35
       // 10/20 projets -> 50% de 30 = 15

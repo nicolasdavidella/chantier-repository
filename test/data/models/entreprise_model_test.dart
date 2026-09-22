@@ -14,7 +14,7 @@ void main() {
       nombreAvis: 20,
       realisations: ['projet1', 'projet2'],
       zoneIntervention: ['Paris', 'Lyon'],
-      certifie: true,
+      isVerified: true,
       prixMoyen: '\$\$',
     );
 
@@ -31,7 +31,7 @@ void main() {
       expect(json['nombreAvis'], 20);
       expect(json['realisations'], ['projet1', 'projet2']);
       expect(json['zoneIntervention'], ['Paris', 'Lyon']);
-      expect(json['certifie'], true);
+      expect(json['isVerified'], true);
       expect(json['prixMoyen'], '\$\$');
     });
 
@@ -47,7 +47,7 @@ void main() {
         'nombreAvis': 20,
         'realisations': ['projet1', 'projet2'],
         'zoneIntervention': ['Paris', 'Lyon'],
-        'certifie': true,
+        'isVerified': true,
         'prixMoyen': '\$\$',
       };
 

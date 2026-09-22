@@ -56,7 +56,7 @@ final filteredEntreprisesProvider = Provider<AsyncValue<List<EntrepriseModel>>>(
   final allAsync = ref.watch(allEntreprisesStreamProvider);
 
   return allAsync.whenData((list) => list.where((e) {
-    if (filters.certifieOnly && !e.certifie) return false;
+    if (filters.certifieOnly && !e.isVerified) return false;
     if (e.noteMoyenne < filters.minRating) return false;
 
     if (filters.ville != null && filters.ville!.isNotEmpty && filters.ville != 'Toutes') {

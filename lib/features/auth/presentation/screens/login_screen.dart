@@ -272,19 +272,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 
                 // Social Buttons
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildSocialButton(FontAwesomeIcons.facebook, const Color(0xFF1877F2)),
-                    _buildSocialButton(FontAwesomeIcons.google, Colors.black), // Standard multicolor usually, but icon is single color, we'll use black or a brand color
-                    _buildSocialButton(FontAwesomeIcons.apple, Colors.black),
+                    Expanded(child: _buildSocialButton(FontAwesomeIcons.facebook, const Color(0xFF1877F2))),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildSocialButton(FontAwesomeIcons.google, Colors.black)),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildSocialButton(FontAwesomeIcons.apple, Colors.black)),
                   ],
                 ),
                 
                 const SizedBox(height: 40),
                 
                 // Sign up link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
                   children: [
                     Text(
                       "Pas encore de compte ? ",
@@ -329,7 +330,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Widget _buildSocialButton(dynamic icon, Color color) {
     return Container(
-      width: 100,
       height: 56,
       decoration: BoxDecoration(
         color: Colors.white,

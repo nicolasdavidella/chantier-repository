@@ -48,7 +48,7 @@ class EntrepriseCard extends ConsumerWidget {
                           : const Icon(Icons.business_center, size: 48, color: Colors.grey),
                     ),
                   ),
-                  if (entreprise.certifie)
+                  if (entreprise.isVerified)
                     Positioned(
                       top: 12,
                       right: 12,

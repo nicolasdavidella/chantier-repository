@@ -2,10 +2,25 @@
 // Root collection: 'entreprises'
 // Document ID: id
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class EntrepriseModel {
   final String id;
   final String userId;
   final String raisonSociale;
+  final String? nomCommercial;
+  final String? numeroImmatriculation;
+  final String? formeJuridique;
+  final DateTime? dateCreation;
+  final String? adresseSiege;
+  final String? ville;
+  final String? region;
+  final String? telephone;
+  final String? emailProfessionnel;
+  final String? siteWeb;
+  final String? responsableNom;
+  final String? responsableFonction;
+  final String? responsableTelephone;
   final String description;
   final List<String> specialites;
   final int anneesExperience;
@@ -13,16 +28,32 @@ class EntrepriseModel {
   final int nombreAvis;
   final List<String> realisations;
   final List<String> zoneIntervention;
-  final bool certifie;
+  
+  // Verification System
+  final bool isVerified;
+  final String verificationStatus; // DRAFT, SUBMITTED, UNDER_REVIEW, ADDITIONAL_INFO_REQUIRED, APPROVED, REJECTED, SUSPENDED, EXPIRED
+  final DateTime? verificationDate;
+  
   final String? prixMoyen;
   final String? delaiMoyen;
-  final String statutCertification; // 'non_demande', 'en_attente', 'approuve', 'rejete'
-  final Map<String, String>? documentsCertification;
 
   EntrepriseModel({
     required this.id,
     required this.userId,
     required this.raisonSociale,
+    this.nomCommercial,
+    this.numeroImmatriculation,
+    this.formeJuridique,
+    this.dateCreation,
+    this.adresseSiege,
+    this.ville,
+    this.region,
+    this.telephone,
+    this.emailProfessionnel,
+    this.siteWeb,
+    this.responsableNom,
+    this.responsableFonction,
+    this.responsableTelephone,
     required this.description,
     required this.specialites,
     required this.anneesExperience,
@@ -30,11 +61,11 @@ class EntrepriseModel {
     required this.nombreAvis,
     required this.realisations,
     required this.zoneIntervention,
-    required this.certifie,
+    this.isVerified = false,
+    this.verificationStatus = 'DRAFT',
+    this.verificationDate,
     this.prixMoyen,
     this.delaiMoyen,
-    this.statutCertification = 'non_demande',
-    this.documentsCertification,
   });
 
   factory EntrepriseModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +73,19 @@ class EntrepriseModel {
       id: json['id'] as String,
       userId: json['userId'] as String,
       raisonSociale: json['raisonSociale'] as String,
+      nomCommercial: json['nomCommercial'] as String?,
+      numeroImmatriculation: json['numeroImmatriculation'] as String?,
+      formeJuridique: json['formeJuridique'] as String?,
+      dateCreation: json['dateCreation'] != null ? (json['dateCreation'] as Timestamp).toDate() : null,
+      adresseSiege: json['adresseSiege'] as String?,
+      ville: json['ville'] as String?,
+      region: json['region'] as String?,
+      telephone: json['telephone'] as String?,
+      emailProfessionnel: json['emailProfessionnel'] as String?,
+      siteWeb: json['siteWeb'] as String?,
+      responsableNom: json['responsableNom'] as String?,
+      responsableFonction: json['responsableFonction'] as String?,
+      responsableTelephone: json['responsableTelephone'] as String?,
       description: json['description'] as String,
       specialites: List<String>.from(json['specialites'] ?? []),
       anneesExperience: json['anneesExperience'] as int,
@@ -49,13 +93,11 @@ class EntrepriseModel {
       nombreAvis: json['nombreAvis'] as int,
       realisations: List<String>.from(json['realisations'] ?? []),
       zoneIntervention: List<String>.from(json['zoneIntervention'] ?? []),
-      certifie: json['certifie'] as bool? ?? false,
+      isVerified: json['isVerified'] as bool? ?? false,
+      verificationStatus: json['verificationStatus'] as String? ?? 'DRAFT',
+      verificationDate: json['verificationDate'] != null ? (json['verificationDate'] as Timestamp).toDate() : null,
       prixMoyen: json['prixMoyen'] as String?,
       delaiMoyen: json['delaiMoyen'] as String?,
-      statutCertification: json['statutCertification'] as String? ?? 'non_demande',
-      documentsCertification: json['documentsCertification'] != null 
-          ? Map<String, String>.from(json['documentsCertification'] as Map)
-          : null,
     );
   }
 
@@ -64,6 +106,19 @@ class EntrepriseModel {
       'id': id,
       'userId': userId,
       'raisonSociale': raisonSociale,
+      'nomCommercial': nomCommercial,
+      'numeroImmatriculation': numeroImmatriculation,
+      'formeJuridique': formeJuridique,
+      'dateCreation': dateCreation != null ? Timestamp.fromDate(dateCreation!) : null,
+      'adresseSiege': adresseSiege,
+      'ville': ville,
+      'region': region,
+      'telephone': telephone,
+      'emailProfessionnel': emailProfessionnel,
+      'siteWeb': siteWeb,
+      'responsableNom': responsableNom,
+      'responsableFonction': responsableFonction,
+      'responsableTelephone': responsableTelephone,
       'description': description,
       'specialites': specialites,
       'anneesExperience': anneesExperience,
@@ -71,11 +126,11 @@ class EntrepriseModel {
       'nombreAvis': nombreAvis,
       'realisations': realisations,
       'zoneIntervention': zoneIntervention,
-      'certifie': certifie,
+      'isVerified': isVerified,
+      'verificationStatus': verificationStatus,
+      'verificationDate': verificationDate != null ? Timestamp.fromDate(verificationDate!) : null,
       'prixMoyen': prixMoyen,
       'delaiMoyen': delaiMoyen,
-      'statutCertification': statutCertification,
-      'documentsCertification': documentsCertification,
     };
   }
 
@@ -83,6 +138,19 @@ class EntrepriseModel {
     String? id,
     String? userId,
     String? raisonSociale,
+    String? nomCommercial,
+    String? numeroImmatriculation,
+    String? formeJuridique,
+    DateTime? dateCreation,
+    String? adresseSiege,
+    String? ville,
+    String? region,
+    String? telephone,
+    String? emailProfessionnel,
+    String? siteWeb,
+    String? responsableNom,
+    String? responsableFonction,
+    String? responsableTelephone,
     String? description,
     List<String>? specialites,
     int? anneesExperience,
@@ -90,16 +158,29 @@ class EntrepriseModel {
     int? nombreAvis,
     List<String>? realisations,
     List<String>? zoneIntervention,
-    bool? certifie,
+    bool? isVerified,
+    String? verificationStatus,
+    DateTime? verificationDate,
     String? prixMoyen,
     String? delaiMoyen,
-    String? statutCertification,
-    Map<String, String>? documentsCertification,
   }) {
     return EntrepriseModel(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       raisonSociale: raisonSociale ?? this.raisonSociale,
+      nomCommercial: nomCommercial ?? this.nomCommercial,
+      numeroImmatriculation: numeroImmatriculation ?? this.numeroImmatriculation,
+      formeJuridique: formeJuridique ?? this.formeJuridique,
+      dateCreation: dateCreation ?? this.dateCreation,
+      adresseSiege: adresseSiege ?? this.adresseSiege,
+      ville: ville ?? this.ville,
+      region: region ?? this.region,
+      telephone: telephone ?? this.telephone,
+      emailProfessionnel: emailProfessionnel ?? this.emailProfessionnel,
+      siteWeb: siteWeb ?? this.siteWeb,
+      responsableNom: responsableNom ?? this.responsableNom,
+      responsableFonction: responsableFonction ?? this.responsableFonction,
+      responsableTelephone: responsableTelephone ?? this.responsableTelephone,
       description: description ?? this.description,
       specialites: specialites ?? this.specialites,
       anneesExperience: anneesExperience ?? this.anneesExperience,
@@ -107,11 +188,11 @@ class EntrepriseModel {
       nombreAvis: nombreAvis ?? this.nombreAvis,
       realisations: realisations ?? this.realisations,
       zoneIntervention: zoneIntervention ?? this.zoneIntervention,
-      certifie: certifie ?? this.certifie,
+      isVerified: isVerified ?? this.isVerified,
+      verificationStatus: verificationStatus ?? this.verificationStatus,
+      verificationDate: verificationDate ?? this.verificationDate,
       prixMoyen: prixMoyen ?? this.prixMoyen,
       delaiMoyen: delaiMoyen ?? this.delaiMoyen,
-      statutCertification: statutCertification ?? this.statutCertification,
-      documentsCertification: documentsCertification ?? this.documentsCertification,
     );
   }
 }

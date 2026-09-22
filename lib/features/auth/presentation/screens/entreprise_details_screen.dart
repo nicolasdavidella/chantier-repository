@@ -42,7 +42,7 @@ class _EntrepriseDetailsScreenState extends ConsumerState<EntrepriseDetailsScree
         nombreAvis: 0,
         realisations: [],
         zoneIntervention: [],
-        certifie: false,
+        isVerified: false,
       );
 
       await ref.read(userRepositoryProvider).createEntreprise(entreprise);

@@ -94,7 +94,7 @@ class CompareEntreprisesScreen extends ConsumerWidget {
                   cells: [
                     const DataCell(Text('Certifié')),
                     ...selectedEntreprises.map((e) => DataCell(
-                          e.certifie
+                          e.isVerified
                               ? const Icon(Icons.check_circle, color: Colors.green)
                               : const Icon(Icons.cancel, color: Colors.red),
                         )),
