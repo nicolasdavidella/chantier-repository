@@ -185,10 +185,10 @@ class _DevisSimulatorScreenState extends ConsumerState<DevisSimulatorScreen> {
   }
 
   Widget _buildResultSheet(BuildContext context, ThemeData theme) {
-    final geminiService = ref.read(geminiServiceProvider);
+    final anthropicService = ref.read(anthropicServiceProvider);
     
     return FutureBuilder<String>(
-      future: geminiService.simulateDevis(_typeTravauxController.text, _surfaceController.text, _selectedGamme),
+      future: anthropicService.simulateDevis(_typeTravauxController.text, _surfaceController.text, _selectedGamme),
       builder: (context, snapshot) {
         return Container(
           padding: const EdgeInsets.all(AppSpacing.xl),

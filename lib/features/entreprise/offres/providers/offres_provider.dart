@@ -41,6 +41,12 @@ class CandidatureController extends StateNotifier<AsyncValue<void>> {
       );
 
       await firestore.collection('candidatures').doc(candidatureId).set(candidature.toJson());
+      
+      // Update Project document to add this entreprise to entreprisesPostulantes
+      await firestore.collection('projects').doc(projectId).update({
+        'entreprisesPostulantes': FieldValue.arrayUnion([user.uid])
+      });
+
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);

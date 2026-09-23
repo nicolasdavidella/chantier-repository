@@ -106,7 +106,10 @@ service cloud.firestore {
       // MODIFICATION: 
       // - Le client propriétaire
       // - L'entreprise sélectionnée (pour mettre à jour l'avancement global ou accepter le projet)
-      allow update: if isAuthenticated() && (isProjectClient() || isProjectEntreprise() || isAdmin());
+      // - Les entreprises si le projet est public (pour s'ajouter aux candidats)
+      allow update: if isAuthenticated() && (
+        isProjectClient() || isProjectEntreprise() || isAdmin() || (isEntreprise() && isProjectPublic())
+      );
       
       // SUPPRESSION: Seul le client ou l'admin
       allow delete: if isAuthenticated() && (
@@ -200,6 +203,20 @@ service cloud.firestore {
         allow write: if false; 
       }
     }
+
+    // ------------------------------------------------------------------------------
+    // CANDIDATURES (Appels d'offres)
+    // ------------------------------------------------------------------------------
+    match /candidatures/{candidatureId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.entrepriseId || 
+        isAdmin() ||
+        isClient() // Le client pourrait vouloir lire
+      );
+      allow create: if isAuthenticated() && isEntreprise() && request.resource.data.entrepriseId == request.auth.uid;
+      allow update: if isAuthenticated() && (isAdmin() || request.auth.uid == resource.data.entrepriseId);
+      allow delete: if isAdmin();
+    }
     
     // ------------------------------------------------------------------------------
     // CONVERSATIONS (Messagerie)
@@ -249,7 +266,7 @@ service cloud.firestore {
       allow create: if isClient() && request.resource.data.clientId == request.auth.uid;
 
       allow update: if isAuthenticated() && (
-        isProjectClient() || isProjectEntreprise() || isAdmin()
+        isProjectClient() || isProjectEntreprise() || isAdmin() || (isEntreprise() && isProjectPublic())
       );
 
       allow delete: if request.auth != null;

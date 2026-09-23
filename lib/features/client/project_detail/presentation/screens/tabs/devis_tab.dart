@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:chantier_track/data/models/project_model.dart';
 import '../../../providers/project_detail_provider.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 
 class DevisTab extends ConsumerWidget {
-  final String projectId;
+  final ProjectModel project;
 
-  const DevisTab({super.key, required this.projectId});
+  const DevisTab({super.key, required this.project});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final devisList = ref.watch(projectDevisProvider(projectId));
+    final devisList = ref.watch(projectDevisProvider(project.id));
     final theme = Theme.of(context);
 
-    if (devisList.isEmpty) {
+    if (devisList.isEmpty && project.entreprisesPostulantes.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -22,7 +24,7 @@ class DevisTab extends ConsumerWidget {
             Icon(Icons.request_quote_outlined, size: 64, color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5)),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Aucun devis reçu pour le moment',
+              'Aucune candidature reçue pour le moment',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
@@ -32,14 +34,36 @@ class DevisTab extends ConsumerWidget {
       );
     }
 
-    return ListView.builder(
+    return ListView(
       padding: const EdgeInsets.all(AppSpacing.md),
-      itemCount: devisList.length,
-      itemBuilder: (context, index) {
-        final devis = devisList[index];
-        final numberFormat = NumberFormat.currency(locale: 'fr_FR', symbol: 'FCFA');
-        
-        return Card(
+      children: [
+        if (project.entreprisesPostulantes.isNotEmpty) ...[
+          Text('Entreprises Intéressées', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: AppSpacing.md),
+          ...project.entreprisesPostulantes.map((entrepriseId) => Card(
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                child: ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.business)),
+                  title: Text('Entreprise $entrepriseId'),
+                  subtitle: const Text('Souhaite réaliser ce projet'),
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                      // Confirmer l'entreprise
+                      _accepterEntreprise(context, ref, entrepriseId);
+                    },
+                    child: const Text('Choisir'),
+                  ),
+                ),
+              )),
+          const Divider(height: 32),
+        ],
+        if (devisList.isNotEmpty) ...[
+          Text('Devis détaillés', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+          const SizedBox(height: AppSpacing.md),
+          ...devisList.map((devis) {
+            final numberFormat = NumberFormat.currency(locale: 'fr_FR', symbol: 'FCFA');
+            return Card(
           margin: const EdgeInsets.only(bottom: AppSpacing.md),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           child: Padding(
@@ -124,8 +148,35 @@ class DevisTab extends ConsumerWidget {
             ),
           ),
         );
-      },
+          }).toList(),
+        ],
+      ],
     );
+  }
+
+  Future<void> _accepterEntreprise(BuildContext context, WidgetRef ref, String entrepriseId) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) => const Center(child: CircularProgressIndicator()),
+      );
+      
+      await FirebaseFirestore.instance.collection('projects').doc(project.id).update({
+        'entrepriseId': entrepriseId,
+        'statut': 'en_cours',
+      });
+      
+      if (context.mounted) {
+        Navigator.pop(context); // close loader
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Entreprise choisie !')));
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e')));
+      }
+    }
   }
 
   Color _getStatusColor(String statut) {

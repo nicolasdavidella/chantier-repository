@@ -1,9 +1,8 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/services/gemini_service.dart';
-
-final geminiServiceProvider = Provider<GeminiService>((ref) {
-  return GeminiService();
+import '../../../../core/services/anthropic_service.dart';
+final anthropicServiceProvider = Provider<AnthropicService>((ref) {
+  return AnthropicService();
 });
 
 // --- Chat Provider ---
@@ -16,11 +15,11 @@ class ChatMessage {
 }
 
 class IAChatNotifier extends StateNotifier<List<ChatMessage>> {
-  final GeminiService _geminiService;
+  final AnthropicService _anthropicService;
 
-  IAChatNotifier(this._geminiService) : super([
+  IAChatNotifier(this._anthropicService) : super([
     ChatMessage(
-      text: "Bonjour ! Je suis l'Assistant IA de ChantierTrack propulsé par Gemini. Posez-moi vos questions !",
+      text: "Bonjour ! Je suis l'Assistant IA de ChantierTrack propulsé par Claude (Anthropic). Posez-moi vos questions !",
       isUser: false,
       timestamp: DateTime.now(),
     )
@@ -31,7 +30,7 @@ class IAChatNotifier extends StateNotifier<List<ChatMessage>> {
     state = [...state, ChatMessage(text: text, isUser: true, timestamp: DateTime.now())];
 
     try {
-      final aiResponse = await _geminiService.chat(text, state);
+      final aiResponse = await _anthropicService.chat(text, state);
       state = [...state, ChatMessage(text: aiResponse, isUser: false, timestamp: DateTime.now())];
     } catch (e) {
       state = [...state, ChatMessage(text: "Erreur de connexion à l'IA.", isUser: false, timestamp: DateTime.now())];
@@ -40,8 +39,8 @@ class IAChatNotifier extends StateNotifier<List<ChatMessage>> {
 }
 
 final iaChatProvider = StateNotifierProvider<IAChatNotifier, List<ChatMessage>>((ref) {
-  final geminiService = ref.watch(geminiServiceProvider);
-  return IAChatNotifier(geminiService);
+  final anthropicService = ref.watch(anthropicServiceProvider);
+  return IAChatNotifier(anthropicService);
 });
 
 // --- Insights Provider ---
@@ -60,10 +59,10 @@ class IAInsightData {
 }
 
 final iaInsightsProvider = FutureProvider.family<IAInsightData, String>((ref, projectId) async {
-  final geminiService = ref.watch(geminiServiceProvider);
+  final anthropicService = ref.watch(anthropicServiceProvider);
   
   try {
-    final jsonStr = await geminiService.generateInsights(projectId);
+    final jsonStr = await anthropicService.generateInsights(projectId);
     final data = jsonDecode(jsonStr);
     
     return IAInsightData(

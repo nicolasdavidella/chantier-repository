@@ -242,12 +242,15 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Recommandés pour vous',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A1A1A),
+                    const Expanded(
+                      child: Text(
+                        'Recommandés pour vous',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1A1A1A),
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     TextButton(

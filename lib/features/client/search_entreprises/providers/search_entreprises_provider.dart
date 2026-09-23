@@ -114,7 +114,7 @@ final selectedEntreprisesProvider = Provider<List<EntrepriseModel>>((ref) {
 // IA Matching
 // ─────────────────────────────────────────────
 final iaMatchingProvider = FutureProvider.family<List<EntrepriseModel>, String>((ref, projectDescription) async {
-  final geminiService = ref.watch(geminiServiceProvider);
+  final anthropicService = ref.watch(anthropicServiceProvider);
   final allAsync = ref.watch(allEntreprisesStreamProvider);
   final allEntreprises = allAsync.value ?? [];
   
@@ -126,9 +126,9 @@ final iaMatchingProvider = FutureProvider.family<List<EntrepriseModel>, String>(
     'note': e.noteMoyenne,
   }).toList();
 
-  final matchingIds = await geminiService.matchEntreprises(projectDescription, availableEntreprises);
+  final matchingIds = await anthropicService.matchEntreprises(projectDescription, availableEntreprises);
   
-  // Sort based on the order returned by Gemini
+  // Sort based on the order returned by Claude
   final matched = matchingIds.map((id) => allEntreprises.firstWhere((e) => e.id == id, orElse: () => allEntreprises.first)).toList();
   // Remove duplicates and elements not in matchingIds
   return matched.where((e) => matchingIds.contains(e.id)).toSet().toList();

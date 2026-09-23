@@ -19,6 +19,8 @@ class ProjectModel {
   final String statut; // brouillon, en_recherche_entreprise, en_cours, en_pause, termine
   final List<String> listePlans;
   final List<String> listeDocuments;
+  final List<String> entreprisesPostulantes;
+  final String? planChoisi;
 
   ProjectModel({
     required this.id,
@@ -34,6 +36,8 @@ class ProjectModel {
     required this.statut,
     required this.listePlans,
     required this.listeDocuments,
+    this.entreprisesPostulantes = const [],
+    this.planChoisi,
   });
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
@@ -51,6 +55,8 @@ class ProjectModel {
       statut: json['statut'] as String,
       listePlans: List<String>.from(json['listePlans'] ?? []),
       listeDocuments: List<String>.from(json['listeDocuments'] ?? []),
+      entreprisesPostulantes: List<String>.from(json['entreprisesPostulantes'] ?? []),
+      planChoisi: json['planChoisi'] as String?,
     );
   }
 
@@ -69,6 +75,8 @@ class ProjectModel {
       'statut': statut,
       'listePlans': listePlans,
       'listeDocuments': listeDocuments,
+      'entreprisesPostulantes': entreprisesPostulantes,
+      'planChoisi': planChoisi,
     };
   }
 
@@ -86,6 +94,8 @@ class ProjectModel {
     String? statut,
     List<String>? listePlans,
     List<String>? listeDocuments,
+    List<String>? entreprisesPostulantes,
+    String? planChoisi,
   }) {
     return ProjectModel(
       id: id ?? this.id,
@@ -101,6 +111,8 @@ class ProjectModel {
       statut: statut ?? this.statut,
       listePlans: listePlans ?? this.listePlans,
       listeDocuments: listeDocuments ?? this.listeDocuments,
+      entreprisesPostulantes: entreprisesPostulantes ?? this.entreprisesPostulantes,
+      planChoisi: planChoisi ?? this.planChoisi,
     );
   }
 }

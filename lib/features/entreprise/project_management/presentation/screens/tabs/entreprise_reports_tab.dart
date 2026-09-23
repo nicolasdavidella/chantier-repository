@@ -41,8 +41,8 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
               onPressed: () async {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Génération en cours...')));
                 try {
-                  final geminiService = ref.read(geminiServiceProvider);
-                  final reportText = await geminiService.generateReport();
+                  final anthropicService = ref.read(anthropicServiceProvider);
+                  final reportText = await anthropicService.generateReport();
                   textController.text = reportText;
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rapport généré par l\'IA !', style: TextStyle(color: Colors.amber))));

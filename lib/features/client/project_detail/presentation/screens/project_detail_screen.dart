@@ -221,7 +221,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
           controller: _tabController,
           children: isSearching
             ? [
-                DevisTab(projectId: project.id),
+                DevisTab(project: project),
                 DocumentsTab(projectId: project.id),
               ]
             : [
