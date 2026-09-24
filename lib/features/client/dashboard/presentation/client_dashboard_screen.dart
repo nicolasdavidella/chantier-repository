@@ -85,21 +85,32 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
 
   Widget _navItem(int index, IconData icon) {
     final isSelected = _currentIndex == index;
-    return GestureDetector(
-      onTap: () => setState(() => _currentIndex = index),
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFE8601A) : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          icon,
-          color: isSelected ? Colors.white : Colors.white54,
-          size: 22,
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _currentIndex = index),
+        behavior: HitTestBehavior.opaque,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 48,
+              maxHeight: 48,
+            ),
+            child: AspectRatio(
+              aspectRatio: 1.0,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFE8601A) : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: isSelected ? Colors.white : Colors.white54,
+                  size: 22,
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

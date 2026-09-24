@@ -80,51 +80,55 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   final page = _pages[index];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Flat illustration composition
-                        Container(
-                          width: 220,
-                          height: 220,
-                          decoration: const BoxDecoration(
-                            color: AppColors.primaryLight,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: FaIcon(
-                              page['icon'],
-                              size: 80,
-                              color: AppColors.primary,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 32),
+                          // Flat illustration composition
+                          Container(
+                            width: 220,
+                            height: 220,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primaryLight,
+                              shape: BoxShape.circle,
                             ),
-                          ),
-                        ).animate(key: ValueKey(index)).scale(duration: 400.ms, curve: Curves.easeOutBack),
-                        
-                        const SizedBox(height: 64),
-                        
-                        Text(
-                          page['title'],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimaryLight,
-                            height: 1.2,
-                          ),
-                        ).animate(key: ValueKey('title_$index')).fadeIn(duration: 400.ms).slideY(begin: 0.1),
-                        
-                        const SizedBox(height: 16),
-                        
-                        Text(
-                          page['description'],
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textSecondaryLight,
-                            height: 1.5,
-                          ),
-                        ).animate(key: ValueKey('desc_$index')).fadeIn(delay: 100.ms, duration: 400.ms).slideY(begin: 0.1),
-                      ],
+                            child: Center(
+                              child: FaIcon(
+                                page['icon'],
+                                size: 80,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ).animate(key: ValueKey(index)).scale(duration: 400.ms, curve: Curves.easeOutBack),
+                          
+                          const SizedBox(height: 48), // Reduced from 64
+                          
+                          Text(
+                            page['title'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimaryLight,
+                              height: 1.2,
+                            ),
+                          ).animate(key: ValueKey('title_$index')).fadeIn(duration: 400.ms).slideY(begin: 0.1),
+                          
+                          const SizedBox(height: 16),
+                          
+                          Text(
+                            page['description'],
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: AppColors.textSecondaryLight,
+                              height: 1.5,
+                            ),
+                          ).animate(key: ValueKey('desc_$index')).fadeIn(delay: 100.ms, duration: 400.ms).slideY(begin: 0.1),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
                     ),
                   );
                 },
