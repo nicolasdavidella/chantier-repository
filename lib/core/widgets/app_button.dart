@@ -94,11 +94,15 @@ class _AppButtonState extends State<AppButton> {
           Icon(widget.icon, size: 20, color: foregroundColor),
           AppSpacing.hSm,
         ],
-        Text(
-          widget.text,
-          style: theme.textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: foregroundColor,
+        Flexible(
+          child: Text(
+            widget.text,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: foregroundColor,
+            ),
           ),
         ),
       ],

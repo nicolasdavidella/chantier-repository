@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -128,7 +128,6 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
       
       List<String> uploadedDocsUrls = [];
       for (var doc in current.documents) {
-        // Use readAsBytes and uploadData to support Web properly
         final data = await doc.readAsBytes();
         final fileName = '${DateTime.now().millisecondsSinceEpoch}_${doc.name}';
         final url = await storageService.uploadData('projects/$projectId/documents/$fileName', data, contentType: doc.mimeType);
@@ -155,13 +154,45 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
         listeDocuments: uploadedDocsUrls,
       );
 
-      await FirebaseFirestore.instance.collection('projects').doc(newProject.id).set(newProject.toJson());
+      final db = FirebaseFirestore.instance;
+      await db.collection('projects').doc(newProject.id).set(newProject.toJson());
+
+      // Diffusion directe aux entreprises (sans Cloud Function)
+      try {
+        final entreprisesSnap = await db.collection('entreprises').get();
+        final batch = db.batch();
+        final ville = current.ville;
+
+        for (final entDoc in entreprisesSnap.docs) {
+          final entData = entDoc.data();
+          // On utilise le userId (Firebase Auth UID) pour que le dashboard puisse le retrouver
+          final entrepriseUserId = entData['userId'] as String?;
+          if (entrepriseUserId == null || entrepriseUserId.isEmpty) continue;
+
+          final diffusionId = '${projectId}_$entrepriseUserId';
+          batch.set(
+            db.collection('diffusions_projet').doc(diffusionId),
+            {
+              'projectId': projectId,
+              'clientId': authUser.uid,
+              'entrepriseId': entrepriseUserId,
+              'ville': ville,
+              'statut': 'envoye',
+              'dateEnvoi': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
+        await batch.commit();
+        debugPrint('✅ Projet diffusé à ${entreprisesSnap.docs.length} entreprise(s)');
+      } catch (e) {
+        debugPrint('⚠️ Erreur diffusion: $e');
+      }
 
       // Reset state on success
       state = AsyncData(ProjectFormData());
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      // Revert to data state so user can try again
       state = AsyncData(current);
       rethrow;
     }

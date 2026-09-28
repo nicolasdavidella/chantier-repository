@@ -16,11 +16,10 @@ class DashboardEmptyState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Lottie.network(
-            'https://lottie.host/8b725055-6677-44da-b371-bd6b90875c75/Z1hW6r60PZ.json', // Placeholder illustration
-            height: 200,
-            repeat: false,
-            errorBuilder: (context, error, stackTrace) => const Icon(Icons.architecture, size: 80),
+          Icon(
+            Icons.architecture,
+            size: 100,
+            color: Theme.of(context).colorScheme.primary,
           ),
           AppSpacing.vLg,
           Text(

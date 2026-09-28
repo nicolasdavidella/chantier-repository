@@ -300,5 +300,56 @@ service cloud.firestore {
         allow update: if isAdmin();
       }
     }
+    
+    // ------------------------------------------------------------------------------
+    // DIFFUSIONS PROJET
+    // ------------------------------------------------------------------------------
+    match /diffusions_projet/{diffusionId} {
+      // LIST : requête avec .where() — resource est null, on autorise tout utilisateur connecté
+      // La sécurité est assurée par la requête elle-même (.where('entrepriseId', isEqualTo: uid))
+      allow list: if isAuthenticated();
+      // GET : lecture d'un document précis — on peut inspecter resource.data
+      allow get: if isAuthenticated() && (
+        isAdmin() ||
+        resource.data.entrepriseId == request.auth.uid ||
+        (isClient() && get(/databases/$(database)/documents/projects/$(resource.data.projectId)).data.clientId == request.auth.uid)
+      );
+      // Mise à jour : accepter/décliner (par l'entreprise concernée)
+      allow update: if isAuthenticated() && resource.data.entrepriseId == request.auth.uid;
+      // Création : par le client qui publie le projet
+      allow create: if isAuthenticated() && request.resource.data.clientId == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------------------
+    // MAIL OUTBOX
+    // ------------------------------------------------------------------------------
+    match /mail_outbox/{mailId} {
+      allow read, write: if false; // Uniquement accessible par le SDK Admin (Cloud Functions)
+    }
+
+    // ------------------------------------------------------------------------------
+    // DEMANDES DE CERTIFICATION
+    // ------------------------------------------------------------------------------
+    match /demandes_certification/{demandeId} {
+      // Lecture : Admin ou l'entreprise concernée
+      allow read: if isAuthenticated() && (isAdmin() || request.auth.uid == demandeId);
+      // Création : Seulement par l'entreprise elle-même
+      allow create: if isAuthenticated() && isEntreprise() && request.auth.uid == demandeId;
+      // Modification : L'entreprise peut modifier si le statut est 'brouillon' ou 'rejetee' (pour corriger)
+      // Les autres statuts sont modifiés par les admins ou les Cloud Functions
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (request.auth.uid == demandeId && (resource.data.statut == 'brouillon' || resource.data.statut == 'rejetee'))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------------------
+    // AUDIT LOGS
+    // ------------------------------------------------------------------------------
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
+    }
   }
 }

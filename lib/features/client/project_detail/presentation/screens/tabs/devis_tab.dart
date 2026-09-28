@@ -40,23 +40,41 @@ class DevisTab extends ConsumerWidget {
         if (project.entreprisesPostulantes.isNotEmpty) ...[
           Text('Entreprises Intéressées', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           const SizedBox(height: AppSpacing.md),
-          ...project.entreprisesPostulantes.map((entrepriseId) => Card(
-                margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.business)),
-                  title: Text('Entreprise $entrepriseId'),
-                  subtitle: const Text('Souhaite réaliser ce projet'),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                      // Confirmer l'entreprise
-                      _accepterEntreprise(context, ref, entrepriseId);
-                    },
-                    child: const Text('Choisir'),
+          ...project.entreprisesPostulantes.map((entrepriseId) {
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance.collection('entreprises').doc(entrepriseId).get(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                if (!snapshot.data!.exists) return const SizedBox.shrink();
+
+                final data = snapshot.data!.data() as Map<String, dynamic>;
+                return Card(
+                  margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: ListTile(
+                    leading: const CircleAvatar(child: Icon(Icons.business)),
+                    title: Row(
+                      children: [
+                        Expanded(child: Text(data['raisonSociale'] ?? 'Entreprise inconnue', style: const TextStyle(fontWeight: FontWeight.bold))),
+                        if (data['isVerified'] == true) 
+                          const Icon(Icons.verified, color: Colors.blue, size: 16),
+                      ],
+                    ),
+                    subtitle: Text('Note: ${data['noteMoyenne'] ?? 'N/A'} • Exp: ${data['anneesExperience'] ?? 0} ans'),
+                    trailing: ElevatedButton(
+                      onPressed: () {
+                        // Confirmer l'entreprise
+                        _accepterEntreprise(context, ref, entrepriseId);
+                      },
+                      child: const Text('Choisir'),
+                    ),
                   ),
-                ),
-              )),
+                );
+              }
+            );
+          }),
           const Divider(height: 32),
+
         ],
         if (devisList.isNotEmpty) ...[
           Text('Devis détaillés', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
@@ -150,6 +168,38 @@ class DevisTab extends ConsumerWidget {
         );
           }).toList(),
         ],
+        
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('diffusions_projet')
+              .where('projectId', isEqualTo: project.id)
+              .where('statut', isEqualTo: 'envoye')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return const SizedBox.shrink();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('En attente de réponse', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey)),
+                const SizedBox(height: AppSpacing.md),
+                ...snapshot.data!.docs.map((doc) {
+                  final entrepriseId = doc['entrepriseId'];
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance.collection('entreprises').doc(entrepriseId).get(),
+                    builder: (context, entSnapshot) {
+                      if (!entSnapshot.hasData || !entSnapshot.data!.exists) return const SizedBox.shrink();
+                      final data = entSnapshot.data!.data() as Map<String, dynamic>;
+                      return ListTile(
+                        leading: const Icon(Icons.hourglass_empty, color: Colors.grey),
+                        title: Text(data['raisonSociale'] ?? 'Entreprise', style: const TextStyle(color: Colors.grey)),
+                      );
+                    }
+                  );
+                }),
+              ],
+            );
+          },
+        ),
       ],
     );
   }

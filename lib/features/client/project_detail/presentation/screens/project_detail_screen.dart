@@ -5,7 +5,7 @@ import '../../../../../data/models/project_model.dart';
 import 'tabs/avancement_tab.dart';
 import 'tabs/depenses_tab.dart';
 import 'tabs/alertes_tab.dart';
-import 'tabs/devis_tab.dart';
+import 'tabs/entreprises_interessees_tab.dart';
 import 'tabs/documents_tab.dart';
 import '../../../../ia_assistant/presentation/screens/ia_insights_screen.dart';
 import '../../../../reviews/presentation/screens/create_review_screen.dart';
@@ -202,7 +202,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   indicatorWeight: 3,
                   tabs: isSearching 
                     ? const [
-                        Tab(text: 'Devis & Offres', icon: Icon(Icons.request_quote)),
+                        Tab(text: 'Entreprises', icon: Icon(Icons.business_center)),
                         Tab(text: 'Documents', icon: Icon(Icons.folder)),
                       ]
                     : const [
@@ -221,7 +221,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
           controller: _tabController,
           children: isSearching
             ? [
-                DevisTab(project: project),
+                EntreprisesInteresseesTab(project: project),
                 DocumentsTab(projectId: project.id),
               ]
             : [

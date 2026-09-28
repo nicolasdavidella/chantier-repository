@@ -34,6 +34,9 @@ class EntrepriseModel {
   final String verificationStatus; // DRAFT, SUBMITTED, UNDER_REVIEW, ADDITIONAL_INFO_REQUIRED, APPROVED, REJECTED, SUSPENDED, EXPIRED
   final DateTime? verificationDate;
   
+  final String? nifDocumentUrl;
+  final String? rccmDocumentUrl;
+  
   final String? prixMoyen;
   final String? delaiMoyen;
 
@@ -64,6 +67,8 @@ class EntrepriseModel {
     this.isVerified = false,
     this.verificationStatus = 'DRAFT',
     this.verificationDate,
+    this.nifDocumentUrl,
+    this.rccmDocumentUrl,
     this.prixMoyen,
     this.delaiMoyen,
   });
@@ -96,6 +101,8 @@ class EntrepriseModel {
       isVerified: json['isVerified'] as bool? ?? false,
       verificationStatus: json['verificationStatus'] as String? ?? 'DRAFT',
       verificationDate: json['verificationDate'] != null ? (json['verificationDate'] as Timestamp).toDate() : null,
+      nifDocumentUrl: json['nifDocumentUrl'] as String?,
+      rccmDocumentUrl: json['rccmDocumentUrl'] as String?,
       prixMoyen: json['prixMoyen'] as String?,
       delaiMoyen: json['delaiMoyen'] as String?,
     );
@@ -129,6 +136,8 @@ class EntrepriseModel {
       'isVerified': isVerified,
       'verificationStatus': verificationStatus,
       'verificationDate': verificationDate != null ? Timestamp.fromDate(verificationDate!) : null,
+      'nifDocumentUrl': nifDocumentUrl,
+      'rccmDocumentUrl': rccmDocumentUrl,
       'prixMoyen': prixMoyen,
       'delaiMoyen': delaiMoyen,
     };
@@ -161,6 +170,8 @@ class EntrepriseModel {
     bool? isVerified,
     String? verificationStatus,
     DateTime? verificationDate,
+    String? nifDocumentUrl,
+    String? rccmDocumentUrl,
     String? prixMoyen,
     String? delaiMoyen,
   }) {
@@ -191,6 +202,8 @@ class EntrepriseModel {
       isVerified: isVerified ?? this.isVerified,
       verificationStatus: verificationStatus ?? this.verificationStatus,
       verificationDate: verificationDate ?? this.verificationDate,
+      nifDocumentUrl: nifDocumentUrl ?? this.nifDocumentUrl,
+      rccmDocumentUrl: rccmDocumentUrl ?? this.rccmDocumentUrl,
       prixMoyen: prixMoyen ?? this.prixMoyen,
       delaiMoyen: delaiMoyen ?? this.delaiMoyen,
     );

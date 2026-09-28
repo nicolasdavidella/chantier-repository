@@ -20,38 +20,25 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
+  bool _isLogin = true;
 
-  void _handleLogin() async {
+  void _handleAuth() async {
     setState(() => _isLoading = true);
     
     try {
-      try {
+      if (_isLogin) {
         await ref.read(authRepositoryProvider).signInWithEmail(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
-      } catch (authErr) {
-        // En mode développement, si la connexion échoue (compte inexistant), 
-        // on tente de créer le compte automatiquement.
-        if (authErr.toString().toLowerCase().contains('incorrect')) {
-          try {
-            await ref.read(authRepositoryProvider).signUpWithEmail(
-              _emailController.text.trim(),
-              _passwordController.text.trim(),
-            );
-          } catch (signUpErr) {
-            if (signUpErr.toString().contains('déjà utilisé')) {
-              throw Exception('Mot de passe incorrect (le compte existe déjà).');
-            } else {
-              rethrow;
-            }
-          }
-        } else {
-          rethrow;
-        }
+      } else {
+        await ref.read(authRepositoryProvider).signUpWithEmail(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
       }
       
-      // FOR DEV: Automatically set the user's role to 'admin' in Firestore
+      // Automatically set the user's role to 'admin' in Firestore
       // so that they are correctly routed to the admin dashboard by the splash screen.
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser != null) {
@@ -135,9 +122,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       child: Icon(Icons.security, size: 48, color: theme.colorScheme.primary),
                     ),
                     AppSpacing.vLg,
-                    const Text(
-                      'Portail Administrateur',
-                      style: TextStyle(
+                    Text(
+                      _isLogin ? 'Portail Administrateur' : 'Créer un accès Admin',
+                      style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -146,7 +133,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                     ),
                     AppSpacing.vSm,
                     Text(
-                      'Veuillez vous identifier pour accéder au panneau de contrôle.',
+                      _isLogin 
+                          ? 'Veuillez vous identifier pour accéder au panneau de contrôle.'
+                          : 'Renseignez un email et un mot de passe pour créer un compte.',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.white.withValues(alpha: 0.6),
@@ -211,24 +200,36 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                 ),
                 AppSpacing.vLg,
                 
-                // Forgot password
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // Handle forgot password
-                    },
-                    child: Text(
-                      'Mot de passe oublié ?',
-                      style: TextStyle(color: theme.colorScheme.primary),
+                // Forgot password & Toggle Mode
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        setState(() => _isLogin = !_isLogin);
+                      },
+                      child: Text(
+                        _isLogin ? 'Créer un compte' : 'Déjà un compte ?',
+                        style: TextStyle(color: theme.colorScheme.primary),
+                      ),
                     ),
-                  ),
+                    if (_isLogin)
+                      TextButton(
+                        onPressed: () {
+                          // Handle forgot password
+                        },
+                        child: Text(
+                          'Mot de passe oublié ?',
+                          style: TextStyle(color: theme.colorScheme.primary),
+                        ),
+                      ),
+                  ],
                 ),
                 AppSpacing.vXl,
                 
-                // Login Button
+                // Login / Register Button
                 ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
+                  onPressed: _isLoading ? null : _handleAuth,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.colorScheme.primary,
                     foregroundColor: Colors.white,
@@ -247,9 +248,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                           ),
                         )
-                      : const Text(
-                          'Se Connecter',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      : Text(
+                          _isLogin ? 'Se Connecter' : 'Créer le compte',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
                 ),
                 AppSpacing.vLg,

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/anthropic_service.dart';
@@ -115,6 +116,37 @@ class AiProjectCreationController extends StateNotifier<AiProjectCreationState> 
       );
 
       await FirebaseFirestore.instance.collection('projects').doc(newProject.id).set(newProject.toJson());
+      
+      // Diffusion directe aux entreprises (sans Cloud Function pour éviter les problèmes d'émulateur)
+      try {
+        final db = FirebaseFirestore.instance;
+        final entreprisesSnap = await db.collection('entreprises').get();
+        final batch = db.batch();
+
+        for (final entDoc in entreprisesSnap.docs) {
+          final entData = entDoc.data();
+          // On utilise le userId (Firebase Auth UID) pour que le dashboard puisse le retrouver
+          final entrepriseUserId = entData['userId'] as String?;
+          if (entrepriseUserId == null || entrepriseUserId.isEmpty) continue;
+
+          final diffusionId = '${newProject.id}_$entrepriseUserId';
+          batch.set(
+            db.collection('diffusions_projet').doc(diffusionId),
+            {
+              'projectId': newProject.id,
+              'clientId': authUser.uid,
+              'entrepriseId': entrepriseUserId,
+              'statut': 'envoye',
+              'dateEnvoi': FieldValue.serverTimestamp(),
+            },
+            SetOptions(merge: true),
+          );
+        }
+        await batch.commit();
+        debugPrint('✅ Projet IA diffusé à ${entreprisesSnap.docs.length} entreprise(s)');
+      } catch (e) {
+        debugPrint('⚠️ Erreur diffusion IA: $e');
+      }
       
     } catch (e) {
       print("Erreur création projet IA: $e");

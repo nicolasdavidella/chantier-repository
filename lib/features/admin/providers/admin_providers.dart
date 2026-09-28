@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/models/avis_model.dart';
+import '../../../../data/models/certification_request_model.dart';
 
 // --- Mock Models ---
 
@@ -54,57 +56,21 @@ final adminStatsProvider = Provider((ref) {
   };
 });
 
-class PendingEnterprisesNotifier extends StateNotifier<List<EntrepriseModel>> {
-  PendingEnterprisesNotifier() : super([]) {
-    _loadMockData();
-  }
+final pendingEnterprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('entreprises')
+      .where('isVerified', isEqualTo: false)
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => EntrepriseModel.fromJson(doc.data())).toList());
+});
 
-  void _loadMockData() {
-    state = [
-      EntrepriseModel(
-        id: 'e_pending_1',
-        userId: 'u2',
-        raisonSociale: 'BatiPlus SARL',
-        description: 'Entreprise spécialisée dans les gros oeuvres depuis 10 ans.',
-        specialites: ['Gros oeuvre', 'Fondations'],
-        anneesExperience: 10,
-        noteMoyenne: 0.0,
-        nombreAvis: 0,
-        realisations: [],
-        zoneIntervention: ['Yaoundé', 'Douala'],
-        isVerified: false,
-        verificationStatus: 'UNDER_REVIEW',
-      ),
-      EntrepriseModel(
-        id: 'e_pending_2',
-        userId: 'u_new',
-        raisonSociale: 'Toiture 237',
-        description: 'Experts en charpentes métalliques.',
-        specialites: ['Charpente', 'Toiture'],
-        anneesExperience: 5,
-        noteMoyenne: 0.0,
-        nombreAvis: 0,
-        realisations: [],
-        zoneIntervention: ['Bafoussam'],
-        isVerified: false,
-        verificationStatus: 'UNDER_REVIEW',
-      ),
-    ];
-  }
-
-  void validateEnterprise(String id) {
-    state = state.where((e) => e.id != id).toList();
-    // Simulate log creation
-  }
-
-  void rejectEnterprise(String id) {
-    state = state.where((e) => e.id != id).toList();
-    // Simulate log creation
-  }
-}
-
-final pendingEnterprisesProvider = StateNotifierProvider<PendingEnterprisesNotifier, List<EntrepriseModel>>((ref) {
-  return PendingEnterprisesNotifier();
+final pendingCertificationsProvider = StreamProvider<List<CertificationRequestModel>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('demandes_certification')
+      .where('statut', isEqualTo: 'en_attente')
+      .orderBy('dateSoumission', descending: false) // plus anciennes en premier
+      .snapshots()
+      .map((snapshot) => snapshot.docs.map((doc) => CertificationRequestModel.fromJson(doc.data(), doc.id)).toList());
 });
 
 class UsersManagementNotifier extends StateNotifier<List<UserModel>> {

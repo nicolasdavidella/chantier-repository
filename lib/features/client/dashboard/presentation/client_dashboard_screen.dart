@@ -49,7 +49,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         child: _pages[_currentIndex],
@@ -65,7 +65,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
         child: Container(
           height: 64,
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1A1A),
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(40),
           ),
           child: Row(
@@ -100,12 +100,12 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 250),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFE8601A) : Colors.transparent,
+                  color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   icon,
-                  color: isSelected ? Colors.white : Colors.white54,
+                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
                   size: 22,
                 ),
               ),
@@ -134,7 +134,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
     final userName = user?.nom ?? 'Client';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -153,20 +153,20 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                       children: [
                         Text(
                           'Bonjour, $userName',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1A1A1A),
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Row(
-                          children: const [
-                            Icon(Icons.location_on, color: Color(0xFF0F6E56), size: 14),
-                            SizedBox(width: 4),
+                          children: [
+                            Icon(Icons.location_on, color: Theme.of(context).colorScheme.primary, size: 14),
+                            const SizedBox(width: 4),
                             Text(
                               'Douala, CM',
-                              style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
+                              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
                             ),
                           ],
                         ),
@@ -174,11 +174,11 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                     ),
                     CircleAvatar(
                       radius: 22,
-                      backgroundColor: const Color(0xFFE6F3F0),
+                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                       child: Text(
                         userName.isNotEmpty ? userName[0].toUpperCase() : 'C',
-                        style: const TextStyle(
-                          color: Color(0xFF0F6E56),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimaryContainer,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -194,20 +194,20 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'À proximité',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1A1A1A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     TextButton(
                       onPressed: () {},
-                      child: const Text(
+                      child: Text(
                         'Voir tout',
                         style: TextStyle(
-                          color: Color(0xFF0F6E56),
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -225,9 +225,9 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                     height: 230,
                     child: nearby.when(
                       loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(child: Text('Erreur: $e', style: const TextStyle(color: Colors.red))),
+                      error: (e, _) => Center(child: Text('Erreur: $e', style: TextStyle(color: Theme.of(context).colorScheme.error))),
                       data: (list) => list.isEmpty
-                          ? const Center(child: Text('Aucune entreprise', style: TextStyle(color: Color(0xFF6B7280))))
+                          ? Center(child: Text('Aucune entreprise', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)))
                           : ListView.separated(
                               scrollDirection: Axis.horizontal,
                               physics: const BouncingScrollPhysics(),
@@ -253,23 +253,23 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Recommandés pour vous',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1A1A1A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     TextButton(
                       onPressed: () {},
-                      child: const Text(
+                      child: Text(
                         'Voir tout',
                         style: TextStyle(
-                          color: Color(0xFF0F6E56),
+                          color: Theme.of(context).colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -285,11 +285,11 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                   final recommended = ref.watch(_recommendedEntreprisesProvider);
                   return recommended.when(
                     loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text('Erreur: $e', style: const TextStyle(color: Colors.red))),
+                    error: (e, _) => Center(child: Text('Erreur: $e', style: TextStyle(color: Theme.of(context).colorScheme.error))),
                     data: (list) => list.isEmpty
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            child: Text('Aucune entreprise recommandée', style: TextStyle(color: Color(0xFF6B7280))),
+                        ? Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Text('Aucune entreprise recommandée', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
                           )
                         : ListView.separated(
                             shrinkWrap: true,
@@ -329,7 +329,7 @@ class _NearbyCard extends StatelessWidget {
     return Container(
       width: 160,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -353,16 +353,16 @@ class _NearbyCard extends StatelessWidget {
                         height: 120,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(height: 120, color: const Color(0xFFE6F3F0)),
+                        placeholder: (context, url) => Container(height: 120, color: Theme.of(context).colorScheme.surfaceContainerHighest),
                         errorWidget: (context, url, error) => Container(
-                          height: 120, color: const Color(0xFFE6F3F0),
-                          child: const Icon(Icons.business, color: Color(0xFF0F6E56)),
+                          height: 120, color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                          child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary),
                         ),
                       )
                     : Container(
                         height: 120,
-                        color: const Color(0xFFE6F3F0),
-                        child: const Center(child: Icon(Icons.business, color: Color(0xFF0F6E56), size: 40)),
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: Center(child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary, size: 40)),
                       ),
                 // Zone badge
                 if (entreprise.zoneIntervention.isNotEmpty)
@@ -372,18 +372,18 @@ class _NearbyCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF6C63FF),
+                        color: Theme.of(context).colorScheme.tertiary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.location_on, color: Colors.white, size: 11),
+                          Icon(Icons.location_on, color: Theme.of(context).colorScheme.onTertiary, size: 11),
                           const SizedBox(width: 3),
                           Text(
                             entreprise.zoneIntervention.first,
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onTertiary,
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                             ),
@@ -406,10 +406,10 @@ class _NearbyCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         entreprise.raisonSociale,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
-                          color: Color(0xFF1A1A1A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -420,10 +420,10 @@ class _NearbyCard extends StatelessWidget {
                     const SizedBox(width: 2),
                     Text(
                       entreprise.noteMoyenne.toStringAsFixed(1),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A1A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -431,7 +431,7 @@ class _NearbyCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   entreprise.zoneIntervention.join(', '),
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                  style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -457,7 +457,7 @@ class _RecommendedCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -478,15 +478,15 @@ class _RecommendedCard extends StatelessWidget {
                     width: 72,
                     height: 72,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(width: 72, height: 72, color: const Color(0xFFE6F3F0)),
+                    placeholder: (context, url) => Container(width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHighest),
                     errorWidget: (context, url, error) => Container(
-                      width: 72, height: 72, color: const Color(0xFFE6F3F0),
-                      child: const Icon(Icons.business, color: Color(0xFF0F6E56)),
+                      width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary),
                     ),
                   )
                 : Container(
-                    width: 72, height: 72, color: const Color(0xFFE6F3F0),
-                    child: const Center(child: Icon(Icons.business, color: Color(0xFF0F6E56), size: 36)),
+                    width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: Center(child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary, size: 36)),
                   ),
           ),
           const SizedBox(width: 14),
@@ -500,10 +500,10 @@ class _RecommendedCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         entreprise.raisonSociale,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: Color(0xFF1A1A1A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -513,10 +513,10 @@ class _RecommendedCard extends StatelessWidget {
                     const SizedBox(width: 3),
                     Text(
                       entreprise.noteMoyenne.toStringAsFixed(1),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1A1A1A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ],
@@ -524,25 +524,25 @@ class _RecommendedCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   entreprise.zoneIntervention.join(', '),
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(Icons.star_outline, color: Color(0xFF6B7280), size: 14),
+                    Icon(Icons.star_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       '${entreprise.nombreAvis} Avis',
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(width: 12),
-                    const Icon(Icons.work_outline, color: Color(0xFF6B7280), size: 14),
+                    Icon(Icons.work_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 14),
                     const SizedBox(width: 4),
                     Text(
                       '${entreprise.anneesExperience} ans exp.',
-                      style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     ),
                   ],
                 ),

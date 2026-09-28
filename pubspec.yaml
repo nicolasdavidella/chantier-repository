@@ -41,6 +41,8 @@ dependencies:
   flutter_dotenv: ^5.1.0
   file_picker: ^13.1.0
   http: ^1.6.0
+  url_launcher: ^6.3.2
+  cloud_functions: ^6.5.0
 
 dev_dependencies:
   flutter_test:

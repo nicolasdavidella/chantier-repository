@@ -78,11 +78,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Lottie.network(
-          'https://lottie.host/8b725055-6677-44da-b371-bd6b90875c75/Z1hW6r60PZ.json', // Placeholder ChantierTrack logo/loader
-          width: 200,
-          height: 200,
-          errorBuilder: (context, error, stackTrace) => const CircularProgressIndicator(),
+        child: Icon(
+          Icons.construction,
+          size: 100,
+          color: Theme.of(context).colorScheme.primary,
         ),
       ),
     );

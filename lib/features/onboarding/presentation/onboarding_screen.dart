@@ -55,132 +55,142 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
-        child: Column(
-          children: [
-            // Top skip button
-            Align(
-              alignment: Alignment.topRight,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 16, top: 8),
-                child: TextButton(
-                  onPressed: () => context.go('/login'),
-                  child: const Text('Passer', style: TextStyle(color: AppColors.textSecondaryLight)),
-                ),
-              ),
-            ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Empêche l'erreur RenderFlex overflow au lancement sur Chrome Web 
+            // lorsque la taille initiale est temporairement minuscule (ex: 1.3 pixels)
+            if (constraints.maxHeight < 200) {
+              return const SizedBox.shrink();
+            }
             
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() => _currentPage = index);
-                },
-                itemCount: _pages.length,
-                itemBuilder: (context, index) {
-                  final page = _pages[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 32),
-                          // Flat illustration composition
-                          Container(
-                            width: 220,
-                            height: 220,
-                            decoration: const BoxDecoration(
-                              color: AppColors.primaryLight,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: FaIcon(
-                                page['icon'],
-                                size: 80,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ).animate(key: ValueKey(index)).scale(duration: 400.ms, curve: Curves.easeOutBack),
-                          
-                          const SizedBox(height: 48), // Reduced from 64
-                          
-                          Text(
-                            page['title'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimaryLight,
-                              height: 1.2,
-                            ),
-                          ).animate(key: ValueKey('title_$index')).fadeIn(duration: 400.ms).slideY(begin: 0.1),
-                          
-                          const SizedBox(height: 16),
-                          
-                          Text(
-                            page['description'],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: AppColors.textSecondaryLight,
-                              height: 1.5,
-                            ),
-                          ).animate(key: ValueKey('desc_$index')).fadeIn(delay: 100.ms, duration: 400.ms).slideY(begin: 0.1),
-                          const SizedBox(height: 32),
-                        ],
-                      ),
+            return Column(
+              children: [
+                // Top skip button
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16, top: 8),
+                    child: TextButton(
+                      onPressed: () => context.go('/login'),
+                      child: const Text('Passer', style: TextStyle(color: AppColors.textSecondaryLight)),
                     ),
-                  );
-                },
-              ),
-            ),
-            
-            // Bottom Controls
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Pagination Dots
-                  Row(
-                    children: List.generate(_pages.length, (index) {
-                      final isActive = _currentPage == index;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.only(right: 8),
-                        height: 8,
-                        width: isActive ? 24 : 8,
-                        decoration: BoxDecoration(
-                          color: isActive ? AppColors.primary : AppColors.borderLight,
-                          borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() => _currentPage = index);
+                    },
+                    itemCount: _pages.length,
+                    itemBuilder: (context, index) {
+                      final page = _pages[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const SizedBox(height: 32),
+                              // Flat illustration composition
+                              Container(
+                                width: 220,
+                                height: 220,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: FaIcon(
+                                    page['icon'],
+                                    size: 80,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ).animate(key: ValueKey(index)).scale(duration: 400.ms, curve: Curves.easeOutBack),
+                              
+                              const SizedBox(height: 48),
+                              
+                              Text(
+                                page['title'],
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 28,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimaryLight,
+                                  height: 1.2,
+                                ),
+                              ).animate(key: ValueKey('title_$index')).fadeIn(duration: 400.ms).slideY(begin: 0.1),
+                              
+                              const SizedBox(height: 16),
+                              
+                              Text(
+                                page['description'],
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textSecondaryLight,
+                                  height: 1.5,
+                                ),
+                              ).animate(key: ValueKey('desc_$index')).fadeIn(delay: 100.ms, duration: 400.ms).slideY(begin: 0.1),
+                              const SizedBox(height: 32),
+                            ],
+                          ),
                         ),
                       );
-                    }),
+                    },
                   ),
-                  
-                  // Next / Start Button
-                  ElevatedButton(
-                    onPressed: _nextPage,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary, // Terracotta accent
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                ),
+                
+                // Bottom Controls
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Pagination Dots
+                      Row(
+                        children: List.generate(_pages.length, (index) {
+                          final isActive = _currentPage == index;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.only(right: 8),
+                            height: 8,
+                            width: isActive ? 24 : 8,
+                            decoration: BoxDecoration(
+                              color: isActive ? AppColors.primary : AppColors.borderLight,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          );
+                        }),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                    ),
-                    child: Text(
-                      _currentPage == _pages.length - 1 ? "Commencer" : "Suivant",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                      
+                      // Next / Start Button
+                      ElevatedButton(
+                        onPressed: _nextPage,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.secondary,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        ),
+                        child: Text(
+                          _currentPage == _pages.length - 1 ? "Commencer" : "Suivant",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

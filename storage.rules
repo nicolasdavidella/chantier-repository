@@ -1,6 +1,32 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
+    
+    // Fonction utilitaire pour vérifier si l'utilisateur est admin
+    function isAdmin() {
+      return request.auth != null && 
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Documents légaux de certification
+    match /certifications/{entrepriseId}/{fileName} {
+      allow read: if request.auth != null && (request.auth.uid == entrepriseId || isAdmin());
+      allow write: if request.auth != null && request.auth.uid == entrepriseId;
+    }
+    
+    // Fichiers liés aux conversations (messagerie)
+    match /conversations/{conversationId}/{fileName} {
+      allow read, write: if request.auth != null && 
+        (request.auth.uid in firestore.get(/databases/(default)/documents/conversations/$(conversationId)).data.participantsIds);
+    }
+
+    // Profils utilisateurs (avatars, etc.)
+    match /profiles/{userId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Fallback permissif (temporaire) pour ce qui existait déjà
     match /{allPaths=**} {
       allow read, write: if request.auth != null;
     }

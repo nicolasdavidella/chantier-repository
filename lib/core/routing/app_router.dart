@@ -13,7 +13,7 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/entreprise_details_screen.dart';
 import '../../features/client/dashboard/presentation/client_dashboard_screen.dart';
 import '../../features/client/create_project/presentation/project_creation_wizard.dart';
-import '../../features/client/create_project/presentation/ai_project_creation_screen.dart';
+import '../../features/ia_assistant/presentation/screens/ia_project_chat_screen.dart';
 import '../../features/client/project_detail/presentation/screens/project_detail_screen.dart';
 import '../../features/client/search_entreprises/presentation/screens/entreprise_profile_screen.dart';
 import '../../features/client/search_entreprises/presentation/screens/compare_entreprises_screen.dart';
@@ -190,7 +190,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'create_project',
             name: 'create_project',
-            pageBuilder: (context, state) => _buildPageWithTransition(const AiProjectCreationScreen(), state),
+            pageBuilder: (context, state) => _buildPageWithTransition(const IaProjectChatScreen(), state),
           ),
           GoRoute(
             path: 'entreprise_profile',

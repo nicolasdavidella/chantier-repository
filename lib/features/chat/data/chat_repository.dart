@@ -34,7 +34,7 @@ class ChatRepository {
     });
   }
 
-  Future<void> sendMessage(String conversationId, String content, String senderId, {String type = 'texte'}) async {
+  Future<void> sendMessage(String conversationId, String content, String senderId, {String type = 'texte', Map<String, dynamic>? metadata}) async {
     final messageRef = _firestore
         .collection('conversations')
         .doc(conversationId)
@@ -50,6 +50,7 @@ class ChatRepository {
       type: type,
       status: 'sent',
       lu: false,
+      metadata: metadata,
     );
 
     // Run in a batch to update both message and conversation

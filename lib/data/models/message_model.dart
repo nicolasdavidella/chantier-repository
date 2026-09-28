@@ -9,6 +9,7 @@ class MessageModel {
   final String type; // texte, image, fichier
   final String status; // sent, delivered, read
   final bool lu;
+  final Map<String, dynamic>? metadata;
 
   MessageModel({
     required this.id,
@@ -19,6 +20,7 @@ class MessageModel {
     required this.type,
     this.status = 'sent',
     required this.lu,
+    this.metadata,
   });
 
   factory MessageModel.fromJson(Map<String, dynamic> json) {
@@ -31,6 +33,7 @@ class MessageModel {
       type: json['type'] as String,
       status: json['status'] as String? ?? 'sent',
       lu: json['lu'] as bool? ?? false,
+      metadata: json['metadata'] as Map<String, dynamic>?,
     );
   }
 
@@ -44,6 +47,7 @@ class MessageModel {
       'type': type,
       'status': status,
       'lu': lu,
+      'metadata': metadata,
     };
   }
 
@@ -56,6 +60,7 @@ class MessageModel {
     String? type,
     String? status,
     bool? lu,
+    Map<String, dynamic>? metadata,
   }) {
     return MessageModel(
       id: id ?? this.id,
@@ -66,6 +71,7 @@ class MessageModel {
       type: type ?? this.type,
       status: status ?? this.status,
       lu: lu ?? this.lu,
+      metadata: metadata ?? this.metadata,
     );
   }
 }

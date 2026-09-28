@@ -21,11 +21,11 @@ class AdminDashboardScreen extends ConsumerWidget {
     final isWideScreen = MediaQuery.of(context).size.width > 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: Text('Tableau de bord', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
+        title: Text('Tableau de bord', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
         centerTitle: false,
         actions: [
           if (!isWideScreen)
@@ -51,14 +51,14 @@ class AdminDashboardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF0F6E56), Color(0xFF169E7B)],
+                gradient: LinearGradient(
+                  colors: [theme.colorScheme.primary, theme.colorScheme.primary.withValues(alpha: 0.8)],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 boxShadow: [
-                  BoxShadow(color: const Color(0xFF0F6E56).withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10)),
+                  BoxShadow(color: theme.colorScheme.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10)),
                 ],
               ),
               child: Row(
@@ -67,24 +67,24 @@ class AdminDashboardScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Bienvenue, Administrateur 👋', style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
+                        Text('Bienvenue, Administrateur 👋', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
                         AppSpacing.vSm,
-                        const Text('Voici un résumé de l\'activité sur la plateforme Chantier Track aujourd\'hui.', style: TextStyle(color: Colors.white70, fontSize: 16)),
+                        Text('Voici un résumé de l\'activité sur la plateforme Chantier Track aujourd\'hui.', style: TextStyle(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8), fontSize: 16)),
                       ],
                     ),
                   ),
                   if (isWideScreen)
                     Container(
                       padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(AppSpacing.radiusLg)),
-                      child: const Icon(Icons.analytics_rounded, color: Colors.white, size: 48),
+                      decoration: BoxDecoration(color: theme.colorScheme.onPrimary.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(AppSpacing.radiusLg)),
+                      child: Icon(Icons.analytics_rounded, color: theme.colorScheme.onPrimary, size: 48),
                     )
                 ],
               ),
             ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.2),
 
             AppSpacing.vXxl,
-            Text('Aperçu des performances', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF334155))),
+            Text('Aperçu des performances', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             AppSpacing.vLg,
 
             // Stats Grid
@@ -101,7 +101,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   title: 'Utilisateurs',
                   value: stats['totalUsers'].toString(),
                   icon: Icons.group_rounded,
-                  color: const Color(0xFF3B82F6),
+                  color: theme.colorScheme.primary,
                   chartData: stats['usersData'] as List<double>,
                   delay: 100,
                 ),
@@ -110,7 +110,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   title: 'Chantiers Actifs',
                   value: stats['activeProjects'].toString(),
                   icon: Icons.construction_rounded,
-                  color: const Color(0xFFE8601A),
+                  color: theme.colorScheme.secondary,
                   chartData: [10, 15, 20, 18, 25, 30, 34],
                   delay: 200,
                 ),
@@ -119,7 +119,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   title: 'Volume Financier',
                   value: currencyFormatter.format(stats['financialVolume']),
                   icon: Icons.account_balance_wallet_rounded,
-                  color: const Color(0xFF10B981),
+                  color: theme.colorScheme.tertiary,
                   chartData: stats['financialData'] as List<double>,
                   delay: 300,
                 ),
@@ -130,10 +130,10 @@ class AdminDashboardScreen extends ConsumerWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Activité Récente', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF334155))),
+                Text('Activité Récente', style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
                 TextButton(
                   onPressed: () {},
-                  child: const Text('Voir tout', style: TextStyle(color: Color(0xFF0F6E56), fontWeight: FontWeight.bold)),
+                  child: Text('Voir tout', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
                 )
               ],
             ),
@@ -142,10 +142,10 @@ class AdminDashboardScreen extends ConsumerWidget {
             // Recent Activity from Provider
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
                 boxShadow: [
-                  BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 5)),
+                  BoxShadow(color: theme.colorScheme.shadow.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 5)),
                 ],
               ),
               child: ListView.separated(
@@ -162,30 +162,30 @@ class AdminDashboardScreen extends ConsumerWidget {
                     leading: Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF1F5F9),
+                        color: theme.colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         _getIconForAction(log.action),
-                        color: const Color(0xFF475569),
+                        color: theme.colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    title: Text(log.action, style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF1E293B))),
+                    title: Text(log.action, style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
                     subtitle: Padding(
                       padding: const EdgeInsets.only(top: 4.0),
                       child: Text(
                         'Par ${log.user} • ${_formatTimeAgo(log.timestamp)}',
-                        style: TextStyle(color: Colors.grey.shade500, fontSize: 13),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                     ),
                     trailing: isRecent
                         ? Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                              color: theme.colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text('Nouveau', style: TextStyle(color: Color(0xFF10B981), fontSize: 11, fontWeight: FontWeight.bold)),
+                            child: Text('Nouveau', style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 11, fontWeight: FontWeight.bold)),
                           )
                         : null,
                   ).animate().fadeIn(delay: Duration(milliseconds: 400 + (index * 100))).slideX(begin: 0.1);
@@ -203,10 +203,10 @@ class AdminDashboardScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 5)),
+          BoxShadow(color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 5)),
         ],
       ),
       child: Column(
@@ -226,24 +226,24 @@ class AdminDashboardScreen extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                  color: Theme.of(context).colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.arrow_upward_rounded, color: Color(0xFF10B981), size: 14),
-                    SizedBox(width: 4),
-                    Text('+12%', style: TextStyle(color: Color(0xFF10B981), fontWeight: FontWeight.bold, fontSize: 12)),
+                  children: [
+                    Icon(Icons.arrow_upward_rounded, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 14),
+                    const SizedBox(width: 4),
+                    Text('+12%', style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold, fontSize: 12)),
                   ],
                 ),
               ),
             ],
           ),
           const Spacer(),
-          Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
+          Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
           AppSpacing.vXs,
-          Text(title, style: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+          Text(title, style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500)),
           AppSpacing.vMd,
           SizedBox(
             height: 45,

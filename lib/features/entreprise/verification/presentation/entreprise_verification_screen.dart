@@ -1,186 +1,322 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/verification_providers.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import '../../../../data/models/certification_request_model.dart';
 import 'widgets/document_upload_widget.dart';
-import '../../../../data/models/verification_document_model.dart';
+import '../../../../core/theme/app_spacing.dart';
+
+final myCertificationProvider =
+    StreamProvider.family<CertificationRequestModel?, String>((
+      ref,
+      entrepriseId,
+    ) {
+      return FirebaseFirestore.instance
+          .collection('demandes_certification')
+          .doc(entrepriseId)
+          .snapshots()
+          .map(
+            (doc) => doc.exists
+                ? CertificationRequestModel.fromJson(doc.data()!, doc.id)
+                : null,
+          );
+    });
 
 class EntrepriseVerificationScreen extends ConsumerStatefulWidget {
   final String entrepriseId;
   const EntrepriseVerificationScreen({super.key, required this.entrepriseId});
 
   @override
-  ConsumerState<EntrepriseVerificationScreen> createState() => _EntrepriseVerificationScreenState();
+  ConsumerState<EntrepriseVerificationScreen> createState() =>
+      _EntrepriseVerificationScreenState();
 }
 
-class _EntrepriseVerificationScreenState extends ConsumerState<EntrepriseVerificationScreen> {
-  int _currentStep = 0;
+class _EntrepriseVerificationScreenState
+    extends ConsumerState<EntrepriseVerificationScreen> {
   final Map<String, File> _selectedFiles = {};
+  bool _isUploading = false;
+  String _uploadStatus = '';
 
   @override
   Widget build(BuildContext context) {
-    final activeRequestAsync = ref.watch(currentVerificationRequestProvider(widget.entrepriseId));
+    final activeRequestAsync = ref.watch(
+      myCertificationProvider(widget.entrepriseId),
+    );
+    final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Certification Entreprise'),
-      ),
+      appBar: AppBar(title: const Text('Certification Entreprise')),
       body: activeRequestAsync.when(
         data: (request) {
-          if (request == null || request.status == 'DRAFT') {
-            return _buildStepper(context, request?.id);
+          if (request == null ||
+              request.statut == 'brouillon' ||
+              request.statut == 'rejetee') {
+            return _buildForm(context, request);
           }
           return _buildStatusView(request);
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Erreur: \$e')),
+        error: (e, st) => Center(child: Text('Erreur: $e')),
       ),
     );
   }
 
-  Widget _buildStatusView(request) {
+  Widget _buildStatusView(CertificationRequestModel request) {
+    final theme = Theme.of(context);
+    final isPending = request.statut == 'en_attente';
+    final isCertified = request.statut == 'certifiee';
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              _getStatusIcon(request.status),
+              isCertified ? Icons.verified : Icons.hourglass_top,
               size: 80,
-              color: _getStatusColor(request.status),
+              color: isCertified ? Colors.green : Colors.orange,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
             Text(
-              _getStatusTitle(request.status),
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _getStatusDescription(request.status),
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-            if (request.status == 'REJECTED' || request.status == 'ADDITIONAL_INFO_REQUIRED') ...[
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () {
-                  // Mettre à jour pour repasser en mode DRAFT ou afficher le formulaire de correction
-                  setState(() {
-                    _currentStep = 1;
-                  });
-                },
-                child: const Text('Soumettre les corrections'),
+              isCertified ? 'Entreprise certifiée !' : 'En cours d\'examen',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
               ),
-            ]
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              isCertified
+                  ? 'Félicitations, vous pouvez désormais répondre aux appels d\'offres.'
+                  : 'Votre demande envoyée le ${request.dateSoumission?.toLocal().toString().split(' ')[0] ?? 'récemment'} est en cours de traitement.',
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       ),
     );
   }
 
-  IconData _getStatusIcon(String status) {
-    switch (status) {
-      case 'SUBMITTED':
-      case 'UNDER_REVIEW': return Icons.hourglass_top;
-      case 'APPROVED': return Icons.verified;
-      case 'REJECTED': return Icons.cancel;
-      default: return Icons.info;
-    }
-  }
+  Widget _buildForm(BuildContext context, CertificationRequestModel? request) {
+    final theme = Theme.of(context);
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'SUBMITTED':
-      case 'UNDER_REVIEW': return Colors.orange;
-      case 'APPROVED': return Colors.green;
-      case 'REJECTED': return Colors.red;
-      default: return Colors.blue;
-    }
-  }
+    // Check missing documents
+    bool hasRccm =
+        _selectedFiles.containsKey('RCCM') ||
+        (request?.documents.any((d) => d.type == 'RCCM') ?? false);
+    bool hasNiu =
+        _selectedFiles.containsKey('NIU') ||
+        (request?.documents.any((d) => d.type == 'NIU') ?? false);
+    bool hasId =
+        _selectedFiles.containsKey('PIECE_IDENTITE') ||
+        (request?.documents.any((d) => d.type == 'PIECE_IDENTITE') ?? false);
 
-  String _getStatusTitle(String status) {
-    switch (status) {
-      case 'SUBMITTED': return 'Dossier soumis';
-      case 'UNDER_REVIEW': return 'En cours de vérification';
-      case 'APPROVED': return 'Entreprise vérifiée !';
-      case 'REJECTED': return 'Demande refusée';
-      case 'ADDITIONAL_INFO_REQUIRED': return 'Informations manquantes';
-      default: return 'Statut inconnu';
-    }
-  }
+    bool canSubmit = hasRccm && hasNiu && hasId;
 
-  String _getStatusDescription(String status) {
-    switch (status) {
-      case 'SUBMITTED': return 'Votre dossier a été soumis avec succès et est en attente d\'examen.';
-      case 'UNDER_REVIEW': return 'Un administrateur examine actuellement vos documents.';
-      case 'APPROVED': return 'Félicitations, votre entreprise est certifiée sur la plateforme !';
-      case 'REJECTED': return 'Veuillez consulter les motifs de rejet dans vos documents.';
-      default: return '';
-    }
-  }
-
-  Widget _buildStepper(BuildContext context, String? requestId) {
-    return Stepper(
-      currentStep: _currentStep,
-      onStepContinue: () {
-        if (_currentStep < 2) {
-          setState(() => _currentStep++);
-        } else {
-          _submitFinalRequest(requestId);
-        }
-      },
-      onStepCancel: () {
-        if (_currentStep > 0) {
-          setState(() => _currentStep--);
-        }
-      },
-      steps: [
-        Step(
-          title: const Text('Profil Entreprise'),
-          content: const Text('Ici sera affiché le formulaire de profil (Nom, adresse, RCCM, etc.).'),
-          isActive: _currentStep >= 0,
-        ),
-        Step(
-          title: const Text('Documents'),
-          content: Column(
-            children: [
-              DocumentUploadWidget(
-                title: 'Registre de commerce',
-                documentType: 'registre_commerce',
-                onFileSelected: (file) => _selectedFiles['registre_commerce'] = file,
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (request?.statut == 'rejetee') ...[
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
               ),
-              DocumentUploadWidget(
-                title: 'Identifiant Fiscal (NIU)',
-                documentType: 'identifiant_fiscal',
-                onFileSelected: (file) => _selectedFiles['identifiant_fiscal'] = file,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Demande rejetée',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    'Motif : ${request?.motifRejet ?? "Non précisé"}',
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ],
               ),
-              DocumentUploadWidget(
-                title: 'Pièce d\'identité du responsable',
-                documentType: 'cni_responsable',
-                onFileSelected: (file) => _selectedFiles['cni_responsable'] = file,
-              ),
-            ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+
+          Text(
+            'Documents obligatoires',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          isActive: _currentStep >= 1,
-        ),
-        Step(
-          title: const Text('Soumission'),
-          content: const Text('En soumettant ce dossier, vous confirmez l\'exactitude des informations fournies.'),
-          isActive: _currentStep >= 2,
-        ),
-      ],
+          const SizedBox(height: AppSpacing.md),
+
+          DocumentUploadWidget(
+            title: 'Registre de commerce (RCCM)',
+            documentType: 'RCCM',
+            onFileSelected: (file) =>
+                setState(() => _selectedFiles['RCCM'] = file),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          DocumentUploadWidget(
+            title: 'Identifiant Fiscal (NIU)',
+            documentType: 'NIU',
+            onFileSelected: (file) =>
+                setState(() => _selectedFiles['NIU'] = file),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          DocumentUploadWidget(
+            title: 'Pièce d\'identité du gérant',
+            documentType: 'PIECE_IDENTITE',
+            onFileSelected: (file) =>
+                setState(() => _selectedFiles['PIECE_IDENTITE'] = file),
+          ),
+
+          const SizedBox(height: AppSpacing.xl),
+
+          if (!canSubmit && !_isUploading)
+            const Text(
+              'Veuillez fournir tous les documents requis pour soumettre la demande.',
+              style: TextStyle(color: Colors.orange),
+              textAlign: TextAlign.center,
+            ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          ElevatedButton(
+            onPressed: (canSubmit && !_isUploading)
+                ? () => _submitRequest(request)
+                : null,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+            ),
+            child: _isUploading
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Text(_uploadStatus),
+                    ],
+                  )
+                : const Text(
+                    'Soumettre ma demande',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
-  Future<void> _submitFinalRequest(String? requestId) async {
-    // Dans une implémentation complète, nous devrions :
-    // 1. S'assurer que le requestId existe (getOrCreateDraft)
-    // 2. Upload tous les fichiers dans _selectedFiles via VerificationRepository
-    // 3. Appeler submitRequest
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Dossier soumis pour vérification !')),
-    );
+  Future<void> _submitRequest(CertificationRequestModel? currentRequest) async {
+    setState(() {
+      _isUploading = true;
+      _uploadStatus = 'Préparation...';
+    });
+
+    try {
+      final docList = currentRequest?.documents.toList() ?? [];
+
+      for (var entry in _selectedFiles.entries) {
+        setState(() => _uploadStatus = 'Envoi de ${entry.key}...');
+        final type = entry.key;
+        final file = entry.value;
+        final ref = FirebaseStorage.instance.ref().child(
+          'certifications/${widget.entrepriseId}/${type}_${DateTime.now().millisecondsSinceEpoch}.pdf',
+        );
+
+        await ref.putFile(file);
+        final url = await ref.getDownloadURL();
+
+        // Remove old document of same type if it exists
+        docList.removeWhere((d) => d.type == type);
+
+        docList.add(
+          CertificationDocument(
+            type: type,
+            nom: file.path.split('/').last,
+            url: url,
+            dateUpload: DateTime.now(),
+          ),
+        );
+      }
+
+      setState(() => _uploadStatus = 'Enregistrement...');
+
+      // Update or create draft in Firestore
+      final db = FirebaseFirestore.instance;
+      final docRef = db
+          .collection('demandes_certification')
+          .doc(widget.entrepriseId);
+
+      if (currentRequest == null) {
+        // We need enterprise data, let's fetch it from entreprises collection
+        final entDoc = await db
+            .collection('entreprises')
+            .doc(widget.entrepriseId)
+            .get();
+        final entData = entDoc.data() ?? {};
+
+        await docRef.set({
+          'entrepriseId': widget.entrepriseId,
+          'raisonSociale': entData['raisonSociale'] ?? 'Entreprise sans nom',
+          'rccm': entData['rccm'] ?? '',
+          'niu': entData['niu'] ?? '',
+          'villesZones': entData['villesIntervention'] ?? [],
+          'specialites': entData['specialites'] ?? [],
+          'contact': entData['telephone'] ?? '',
+          'documents': docList.map((d) => d.toJson()).toList(),
+          'statut': 'brouillon',
+          'nombreSoumissions': 0,
+        });
+      } else {
+        await docRef.update({
+          'documents': docList.map((d) => d.toJson()).toList(),
+        });
+      }
+
+      setState(() => _uploadStatus = 'Validation finale...');
+
+      // Call Cloud Function to submit
+      final functions = FirebaseFunctions.instance;
+      final callable = functions.httpsCallable('soumettreCertification');
+      await callable.call();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Demande soumise avec succès !')),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUploading = false;
+          _uploadStatus = '';
+        });
+      }
+    }
   }
 }

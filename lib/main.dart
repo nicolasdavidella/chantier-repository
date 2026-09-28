@@ -13,9 +13,10 @@ import 'core/connectivity/offline_banner_wrapper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/foundation.dart';
 
-const bool useFirebaseEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR', defaultValue: false);
+const bool useFirebaseEmulator = bool.fromEnvironment('USE_FIREBASE_EMULATOR', defaultValue: true);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,6 +43,7 @@ void main() async {
       await FirebaseAuth.instance.useAuthEmulator(localhost, 9099);
       FirebaseFirestore.instance.useFirestoreEmulator(localhost, 8080);
       await FirebaseStorage.instance.useStorageEmulator(localhost, 9199);
+      FirebaseFunctions.instance.useFunctionsEmulator(localhost, 5001);
     }
   } catch (e) {
     debugPrint('Erreur d\'initialisation Firebase (Avez-vous fait flutterfire configure ?): $e');

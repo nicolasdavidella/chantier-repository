@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'admin_dashboard_screen.dart';
-import 'enterprise_validation_screen.dart';
+import 'certifications_screen.dart';
 import 'user_management_screen.dart';
 import 'moderation_screen.dart';
 import 'activity_logs_screen.dart';
@@ -23,7 +23,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
 
   final List<Widget> _screens = [
     const AdminDashboardScreen(),
-    const EnterpriseValidationScreen(),
+    const CertificationsScreen(),
     const UserManagementScreen(),
     const ModerationScreen(),
     const ActivityLogsScreen(),
@@ -32,7 +32,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
 
   final List<NavigationRailDestination> _railDestinations = const [
     NavigationRailDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: Text('Tableau de bord')),
-    NavigationRailDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: Text('Validation')),
+    NavigationRailDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: Text('Certifications')),
     NavigationRailDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: Text('Utilisateurs')),
     NavigationRailDestination(icon: Icon(Icons.gavel_outlined), selectedIcon: Icon(Icons.gavel), label: Text('Modération')),
     NavigationRailDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: Text('Logs')),
@@ -41,7 +41,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
 
   final List<NavigationDestination> _bottomDestinations = const [
     NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Tableau de bord'),
-    NavigationDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: 'Validation'),
+    NavigationDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: 'Certifications'),
     NavigationDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: 'Utilisateurs'),
     NavigationDestination(icon: Icon(Icons.gavel_outlined), selectedIcon: Icon(Icons.gavel), label: 'Modération'),
     NavigationDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: 'Logs'),
