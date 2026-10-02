@@ -108,7 +108,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
                     offset: const Offset(0, -2),
                     blurRadius: 5,
                   )
@@ -126,7 +126,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                           borderSide: BorderSide.none,
                         ),
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: AppColors.grey100,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       ),
                     ),
@@ -172,7 +172,7 @@ class _ChatBubble extends StatelessWidget {
             bottomRight: message.isUser ? const Radius.circular(0) : null,
             bottomLeft: !message.isUser ? const Radius.circular(0) : null,
           ),
-          border: !message.isUser ? Border.all(color: Colors.grey[300]!) : null,
+          border: !message.isUser ? Border.all(color: AppColors.grey300) : null,
         ),
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
@@ -203,7 +203,7 @@ class _TypingIndicator extends StatelessWidget {
           borderRadius: BorderRadius.circular(16).copyWith(
             bottomLeft: const Radius.circular(0),
           ),
-          border: Border.all(color: Colors.grey[300]!),
+          border: Border.all(color: AppColors.grey300),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

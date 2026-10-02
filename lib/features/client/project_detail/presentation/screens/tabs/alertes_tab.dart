@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import '../../../../../../core/widgets/app_button.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class AlertesTab extends StatefulWidget {
   final String projectId;
@@ -13,52 +16,14 @@ class AlertesTab extends StatefulWidget {
 }
 
 class _AlertesTabState extends State<AlertesTab> {
-  final List<Map<String, dynamic>> _alerts = [
-    {
-      'id': '1',
-      'title': 'Anomalie Financière Détectée',
-      'description': 'La facture "Plomberie (Acompte)" de 850,000 FCFA est 40% supérieure à l\'estimation initiale de cette phase.',
-      'type': 'financial',
-      'severity': 'high',
-      'date': 'Il y a 2 heures',
-      'isRead': false,
-    },
-    {
-      'id': '2',
-      'title': 'Risque de Retard',
-      'description': 'Le coulage de la dalle a pris du retard suite aux intempéries. Impact estimé : +4 jours sur le planning.',
-      'type': 'delay',
-      'severity': 'medium',
-      'date': 'Il y a 1 jour',
-      'isRead': true,
-    },
-    {
-      'id': '3',
-      'title': 'Dépassement de Budget Imminent',
-      'description': 'Le budget global est engagé à 92%. Attention aux prochaines dépenses.',
-      'type': 'budget',
-      'severity': 'high',
-      'date': 'Il y a 3 jours',
-      'isRead': true,
-    },
-    {
-      'id': '4',
-      'title': 'Contrôle Qualité Requis',
-      'description': 'Les matériaux reçus (Fer à béton) n\'ont pas encore été validés par l\'ingénieur de contrôle.',
-      'type': 'quality',
-      'severity': 'low',
-      'date': 'Il y a 1 semaine',
-      'isRead': true,
-    },
-  ];
 
-  void _markAsRead(int index) {
-    setState(() {
-      _alerts[index]['isRead'] = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Alerte marquée comme lue.')),
-    );
+  void _markAsRead(String alertId) async {
+    await FirebaseFirestore.instance.collection('alertes').doc(alertId).update({'isRead': true});
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Alerte marquée comme lue.')),
+      );
+    }
   }
 
   void _contactPM() {
@@ -67,112 +32,185 @@ class _AlertesTabState extends State<AlertesTab> {
     );
   }
 
+  // Fonction de test pour générer une fausse alerte en l'absence de Cloud Functions
+  Future<void> _genererAlerteTest() async {
+    final alert = {
+      'projectId': widget.projectId,
+      'title': 'Test : Dépassement de Budget Imminent',
+      'description': 'Le budget global est engagé à 92%. Attention aux prochaines dépenses.',
+      'type': 'budget',
+      'severity': 'high',
+      'statut': 'alerte_rouge',
+      'date': FieldValue.serverTimestamp(),
+      'isRead': false,
+    };
+    await FirebaseFirestore.instance.collection('alertes').add(alert);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      itemCount: _alerts.length,
-      separatorBuilder: (_, __) => AppSpacing.vMd,
-      itemBuilder: (context, index) {
-        final alert = _alerts[index];
-        final isRead = alert['isRead'] as bool;
-        final severity = alert['severity'] as String;
-        final type = alert['type'] as String;
-
-        Color getSeverityColor() {
-          switch (severity) {
-            case 'high':
-              return theme.colorScheme.error;
-            case 'medium':
-              return Colors.orange;
-            case 'low':
-              return Colors.blue;
-            default:
-              return Colors.grey;
-          }
-        }
-
-        IconData getIcon() {
-          switch (type) {
-            case 'financial':
-              return Icons.money_off;
-            case 'delay':
-              return Icons.schedule_outlined;
-            case 'budget':
-              return Icons.account_balance_wallet_outlined;
-            case 'quality':
-              return Icons.verified_user_outlined;
-            default:
-              return Icons.notifications;
-          }
-        }
-
-        return Card(
-          elevation: isRead ? 0 : 2,
-          color: isRead ? theme.cardColor : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            side: BorderSide(color: isRead ? theme.colorScheme.outlineVariant : getSeverityColor(), width: isRead ? 1 : 1.5),
+    return Column(
+      children: [
+        // En mode dev, bouton pour simuler l'alerte
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+          child: OutlinedButton.icon(
+            onPressed: _genererAlerteTest,
+            icon: const Icon(Icons.warning_amber),
+            label: const Text('Simuler une alerte (Test)'),
+            style: OutlinedButton.styleFrom(foregroundColor: AppColors.error),
           ),
-          child: ExpansionTile(
-            shape: const Border(),
-            leading: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                CircleAvatar(
-                  backgroundColor: getSeverityColor().withValues(alpha: 0.1),
-                  child: Icon(getIcon(), color: getSeverityColor()),
-                ),
-                if (!isRead)
-                  Positioned(
-                    top: -2,
-                    right: -2,
-                    child: Container(
-                      width: 12,
-                      height: 12,
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
+        ),
+        
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('alertes')
+                .where('projectId', isEqualTo: widget.projectId)
+                .orderBy('date', descending: true)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              final alertsDocs = snapshot.data?.docs ?? [];
+
+              if (alertsDocs.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.check_circle_outline, size: 64, color: AppColors.primary.withOpacity(0.5)),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'Aucune anomalie détectée',
+                        style: theme.textTheme.titleMedium?.copyWith(color: AppColors.primary),
                       ),
-                    ).animate().scale(duration: 300.ms, delay: 200.ms),
-                  )
-              ],
-            ),
-            title: Text(
-              alert['title'] as String,
-              style: TextStyle(fontWeight: isRead ? FontWeight.normal : FontWeight.bold),
-            ),
-            subtitle: Text(alert['date'] as String, style: theme.textTheme.bodySmall),
-            childrenPadding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.lg),
-            expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AppSpacing.vXs,
-              Text(alert['description'] as String, style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
-              AppSpacing.vLg,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (!isRead)
-                    TextButton.icon(
-                      onPressed: () => _markAsRead(index),
-                      icon: const Icon(Icons.check),
-                      label: const Text('Marquer lu'),
-                    ),
-                  AppSpacing.hSm,
-                  AppButton(
-                    onPressed: _contactPM,
-                    text: 'Contacter',
-                    icon: Icons.chat_bubble_outline,
-                    isOutlined: true,
+                      const SizedBox(height: AppSpacing.xs),
+                      const Text('Le projet se déroule comme prévu.'),
+                    ],
                   ),
-                ],
-              )
-            ],
+                );
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                itemCount: alertsDocs.length,
+                separatorBuilder: (_, __) => AppSpacing.vMd,
+                itemBuilder: (context, index) {
+                  final alertDoc = alertsDocs[index];
+                  final alert = alertDoc.data() as Map<String, dynamic>;
+                  final alertId = alertDoc.id;
+                  
+                  final isRead = alert['isRead'] as bool? ?? false;
+                  final severity = alert['severity'] as String? ?? 'low';
+                  final type = alert['type'] as String? ?? 'general';
+                  
+                  String dateStr = '';
+                  if (alert['date'] != null) {
+                    final date = (alert['date'] as Timestamp).toDate();
+                    dateStr = DateFormat('dd/MM/yyyy HH:mm').format(date);
+                  }
+
+                  Color getSeverityColor() {
+                    switch (severity) {
+                      case 'high':
+                        return theme.colorScheme.error;
+                      case 'medium':
+                        return AppColors.warning;
+                      case 'low':
+                        return AppColors.primary;
+                      default:
+                        return AppColors.textSecondaryLight;
+                    }
+                  }
+
+                  IconData getIcon() {
+                    switch (type) {
+                      case 'budget':
+                      case 'financial':
+                        return Icons.money_off;
+                      case 'delay':
+                        return Icons.schedule_outlined;
+                      case 'quality':
+                        return Icons.verified_user_outlined;
+                      default:
+                        return Icons.notifications;
+                    }
+                  }
+
+                  return Card(
+                    elevation: isRead ? 0 : 2,
+                    color: isRead ? theme.cardColor : theme.colorScheme.surfaceContainerHighest.withOpacity(0.3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                      side: BorderSide(color: isRead ? theme.colorScheme.outlineVariant : getSeverityColor(), width: isRead ? 1 : 1.5),
+                    ),
+                    child: ExpansionTile(
+                      shape: const Border(),
+                      leading: Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: getSeverityColor().withOpacity(0.1),
+                            child: Icon(getIcon(), color: getSeverityColor()),
+                          ),
+                          if (!isRead)
+                            Positioned(
+                              top: -2,
+                              right: -2,
+                              child: Container(
+                                width: 12,
+                                height: 12,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.error,
+                                  shape: BoxShape.circle,
+                                ),
+                              ).animate().scale(duration: 300.ms, delay: 200.ms),
+                            )
+                        ],
+                      ),
+                      title: Text(
+                        alert['title'] ?? 'Alerte',
+                        style: TextStyle(fontWeight: isRead ? FontWeight.normal : FontWeight.bold),
+                      ),
+                      subtitle: Text(dateStr, style: theme.textTheme.bodySmall),
+                      childrenPadding: const EdgeInsets.fromLTRB(AppSpacing.xl, 0, AppSpacing.xl, AppSpacing.lg),
+                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppSpacing.vXs,
+                        Text(alert['description'] ?? '', style: theme.textTheme.bodyMedium?.copyWith(height: 1.4)),
+                        AppSpacing.vLg,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            if (!isRead)
+                              TextButton.icon(
+                                onPressed: () => _markAsRead(alertId),
+                                icon: const Icon(Icons.check),
+                                label: const Text('Marquer lu'),
+                              ),
+                            AppSpacing.hSm,
+                            AppButton(
+                              onPressed: _contactPM,
+                              text: 'Contacter',
+                              icon: Icons.chat_bubble_outline,
+                              isOutlined: true,
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ).animate().slideX(begin: 0.1, curve: Curves.easeOut).fadeIn(delay: (index * 100).ms);
+                },
+              );
+            },
           ),
-        ).animate().slideX(begin: 0.1, curve: Curves.easeOut).fadeIn(delay: (index * 100).ms);
-      },
+        ),
+      ],
     );
   }
 }

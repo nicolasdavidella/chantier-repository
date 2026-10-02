@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 import 'dart:math' as math;
 
 // Shared colors
-const Color primaryGreen = Color(0xFF0F6E56);
-const Color secondaryTerracotta = Color(0xFFD85A30);
+const Color primaryGreen = AppColors.primary;
+const Color secondaryTerracotta = AppColors.secondary;
 const Color lightGreen = Color(0xFFE2F0EC);
 const Color paleGrey = Color(0xFFF5F7FA);
 
@@ -68,7 +70,7 @@ class ConstructionPainter extends CustomPainter {
     // horizontal arm
     canvas.drawLine(const Offset(-30, -140), const Offset(100, -140), cranePaint);
     // wire
-    final wirePaint = Paint()..color = Colors.grey.shade400..strokeWidth = 2;
+    final wirePaint = Paint()..color = AppColors.textSecondaryLight..strokeWidth = 2;
     canvas.drawLine(const Offset(80, -140), const Offset(80, -50), wirePaint);
     // payload (moving up and down slightly)
     final payloadOffset = math.cos(animationValue * 2 * math.pi) * 15;
@@ -93,7 +95,7 @@ class ConstructionPainter extends CustomPainter {
     // Floating effect
     canvas.translate(size.width - 140, 80 + math.sin(animationValue * 2 * math.pi) * 12); 
     final phoneBg = Paint()..color = Colors.white;
-    final phoneShadow = Paint()..color = Colors.black.withOpacity(0.08)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
+    final phoneShadow = Paint()..color = AppColors.textPrimaryLight.withOpacity(0.08)..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15);
     final phoneRect = RRect.fromRectAndRadius(const Rect.fromLTWH(0, 0, 110, 200), const Radius.circular(20));
     canvas.drawRRect(phoneRect.shift(const Offset(0, 15)), phoneShadow);
     canvas.drawRRect(phoneRect, phoneBg);

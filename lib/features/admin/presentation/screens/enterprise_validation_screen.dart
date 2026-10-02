@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/entreprise_model.dart';
 import 'package:chantier_track/features/admin/providers/admin_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EnterpriseValidationScreen extends ConsumerWidget {
   const EnterpriseValidationScreen({super.key});
@@ -26,7 +28,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.check_circle_outline, size: 64, color: Colors.green[300]),
+                  Icon(Icons.check_circle_outline, size: 64, color: AppColors.successVariant),
                   AppSpacing.vMd,
                   Text('Aucune entreprise en attente', style: theme.textTheme.titleMedium),
                 ],
@@ -61,20 +63,20 @@ class EnterpriseValidationScreen extends ConsumerWidget {
                           AppSpacing.vSm,
                           if (entreprise.nifDocumentUrl != null)
                             ListTile(
-                              leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+                              leading: const Icon(Icons.picture_as_pdf, color: AppColors.error),
                               title: const Text('Document NIF'),
                               trailing: const Icon(Icons.open_in_new),
                               onTap: () => _launchURL(entreprise.nifDocumentUrl!),
                             ),
                           if (entreprise.rccmDocumentUrl != null)
                             ListTile(
-                              leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+                              leading: const Icon(Icons.picture_as_pdf, color: AppColors.error),
                               title: const Text('Document RCCM'),
                               trailing: const Icon(Icons.open_in_new),
                               onTap: () => _launchURL(entreprise.rccmDocumentUrl!),
                             ),
                           if (entreprise.nifDocumentUrl == null && entreprise.rccmDocumentUrl == null)
-                            const Text('Aucun document fourni', style: TextStyle(color: Colors.red, fontStyle: FontStyle.italic)),
+                            const Text('Aucun document fourni', style: TextStyle(color: AppColors.error, fontStyle: FontStyle.italic)),
                           AppSpacing.vLg,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.end,
@@ -83,14 +85,14 @@ class EnterpriseValidationScreen extends ConsumerWidget {
                                 onPressed: () => _showRejectDialog(context, entreprise),
                                 icon: const Icon(Icons.cancel),
                                 label: const Text('Rejeter'),
-                                style: OutlinedButton.styleFrom(foregroundColor: Colors.red, side: const BorderSide(color: Colors.red)),
+                                style: OutlinedButton.styleFrom(foregroundColor: AppColors.error, side: const BorderSide(color: AppColors.error)),
                               ),
                               AppSpacing.hMd,
                               FilledButton.icon(
                                 onPressed: () => _showValidateDialog(context, entreprise),
                                 icon: const Icon(Icons.check_circle),
                                 label: const Text('Certifier'),
-                                style: FilledButton.styleFrom(backgroundColor: Colors.green),
+                                style: FilledButton.styleFrom(backgroundColor: AppColors.success),
                               ),
                             ],
                           )
@@ -122,7 +124,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 100, child: Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold))),
+          SizedBox(width: 100, child: Text(label, style: const TextStyle(color: AppColors.textSecondaryLight, fontWeight: FontWeight.bold))),
           Expanded(child: Text(value.isEmpty ? 'Non renseigné' : value)),
         ],
       ),
@@ -138,7 +140,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.green),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.success),
             onPressed: () async {
               Navigator.pop(ctx);
               try {
@@ -185,7 +187,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Annuler')),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            style: FilledButton.styleFrom(backgroundColor: AppColors.error),
             onPressed: () async {
               Navigator.pop(ctx);
               try {

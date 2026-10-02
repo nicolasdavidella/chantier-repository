@@ -11,6 +11,8 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../data/user_repository.dart';
 import '../../../../data/models/entreprise_model.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EntrepriseDetailsScreen extends ConsumerStatefulWidget {
   final String userId;
@@ -106,7 +108,7 @@ class _EntrepriseDetailsScreenState extends ConsumerState<EntrepriseDetailsScree
       );
 
       await ref.read(userRepositoryProvider).createEntreprise(entreprise);
-      if (mounted) context.go('/');
+      if (mounted) context.go('/entreprise_certification', extra: entreprise.id);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
@@ -257,9 +259,9 @@ class _EntrepriseDetailsScreenState extends ConsumerState<EntrepriseDetailsScree
                 ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.grey.shade300),
+                    side: BorderSide(color: AppColors.textSecondaryLight),
                   ),
-                  leading: Icon(_nifFile != null ? Icons.check_circle : Icons.upload_file, color: _nifFile != null ? Colors.green : Colors.grey),
+                  leading: Icon(_nifFile != null ? Icons.check_circle : Icons.upload_file, color: _nifFile != null ? AppColors.success : AppColors.textSecondaryLight),
                   title: const Text('Copie du NIF'),
                   subtitle: Text(_nifFile?.path.split(Platform.pathSeparator).last ?? 'Aucun fichier sélectionné'),
                   trailing: TextButton(
@@ -271,9 +273,9 @@ class _EntrepriseDetailsScreenState extends ConsumerState<EntrepriseDetailsScree
                 ListTile(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
-                    side: BorderSide(color: Colors.grey.shade300),
+                    side: BorderSide(color: AppColors.textSecondaryLight),
                   ),
-                  leading: Icon(_rccmFile != null ? Icons.check_circle : Icons.upload_file, color: _rccmFile != null ? Colors.green : Colors.grey),
+                  leading: Icon(_rccmFile != null ? Icons.check_circle : Icons.upload_file, color: _rccmFile != null ? AppColors.success : AppColors.textSecondaryLight),
                   title: const Text('Copie du RCCM'),
                   subtitle: Text(_rccmFile?.path.split(Platform.pathSeparator).last ?? 'Aucun fichier sélectionné'),
                   trailing: TextButton(

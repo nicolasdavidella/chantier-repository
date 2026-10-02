@@ -5,6 +5,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:chantier_track/data/models/project_model.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import '../../../../../../core/theme/app_colors.dart';
+import '../../widgets/devis_ia_simulator.dart';
 
 class EntreprisesInteresseesTab extends ConsumerStatefulWidget {
   final ProjectModel project;
@@ -43,34 +44,83 @@ class _EntreprisesInteresseesTabState
             .where((d) => d['statut'] == 'envoye')
             .toList();
 
-        if (accepted.isEmpty && pending.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.business_center_outlined,
-                  size: 64,
-                  color: theme.colorScheme.onSurfaceVariant.withValues(
-                    alpha: 0.5,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'Aucune entreprise n\'a encore été sollicitée',
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-
         return ListView(
           padding: const EdgeInsets.all(AppSpacing.md),
           children: [
-            if (accepted.isEmpty) ...[
+            // Bouton IA Simulator
+            Card(
+              elevation: 0,
+              color: AppColors.primary.withOpacity(0.05),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+              ),
+              child: InkWell(
+                onTap: () => DevisIASimulator.show(context, widget.project),
+                borderRadius: BorderRadius.circular(16),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.auto_awesome, color: AppColors.primary),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Simuler un devis avec l\'IA',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            const Text(
+                              'Estimez le coût de votre projet instantanément',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.chevron_right, color: AppColors.primary),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+
+            if (accepted.isEmpty && pending.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.business_center_outlined,
+                        size: 64,
+                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        'Aucune entreprise n\'a encore été sollicitée',
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (accepted.isEmpty) ...[
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
@@ -95,7 +145,8 @@ class _EntreprisesInteresseesTabState
               ...accepted.map((doc) => _buildEntrepriseCard(doc)),
             ],
 
-            const Divider(height: 32),
+            if (pending.isNotEmpty || accepted.isNotEmpty)
+              const Divider(height: 32),
 
             if (pending.isNotEmpty)
               ExpansionTile(
@@ -160,7 +211,7 @@ class _EntreprisesInteresseesTabState
                               if (data['certifie'] == true)
                                 const Icon(
                                   Icons.verified,
-                                  color: Colors.blue,
+                                  color: AppColors.primary,
                                   size: 20,
                                 ),
                             ],
@@ -169,7 +220,7 @@ class _EntreprisesInteresseesTabState
                             children: [
                               const Icon(
                                 Icons.star,
-                                color: Colors.amber,
+                                color: AppColors.warning,
                                 size: 16,
                               ),
                               Text(
@@ -185,7 +236,7 @@ class _EntreprisesInteresseesTabState
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Spécialités : ${(data['specialites'] as List<dynamic>?)?.join(", ") ?? "Général"}',
-                  style: TextStyle(color: Colors.grey[700]),
+                  style: TextStyle(color: AppColors.grey700),
                 ),
                 const SizedBox(height: AppSpacing.md),
                 Row(
@@ -241,10 +292,10 @@ class _EntreprisesInteresseesTabState
           return const SizedBox.shrink();
         final data = snapshot.data!.data() as Map<String, dynamic>;
         return ListTile(
-          leading: const Icon(Icons.hourglass_empty, color: Colors.grey),
+          leading: const Icon(Icons.hourglass_empty, color: AppColors.textSecondaryLight),
           title: Text(
             data['raisonSociale'] ?? 'Entreprise',
-            style: const TextStyle(color: Colors.grey),
+            style: const TextStyle(color: AppColors.textSecondaryLight),
           ),
         );
       },
@@ -283,12 +334,72 @@ class _EntreprisesInteresseesTabState
   Future<void> _choisirEntreprise(String entrepriseId) async {
     setState(() => _isChoosing = true);
     try {
-      final callable = FirebaseFunctions.instance.httpsCallable(
-        'choisirEntreprise',
-      );
-      await callable.call({
-        'projectId': widget.project.id,
-        'entrepriseId': entrepriseId,
+      final firestore = FirebaseFirestore.instance;
+      final projectId = widget.project.id;
+      final clientId = widget.project.clientId;
+
+      await firestore.runTransaction((transaction) async {
+        final projectRef = firestore.collection('projects').doc(projectId);
+        final projectDoc = await transaction.get(projectRef);
+
+        if (!projectDoc.exists || projectDoc.data()?['statut'] != 'en_recherche_entreprise') {
+          throw Exception("Ce projet n'est plus disponible pour l'attribution.");
+        }
+
+        // 1. Mettre à jour le projet
+        transaction.update(projectRef, {
+          'statut': 'en_cours',
+          'entrepriseId': entrepriseId,
+          'dateAttribution': FieldValue.serverTimestamp(),
+        });
+
+        // 2. Récupérer toutes les diffusions de ce projet
+        final diffusionsQuery = await firestore
+            .collection('diffusions_projet')
+            .where('projectId', isEqualTo: projectId)
+            .get();
+
+        for (final diffDoc in diffusionsQuery.docs) {
+          final diffData = diffDoc.data();
+          final isChosen = diffData['entrepriseId'] == entrepriseId;
+          
+          // Mettre à jour le statut de la diffusion
+          transaction.update(diffDoc.reference, {
+            'statut': isChosen ? 'attribue' : 'rejete',
+          });
+
+          // Notifier l'entreprise
+          final notifRef = firestore.collection('notifications').doc();
+          transaction.set(notifRef, {
+            'userId': diffData['entrepriseId'],
+            'titre': isChosen ? "Projet attribué ! 🎉" : "Projet attribué à une autre entreprise",
+            'message': isChosen 
+                ? "Félicitations, le client vous a choisi pour le projet ${widget.project.titre} !"
+                : "Le projet ${widget.project.titre} a été confié à une autre entreprise.",
+            'isRead': false,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        // 3. Créer une conversation de messagerie
+        // Vérifier s'il existe déjà une conversation (optionnel, on va juste en créer une)
+        final convRef = firestore.collection('conversations').doc();
+        transaction.set(convRef, {
+          'id': convRef.id,
+          'projectId': projectId,
+          'participantsIds': [clientId, entrepriseId],
+          'participantNames': {
+            clientId: "Client", // Simplification
+            entrepriseId: "Entreprise", // Simplification
+          },
+          'participantAvatars': {},
+          'lastMessage': "Conversation créée suite à l'attribution du projet",
+          'lastMessageTime': FieldValue.serverTimestamp(),
+          'unreadCount': {
+            clientId: 0,
+            entrepriseId: 0,
+          },
+        });
       });
 
       if (mounted) {
@@ -301,7 +412,7 @@ class _EntreprisesInteresseesTabState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppColors.error),
         );
       }
     } finally {

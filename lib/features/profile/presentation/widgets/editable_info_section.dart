@@ -3,6 +3,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'dart:async';
 import '../../../../data/models/user_model.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EditableInfoSection extends StatefulWidget {
   final UserModel user;
@@ -84,7 +86,7 @@ class _EditableInfoSectionState extends State<EditableInfoSection> {
                     child: SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2)),
                   )
                 : isSaved
-                    ? const Icon(Icons.check_circle, color: Colors.green).animate().scale(curve: Curves.elasticOut)
+                    ? const Icon(Icons.check_circle, color: AppColors.success).animate().scale(curve: Curves.elasticOut)
                     : null,
           ),
           onFieldSubmitted: (val) => _saveField(fieldKey, val),

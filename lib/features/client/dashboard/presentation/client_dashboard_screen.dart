@@ -6,9 +6,11 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../search_entreprises/presentation/screens/search_entreprises_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import 'tabs/client_projects_tab.dart';
-import 'tabs/client_messages_tab.dart';
+import '../../../chat/presentation/screens/conversations_list_screen.dart';
 import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/repositories/entreprise_repository.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 
 // ─────────────────────────────────────────────
@@ -41,7 +43,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
     ClientHomeTab(),
     ClientProjectsTab(),
     SearchEntreprisesScreen(),
-    ClientMessagesTab(),
+    ConversationsListScreen(),
     ProfileScreen(),
   ];
 
@@ -118,7 +120,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
 }
 
 // ─────────────────────────────────────────────
-// Home Tab — Entreprise Discovery
+// Home Tab — Redesign (inspiré du design moderne)
 // ─────────────────────────────────────────────
 class ClientHomeTab extends ConsumerStatefulWidget {
   const ClientHomeTab({super.key});
@@ -134,7 +136,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
     final userName = user?.nom ?? 'Client';
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: AppColors.backgroundLight,
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
@@ -146,171 +148,379 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Bonjour, $userName 👋',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimaryLight,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Bienvenue sur Chantier Track, votre rêve une réalisation',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Stack(
                       children: [
-                        Text(
-                          'Bonjour, $userName',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
+                        Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.textPrimaryLight.withValues(alpha: 0.08),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const CircleAvatar(
+                            radius: 24,
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.notifications_none_rounded, color: AppColors.textPrimaryLight, size: 22),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, color: Theme.of(context).colorScheme.primary, size: 14),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Douala, CM',
-                              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
+                        Positioned(
+                          top: 2, right: 2,
+                          child: Container(
+                            width: 10, height: 10,
+                            decoration: const BoxDecoration(
+                              color: AppColors.secondary,
+                              shape: BoxShape.circle,
                             ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      child: Text(
-                        userName.isNotEmpty ? userName[0].toUpperCase() : 'C',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
                   ],
-                ).animate().fadeIn(duration: 400.ms),
+                ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.05),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
-              // ── Entreprises à proximité ──
+              // ── Promo Banner: Suivez votre projet ──
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'À proximité',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Voir tout',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ],
-                ).animate().fadeIn(delay: 100.ms),
-              ),
-              const SizedBox(height: 12),
+                child: _PromoBanner(),
+              ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05),
+              const SizedBox(height: 32),
 
-              // ── Horizontal scroll Firestore ──
-              Consumer(
-                builder: (context, ref, _) {
-                  final nearby = ref.watch(_nearbyEntreprisesProvider);
-                  return SizedBox(
-                    height: 230,
-                    child: nearby.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(child: Text('Erreur: $e', style: TextStyle(color: Theme.of(context).colorScheme.error))),
-                      data: (list) => list.isEmpty
-                          ? Center(child: Text('Aucune entreprise', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)))
-                          : ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              physics: const BouncingScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              itemCount: list.length,
-                              separatorBuilder: (context, index) => const SizedBox(width: 12),
-                              itemBuilder: (context, i) {
-                                return _NearbyCard(entreprise: list[i])
-                                    .animate()
-                                    .slideX(begin: 0.2, delay: Duration(milliseconds: 100 * i), duration: 400.ms)
-                                    .fadeIn();
-                              },
-                            ),
-                    ),
-                  );
-                },
-              ),
-              const SizedBox(height: 28),
-
-              // ── Recommandés pour vous ──
+              // ── Actions Rapides ──
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: const Text(
+                  'Actions rapides',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                ).animate().fadeIn(delay: 200.ms),
+              ),
+              const SizedBox(height: 16),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: Text(
-                        'Recommandés pour vous',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    TextButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Voir tout',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    _ActionCard(
+                      title: 'Suivre votre projet',
+                      subtitle: 'Voir l\'avancement et les documents',
+                      icon: Icons.track_changes_rounded,
+                      color: AppColors.primary,
+                      onTap: () {
+                        // Navigate to Projects tab (index 1)
+                        // In a real app, you might use a callback to change _currentIndex of the parent
+                      },
+                    ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1),
+                    const SizedBox(height: 16),
+                    _ActionCard(
+                      title: 'Chat direct',
+                      subtitle: 'Discuter avec votre entreprise de construction',
+                      icon: Icons.chat_bubble_rounded,
+                      color: AppColors.secondary,
+                      onTap: () {
+                        // Navigate to Messages tab (index 3)
+                      },
+                    ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
+                    const SizedBox(height: 16),
+                    _ActionCard(
+                      title: 'Soumettre réclamation',
+                      subtitle: 'Un problème ? Signalez-le nous',
+                      icon: Icons.report_problem_rounded,
+                      color: AppColors.error,
+                      onTap: () {
+                        // Open complaint dialog/screen
+                      },
+                    ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
                   ],
-                ).animate().fadeIn(delay: 300.ms),
+                ),
               ),
-              const SizedBox(height: 8),
-
-              // ── Recommended list Firestore ──
-              Consumer(
-                builder: (context, ref, _) {
-                  final recommended = ref.watch(_recommendedEntreprisesProvider);
-                  return recommended.when(
-                    loading: () => const Center(child: CircularProgressIndicator()),
-                    error: (e, _) => Center(child: Text('Erreur: $e', style: TextStyle(color: Theme.of(context).colorScheme.error))),
-                    data: (list) => list.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Text('Aucune entreprise recommandée', style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
-                          )
-                        : ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            itemCount: list.length,
-                            separatorBuilder: (context, index) => const SizedBox(height: 12),
-                            itemBuilder: (context, i) {
-                              return _RecommendedCard(entreprise: list[i])
-                                  .animate()
-                                  .slideY(begin: 0.1, delay: Duration(milliseconds: 100 * i + 350), duration: 400.ms)
-                                  .fadeIn();
-                            },
-                          ),
-                  );
-                },
-              ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 28),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.grey500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Promo Banner
+// ─────────────────────────────────────────────
+class _PromoBanner extends StatelessWidget {
+  const _PromoBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 140,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [AppColors.primary, AppColors.secondaryDark],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.primary.withValues(alpha: 0.35),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Decorative circles
+          Positioned(
+            right: -20, top: -20,
+            child: Container(
+              width: 110, height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 40, bottom: -30,
+            child: Container(
+              width: 80, height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.06),
+              ),
+            ),
+          ),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          '🏗️ Offre exclusive',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Trouvez le bon\nprofessionnel BTP',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          height: 1.25,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Text(
+                          'Explorer →',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  width: 80, height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Icon(Icons.engineering_rounded, color: Colors.white, size: 44),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────
+// Category Chip
+// ─────────────────────────────────────────────
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool selected;
+  const _CategoryChip({required this.label, required this.icon, required this.selected});
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: 72,
+      decoration: BoxDecoration(
+        color: selected ? AppColors.primary : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: selected
+                ? AppColors.primary.withValues(alpha: 0.28)
+                : AppColors.textPrimaryLight.withValues(alpha: 0.05),
+            blurRadius: selected ? 12 : 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: selected ? Colors.white : AppColors.primary,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: selected ? Colors.white : AppColors.textPrimaryLight,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -327,15 +537,15 @@ class _NearbyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final imageUrl = entreprise.realisations.isNotEmpty ? entreprise.realisations.first : '';
     return Container(
-      width: 160,
+      width: 175,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.07),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -344,49 +554,52 @@ class _NearbyCard extends StatelessWidget {
         children: [
           // Image
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             child: Stack(
               children: [
                 imageUrl.isNotEmpty
                     ? CachedNetworkImage(
                         imageUrl: imageUrl,
-                        height: 120,
+                        height: 130,
                         width: double.infinity,
                         fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(height: 120, color: Theme.of(context).colorScheme.surfaceContainerHighest),
-                        errorWidget: (context, url, error) => Container(
-                          height: 120, color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                          child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary),
-                        ),
+                        placeholder: (context, url) => _imgPlaceholder(),
+                        errorWidget: (context, url, error) => _imgPlaceholder(),
                       )
-                    : Container(
-                        height: 120,
-                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                        child: Center(child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary, size: 40)),
-                      ),
+                    : _imgPlaceholder(),
+                // Favourite
+                Positioned(
+                  top: 10, right: 10,
+                  child: Container(
+                    width: 30, height: 30,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(color: AppColors.textPrimaryLight.withValues(alpha: 0.1), blurRadius: 6),
+                      ],
+                    ),
+                    child: const Icon(Icons.favorite_border_rounded, size: 16, color: AppColors.secondary),
+                  ),
+                ),
                 // Zone badge
                 if (entreprise.zoneIntervention.isNotEmpty)
                   Positioned(
-                    bottom: 10,
-                    left: 10,
+                    bottom: 8, left: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.tertiary,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.location_on, color: Theme.of(context).colorScheme.onTertiary, size: 11),
+                          const Icon(Icons.location_on, color: Colors.white, size: 10),
                           const SizedBox(width: 3),
                           Text(
                             entreprise.zoneIntervention.first,
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onTertiary,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -397,43 +610,45 @@ class _NearbyCard extends StatelessWidget {
           ),
           // Info
           Padding(
-            padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  entreprise.raisonSociale,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    color: AppColors.textPrimaryLight,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  entreprise.zoneIntervention.join(', '),
+                  style: TextStyle(fontSize: 11, color: AppColors.grey500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
                 Row(
                   children: [
-                    Expanded(
-                      child: Text(
-                        entreprise.raisonSociale,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 14),
+                    const SizedBox(width: 3),
+                    Text(
+                      entreprise.noteMoyenne.toStringAsFixed(1),
+                      style: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimaryLight,
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.star, color: Color(0xFFF59E0B), size: 13),
-                    const SizedBox(width: 2),
                     Text(
-                      entreprise.noteMoyenne.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                      '(${entreprise.nombreAvis})',
+                      style: TextStyle(fontSize: 11, color: AppColors.grey500),
                     ),
                   ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  entreprise.zoneIntervention.join(', '),
-                  style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -442,6 +657,12 @@ class _NearbyCard extends StatelessWidget {
       ),
     );
   }
+
+  Widget _imgPlaceholder() => Container(
+    height: 130, width: double.infinity,
+    color: const Color(0xFFE6F3F0),
+    child: const Center(child: Icon(Icons.business_rounded, color: AppColors.primary, size: 40)),
+  );
 }
 
 // ─────────────────────────────────────────────
@@ -457,13 +678,13 @@ class _RecommendedCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -471,23 +692,16 @@ class _RecommendedCard extends StatelessWidget {
         children: [
           // Image
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             child: imageUrl.isNotEmpty
                 ? CachedNetworkImage(
                     imageUrl: imageUrl,
-                    width: 72,
-                    height: 72,
+                    width: 78, height: 78,
                     fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHighest),
-                    errorWidget: (context, url, error) => Container(
-                      width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary),
-                    ),
+                    placeholder: (context, url) => _sqPlaceholder(),
+                    errorWidget: (context, url, error) => _sqPlaceholder(),
                   )
-                : Container(
-                    width: 72, height: 72, color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                    child: Center(child: Icon(Icons.business, color: Theme.of(context).colorScheme.primary, size: 36)),
-                  ),
+                : _sqPlaceholder(),
           ),
           const SizedBox(width: 14),
           // Info
@@ -500,55 +714,89 @@ class _RecommendedCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         entreprise.raisonSociale,
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Theme.of(context).colorScheme.onSurface,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                          color: AppColors.textPrimaryLight,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    const Icon(Icons.star, color: Color(0xFFF59E0B), size: 14),
+                    const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 14),
                     const SizedBox(width: 3),
                     Text(
                       entreprise.noteMoyenne.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    Icon(Icons.location_on_outlined, size: 13, color: AppColors.grey500),
+                    const SizedBox(width: 2),
+                    Expanded(
+                      child: Text(
+                        entreprise.zoneIntervention.join(', '),
+                        style: TextStyle(fontSize: 12, color: AppColors.grey500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  entreprise.zoneIntervention.join(', '),
-                  style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.onSurfaceVariant),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.star_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${entreprise.nombreAvis} Avis',
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    _InfoBadge(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      label: '${entreprise.nombreAvis} avis',
                     ),
-                    const SizedBox(width: 12),
-                    Icon(Icons.work_outline, color: Theme.of(context).colorScheme.onSurfaceVariant, size: 14),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${entreprise.anneesExperience} ans exp.',
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    _InfoBadge(
+                      icon: Icons.work_history_outlined,
+                      label: '${entreprise.anneesExperience} ans',
                     ),
                   ],
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _sqPlaceholder() => Container(
+    width: 78, height: 78,
+    color: const Color(0xFFE6F3F0),
+    child: const Center(child: Icon(Icons.business_rounded, color: AppColors.primary, size: 36)),
+  );
+}
+
+// ─────────────────────────────────────────────
+// Small badge for recommended card
+// ─────────────────────────────────────────────
+class _InfoBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _InfoBadge({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundLight,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: AppColors.primary),
+          const SizedBox(width: 4),
+          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimaryLight)),
         ],
       ),
     );

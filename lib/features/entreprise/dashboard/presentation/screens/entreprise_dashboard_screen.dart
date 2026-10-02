@@ -1,74 +1,223 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../../core/theme/app_spacing.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/app_card.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_badge.dart';
+import '../../providers/entreprise_dashboard_providers.dart';
+import '../../../../auth/data/auth_repository.dart';
+import '../../../../chat/presentation/screens/conversations_list_screen.dart';
+import 'mes_chantiers_screen.dart';
+import 'equipe_screen.dart';
+import 'documents_reports_screen.dart';
+import 'entreprise_profil_screen.dart';
+import '../../../devis/presentation/screens/devis_screen.dart';
+import '../../../offres/presentation/screens/offres_screen.dart';
 
-final diffusionsProvider = StreamProvider<List<QueryDocumentSnapshot>>((ref) {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return const Stream.empty();
-  
-  return FirebaseFirestore.instance
-      .collection('diffusions_projet')
-      .where('entrepriseId', isEqualTo: user.uid)
-      .where('statut', isEqualTo: 'envoye') // pending ones
-      .snapshots()
-      .map((snapshot) => snapshot.docs);
-});
-
-class EntrepriseDashboardScreen extends ConsumerWidget {
+class EntrepriseDashboardScreen extends ConsumerStatefulWidget {
   const EntrepriseDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final diffusionsAsync = ref.watch(diffusionsProvider);
+  ConsumerState<EntrepriseDashboardScreen> createState() =>
+      _EntrepriseDashboardScreenState();
+}
 
+class _EntrepriseDashboardScreenState
+    extends ConsumerState<EntrepriseDashboardScreen> {
+  int _currentIndex = 0;
+
+  // Pages corresponding to bottom nav items
+  final _pages = const [
+    _DashboardHomeTab(),
+    OffresScreen(),
+    MesChantierScreen(),
+    ConversationsListScreen(),
+    EntrepriseProfilScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Tableau de Bord Entreprise'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => context.push('/profile'),
-          )
+      backgroundColor: AppColors.backgroundLight,
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _pages,
+      ),
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
+
+  Widget _buildBottomNav() {
+    final offresAsync = ref.watch(appelsOffresProvider);
+    final newOffresCount = offresAsync.value?.length ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E2822),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 20,
+              offset: const Offset(0, -5)),
         ],
       ),
-      body: SafeArea(
+      child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _navItem(0, Icons.home_rounded, 'Accueil'),
+              _navItem(1, Icons.campaign_rounded, 'Offres', badge: newOffresCount),
+              _navItem(2, Icons.construction_rounded, 'Chantiers'),
+              _navItem(3, Icons.chat_bubble_rounded, 'Messages'),
+              _navItem(4, Icons.person_rounded, 'Profil'),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _navItem(int index, IconData icon, String label, {int badge = 0}) {
+    final selected = _currentIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _currentIndex = index),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.secondary.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: selected ? AppColors.secondary : Colors.white54,
+                  size: 24,
+                ),
+                const SizedBox(height: 2),
+                Text(label,
+                    style: TextStyle(
+                        color: selected ? AppColors.secondary : Colors.white54,
+                        fontSize: 10,
+                        fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+              ],
+            ),
+            if (badge > 0)
+              Positioned(
+                top: -6,
+                right: -8,
+                child: Container(
+                  width: 18, height: 18,
+                  decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                  child: Center(
+                    child: Text('$badge',
+                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                  ),
+                ).animate(onPlay: (c) => c.repeat(reverse: true))
+                 .scale(begin: const Offset(1, 1), end: const Offset(1.15, 1.15), duration: 600.ms),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Home Tab ─────────────────────────────────────────
+class _DashboardHomeTab extends ConsumerWidget {
+  const _DashboardHomeTab();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entrepriseAsync = ref.watch(currentEntrepriseProvider);
+    final chantierAsync = ref.watch(mesChantierProvider);
+    final offresAsync = ref.watch(appelsOffresProvider);
+
+    return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Projets reçus', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
-              const SizedBox(height: AppSpacing.md),
-              Expanded(
-                child: diffusionsAsync.when(
-                  data: (docs) {
-                    if (docs.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'Aucun nouveau projet pour le moment.',
-                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
-                        ),
-                      );
-                    }
-                    return ListView.builder(
-                      itemCount: docs.length,
-                      itemBuilder: (context, index) {
-                        return _ProjectCard(diffusion: docs[index], ref: ref);
-                      },
+              // Header
+              _buildHeader(context, ref, entrepriseAsync.value),
+              const SizedBox(height: 20),
+
+              // Certification Banner
+              if (entrepriseAsync.value == null)
+                const Text('Profil entreprise introuvable', style: TextStyle(color: Colors.red)),
+              if (entrepriseAsync.value == null || !entrepriseAsync.value!.isVerified) ...[
+                _buildCertificationBanner(context, entrepriseAsync.value?.id ?? ''),
+                const SizedBox(height: 20),
+              ],
+
+              // Stats row
+              _buildStatsRow(chantierAsync.value ?? [], offresAsync.value ?? []),
+              const SizedBox(height: 24),
+
+              // Quick actions
+              const Text('Actions rapides',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimaryLight)),
+              const SizedBox(height: 14),
+              _buildQuickActions(context),
+              const SizedBox(height: 24),
+
+              // New offres banner
+              _buildOffresBanner(context, offresAsync.value?.length ?? 0),
+              const SizedBox(height: 24),
+
+              // Recent chantiers
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Chantiers récents',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimaryLight)),
+                  TextButton(
+                    onPressed: () {},
+                    child: const Text('Voir tout',
+                        style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              chantierAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Text('Erreur: $e'),
+                data: (projets) {
+                  if (projets.isEmpty) {
+                    return Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.borderLight),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.info_outline_rounded, color: AppColors.primary),
+                          SizedBox(width: 10),
+                          Expanded(
+                            child: Text('Aucun chantier pour l\'instant. Candidatez aux appels d\'offres !',
+                                style: TextStyle(color: AppColors.textSecondaryLight)),
+                          ),
+                        ],
+                      ),
                     );
-                  },
-                  loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (err, stack) => Center(child: Text('Erreur: $err')),
-                ),
+                  }
+                  return Column(
+                    children: projets.take(3).map((p) => _MiniChantierCard(project: p)).toList(),
+                  );
+                },
               ),
             ],
           ),
@@ -76,148 +225,303 @@ class EntrepriseDashboardScreen extends ConsumerWidget {
       ),
     );
   }
-}
 
-class _ProjectCard extends StatefulWidget {
-  final QueryDocumentSnapshot diffusion;
-  final WidgetRef ref;
-
-  const _ProjectCard({required this.diffusion, required this.ref});
-
-  @override
-  State<_ProjectCard> createState() => _ProjectCardState();
-}
-
-class _ProjectCardState extends State<_ProjectCard> {
-  bool _isLoading = false;
-  String _message = '';
-
-  Future<void> _repondre(String reponse) async {
-    if (_isLoading) return;
-    setState(() => _isLoading = true);
-
-    try {
-      final projectId = widget.diffusion['projectId'];
-      final functions = FirebaseFunctions.instance;
-      // In dev mode, ensure it points to the emulator (handled in main.dart)
-      final callable = functions.httpsCallable('repondreProjet');
-      
-      await callable.call({
-        'projectId': projectId,
-        'reponse': reponse,
-      });
-
-      if (mounted) {
-        setState(() {
-          _message = reponse == 'accepte' ? 'Réponse envoyée' : 'Décliné';
-          _isLoading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(reponse == 'accepte' ? 'Projet accepté !' : 'Projet décliné')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red));
-      }
-    }
+  Widget _buildHeader(BuildContext context, WidgetRef ref, entreprise) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundColor: AppColors.primary.withOpacity(0.12),
+              child: const Icon(Icons.business_rounded, size: 26, color: AppColors.primary),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  entreprise?.raisonSociale ?? 'Espace Entreprise',
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimaryLight),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const Text(
+                  'Tableau de bord',
+                  style: TextStyle(fontSize: 12, color: AppColors.grey500, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.08), blurRadius: 8)],
+              ),
+              child: const Icon(Icons.notifications_none_rounded, size: 20, color: AppColors.textPrimaryLight),
+            ),
+            const SizedBox(width: 8),
+            GestureDetector(
+              onTap: () async {
+                await ref.read(authRepositoryProvider).signOut();
+                if (context.mounted) context.go('/login');
+              },
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: const BoxDecoration(color: AppColors.errorLight, shape: BoxShape.circle),
+                child: const Icon(Icons.logout_rounded, size: 20, color: AppColors.error),
+              ),
+            ),
+          ],
+        ),
+      ],
+    ).animate().fadeIn();
   }
+
+  Widget _buildCertificationBanner(BuildContext context, String entrepriseId) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.errorLight,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: AppColors.error),
+              SizedBox(width: 8),
+              Text(
+                'Entreprise non certifiée',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.error,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Pour obtenir plus de clients et rassurer sur votre expertise, veuillez soumettre vos documents de certification (RCCM, Carte contribuable, etc.).',
+            style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: () => context.push('/entreprise_certification', extra: entrepriseId),
+              icon: const Icon(Icons.verified_rounded),
+              label: const Text('Faire certifier mon entreprise'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.error,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().slideX(begin: -0.1).fadeIn();
+  }
+
+  Widget _buildStatsRow(List projects, List offres) {
+    final enCours = projects.where((p) => p.statut == 'en_cours').length;
+    final termines = projects.where((p) => p.statut == 'termine').length;
+    return Row(
+      children: [
+        Expanded(child: _StatCard(label: 'En cours', value: '$enCours', icon: Icons.construction_rounded, color: AppColors.secondary)),
+        const SizedBox(width: 10),
+        Expanded(child: _StatCard(label: 'Terminés', value: '$termines', icon: Icons.check_circle_rounded, color: AppColors.success)),
+        const SizedBox(width: 10),
+        Expanded(child: _StatCard(label: 'Nouvelles offres', value: '${offres.length}', icon: Icons.campaign_rounded, color: AppColors.warning)),
+      ],
+    ).animate().fadeIn(delay: 100.ms);
+  }
+
+  Widget _buildQuickActions(BuildContext context) {
+    final actions = [
+      {'name': 'Mes\nChantiers', 'icon': Icons.construction_rounded, 'screen': const MesChantierScreen()},
+      {'name': 'Devis', 'icon': Icons.request_quote_rounded, 'screen': const DevisScreen()},
+      {'name': 'Équipe', 'icon': Icons.group_rounded, 'screen': const EquipeScreen()},
+      {'name': 'Rapports', 'icon': Icons.bar_chart_rounded, 'screen': const RapportsScreen()},
+    ];
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: actions.asMap().entries.map((entry) {
+        final act = entry.value;
+        return GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => act['screen'] as Widget)),
+          child: Column(
+            children: [
+              Container(
+                width: 64, height: 64,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.06), blurRadius: 10)],
+                ),
+                child: Icon(act['icon'] as IconData, color: AppColors.primary, size: 28),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                act['name'] as String,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight),
+              ),
+            ],
+          ).animate().fadeIn(delay: Duration(milliseconds: 50 * entry.key)).slideY(begin: 0.1),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildOffresBanner(BuildContext context, int count) {
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OffresScreen())),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [AppColors.primary, AppColors.primaryLight],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (count > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppColors.secondary,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text('$count nouveau${count > 1 ? 'x' : ''}',
+                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ),
+                  const SizedBox(height: 8),
+                  const Text('Appels d\'offres\n& Annonces',
+                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, height: 1.2)),
+                  const SizedBox(height: 6),
+                  const Text('Découvrez les projets disponibles',
+                      style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const SizedBox(height: 12),
+                  const Row(
+                    children: [
+                      Text('Voir les annonces', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                      SizedBox(width: 4),
+                      Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.secondary),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.campaign_rounded, size: 60, color: Colors.white24),
+          ],
+        ),
+      ).animate().fadeIn(delay: 200.ms),
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+  final Color color;
+
+  const _StatCard({required this.label, required this.value, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final projectId = widget.diffusion['projectId'];
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.05), blurRadius: 8)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 6),
+          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: color)),
+          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.grey500)),
+        ],
+      ),
+    );
+  }
+}
 
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance.collection('projects').doc(projectId).get(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-        if (!snapshot.data!.exists) return const SizedBox.shrink();
+class _MiniChantierCard extends StatelessWidget {
+  final project;
+  const _MiniChantierCard({required this.project});
 
-        final projectData = snapshot.data!.data() as Map<String, dynamic>;
-        
-        return Card(
-          margin: const EdgeInsets.only(bottom: AppSpacing.md),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+  @override
+  Widget build(BuildContext context) {
+    final ville = project.localisation['ville'] ?? '';
+    Color statusColor = project.statut == 'en_cours' ? AppColors.secondary :
+                        project.statut == 'termine' ? AppColors.success : AppColors.warning;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.borderLight),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 40, height: 40,
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(Icons.construction_rounded, color: statusColor, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Text(
-                        projectData['titre'] ?? 'Projet sans titre',
-                        style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const AppBadge(label: 'Nouveau', status: AppBadgeStatus.inProgress),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  '${projectData['localisation']?['ville'] ?? ''}, ${projectData['localisation']?['quartier'] ?? ''}',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Row(
-                  children: [
-                    const Icon(Icons.attach_money, size: 16, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text('${projectData['budgetPrevisionnel']} FCFA'),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  projectData['description'] ?? '',
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                
-                if (_message.isNotEmpty)
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(_message, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-                    ),
-                  )
-                else
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: _isLoading ? null : () => _repondre('decline'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: theme.colorScheme.error,
-                            side: BorderSide(color: theme.colorScheme.error),
-                          ),
-                          child: const Text('Décliner'),
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : () => _repondre('accepte'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.primary,
-                            foregroundColor: Colors.white,
-                          ),
-                          child: _isLoading 
-                            ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : const Text('Je peux réaliser'),
-                        ),
-                      ),
-                    ],
-                  ),
+                Text(project.titre,
+                    style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight),
+                    overflow: TextOverflow.ellipsis),
+                Text(ville, style: const TextStyle(fontSize: 12, color: AppColors.grey500)),
               ],
             ),
           ),
-        );
-      },
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: statusColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(project.statut.replaceAll('_', ' '),
+                style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 }

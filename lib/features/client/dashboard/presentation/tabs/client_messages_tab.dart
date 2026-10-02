@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/l10n/app_localizations.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ClientMessagesTab extends ConsumerWidget {
   const ClientMessagesTab({super.key});
@@ -70,7 +72,7 @@ class ClientMessagesTab extends ConsumerWidget {
                               width: 14,
                               height: 14,
                               decoration: BoxDecoration(
-                                color: Colors.green,
+                                color: AppColors.success,
                                 shape: BoxShape.circle,
                                 border: Border.all(color: theme.colorScheme.background, width: 2),
                               ),

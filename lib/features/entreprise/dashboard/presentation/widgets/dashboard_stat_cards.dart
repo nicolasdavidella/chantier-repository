@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/entreprise_dashboard_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DashboardStatCards extends ConsumerWidget {
   const DashboardStatCards({super.key});
@@ -26,7 +28,7 @@ class DashboardStatCards extends ConsumerWidget {
           title: 'Chantiers Actifs',
           value: stats.activeProjects.toString(),
           icon: Icons.construction,
-          color: Colors.blue,
+          color: AppColors.primary,
           delay: 0.ms,
         ),
         _buildStatCard(
@@ -34,7 +36,7 @@ class DashboardStatCards extends ConsumerWidget {
           title: 'Devis en attente',
           value: stats.pendingQuotes.toString(),
           icon: Icons.request_quote,
-          color: Colors.orange,
+          color: AppColors.warning,
           delay: 100.ms,
         ),
         _buildStatCard(
@@ -42,7 +44,7 @@ class DashboardStatCards extends ConsumerWidget {
           title: 'Note moyenne',
           value: stats.averageRating.toString(),
           icon: Icons.star,
-          color: Colors.amber,
+          color: AppColors.warning,
           delay: 200.ms,
         ),
         _buildStatCard(
@@ -50,7 +52,7 @@ class DashboardStatCards extends ConsumerWidget {
           title: 'CA du mois',
           value: currencyFormatter.format(stats.monthlyRevenue),
           icon: Icons.euro_symbol,
-          color: Colors.green,
+          color: AppColors.success,
           delay: 300.ms,
           valueFontSize: 14,
         ),
@@ -99,7 +101,7 @@ class DashboardStatCards extends ConsumerWidget {
             AppSpacing.vXs,
             Text(
               title,
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+              style: theme.textTheme.bodySmall?.copyWith(color: AppColors.grey700),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),

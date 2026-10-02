@@ -51,14 +51,14 @@ class _AppCardState extends State<AppCard> {
     final List<BoxShadow> shadows = _isHovered && !_isPressed
         ? [
             BoxShadow(
-              color: (isDark ? Colors.black : AppColors.primaryDark).withOpacity(0.08),
+              color: (isDark ? AppColors.textPrimaryLight : AppColors.primaryDark).withOpacity(0.08),
               blurRadius: 24,
               offset: const Offset(0, 8),
             )
           ]
         : [
             BoxShadow(
-              color: (isDark ? Colors.black : AppColors.primaryDark).withOpacity(0.04),
+              color: (isDark ? AppColors.textPrimaryLight : AppColors.primaryDark).withOpacity(0.04),
               blurRadius: 12,
               offset: const Offset(0, 4),
             )

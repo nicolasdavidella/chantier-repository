@@ -7,6 +7,8 @@ import 'add_report_screen.dart';
 import 'add_expense_screen.dart';
 import 'widgets/sync_queue_indicator.dart';
 import '../../../../core/connectivity/sync_queue_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ChefDashboardScreen extends ConsumerWidget {
   const ChefDashboardScreen({super.key});
@@ -34,9 +36,9 @@ class ChefDashboardScreen extends ConsumerWidget {
                 },
                 child: Row(
                   children: [
-                    const Icon(Icons.cloud_upload, color: Colors.orange),
+                    const Icon(Icons.cloud_upload, color: AppColors.warning),
                     AppSpacing.hXs,
-                    Text('${syncQueue.length}', style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
+                    Text('${syncQueue.length}', style: const TextStyle(color: AppColors.warning, fontWeight: FontWeight.bold)),
                   ],
                 ).animate(onPlay: (controller) => controller.repeat(reverse: true)).fade(duration: 1.seconds, begin: 0.5, end: 1),
               ),
@@ -77,9 +79,9 @@ class ChefDashboardScreen extends ConsumerWidget {
                             AppSpacing.vXs,
                             Row(
                               children: [
-                                const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                                const Icon(Icons.location_on, size: 16, color: AppColors.textSecondaryLight),
                                 AppSpacing.hXs,
-                                Text('${projects[0].localisation['ville']} - ${projects[0].localisation['quartier']}', style: const TextStyle(color: Colors.grey)),
+                                Text('${projects[0].localisation['ville']} - ${projects[0].localisation['quartier']}', style: const TextStyle(color: AppColors.textSecondaryLight)),
                               ],
                             ),
                           ],
@@ -114,7 +116,7 @@ class ChefDashboardScreen extends ConsumerWidget {
                       context,
                       title: 'Dépense',
                       icon: Icons.receipt_long,
-                      color: Colors.orange,
+                      color: AppColors.warning,
                       onTap: () {
                         Navigator.push(context, MaterialPageRoute(builder: (_) => AddExpenseScreen(projectId: projects[0].id)));
                       },
@@ -152,7 +154,7 @@ class ChefDashboardScreen extends ConsumerWidget {
                       decoration: BoxDecoration(
                         color: theme.cardColor,
                         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                        border: Border.all(color: isDone ? Colors.green : (isDoing ? theme.colorScheme.primary : theme.colorScheme.outlineVariant)),
+                        border: Border.all(color: isDone ? AppColors.success : (isDoing ? theme.colorScheme.primary : theme.colorScheme.outlineVariant)),
                       ),
                       child: Row(
                         children: [
@@ -160,8 +162,8 @@ class ChefDashboardScreen extends ConsumerWidget {
                             width: 32,
                             height: 32,
                             decoration: BoxDecoration(
-                              color: isDone ? Colors.green : (isDoing ? theme.colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent),
-                              border: Border.all(color: isDone ? Colors.green : (isDoing ? theme.colorScheme.primary : Colors.grey)),
+                              color: isDone ? AppColors.success : (isDoing ? theme.colorScheme.primary.withValues(alpha: 0.1) : Colors.transparent),
+                              border: Border.all(color: isDone ? AppColors.success : (isDoing ? theme.colorScheme.primary : AppColors.textSecondaryLight)),
                               shape: BoxShape.circle,
                             ),
                             child: isDone
@@ -178,7 +180,7 @@ class ChefDashboardScreen extends ConsumerWidget {
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     decoration: isDone ? TextDecoration.lineThrough : null,
-                                    color: isDone ? Colors.grey : null,
+                                    color: isDone ? AppColors.textSecondaryLight : null,
                                   ),
                                 ),
                                 AppSpacing.vXs,
@@ -186,7 +188,7 @@ class ChefDashboardScreen extends ConsumerWidget {
                                   isDone ? 'Terminée' : (isDoing ? 'En cours' : 'À faire'),
                                   style: TextStyle(
                                     fontSize: 12,
-                                    color: isDone ? Colors.green : (isDoing ? theme.colorScheme.primary : Colors.grey),
+                                    color: isDone ? AppColors.success : (isDoing ? theme.colorScheme.primary : AppColors.textSecondaryLight),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 )

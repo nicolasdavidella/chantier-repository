@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ZonesHeatMap extends ConsumerWidget {
   const ZonesHeatMap({super.key});
@@ -19,7 +21,7 @@ class ZonesHeatMap extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),

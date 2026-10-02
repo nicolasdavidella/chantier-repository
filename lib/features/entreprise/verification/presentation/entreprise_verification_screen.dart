@@ -7,6 +7,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../../../../data/models/certification_request_model.dart';
 import 'widgets/document_upload_widget.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 final myCertificationProvider =
     StreamProvider.family<CertificationRequestModel?, String>((
@@ -77,7 +79,7 @@ class _EntrepriseVerificationScreenState
             Icon(
               isCertified ? Icons.verified : Icons.hourglass_top,
               size: 80,
-              color: isCertified ? Colors.green : Colors.orange,
+              color: isCertified ? AppColors.success : AppColors.warning,
             ),
             const SizedBox(height: AppSpacing.lg),
             Text(
@@ -125,9 +127,9 @@ class _EntrepriseVerificationScreenState
             Container(
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,14 +137,14 @@ class _EntrepriseVerificationScreenState
                   const Text(
                     'Demande rejetée',
                     style: TextStyle(
-                      color: Colors.red,
+                      color: AppColors.error,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     'Motif : ${request?.motifRejet ?? "Non précisé"}',
-                    style: const TextStyle(color: Colors.red),
+                    style: const TextStyle(color: AppColors.error),
                   ),
                 ],
               ),
@@ -184,7 +186,7 @@ class _EntrepriseVerificationScreenState
           if (!canSubmit && !_isUploading)
             const Text(
               'Veuillez fournir tous les documents requis pour soumettre la demande.',
-              style: TextStyle(color: Colors.orange),
+              style: TextStyle(color: AppColors.warning),
               textAlign: TextAlign.center,
             ),
 
@@ -307,7 +309,7 @@ class _EntrepriseVerificationScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppColors.error),
         );
       }
     } finally {

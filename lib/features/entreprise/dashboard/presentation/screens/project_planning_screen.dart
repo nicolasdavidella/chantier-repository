@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ProjectPlanningScreen extends StatefulWidget {
   const ProjectPlanningScreen({super.key});
@@ -49,7 +51,7 @@ class _ProjectPlanningScreenState extends State<ProjectPlanningScreen> {
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.4),
+                      color: AppColors.textPrimaryLight.withOpacity(0.4),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -88,10 +90,10 @@ class _ProjectPlanningScreenState extends State<ProjectPlanningScreen> {
                       end: Alignment.bottomCenter,
                     ),
                     borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: const Color(0xFFDCA96F).withOpacity(0.5), width: 1.5),
+                    border: Border.all(color: AppColors.warning.withOpacity(0.5), width: 1.5),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
+                        color: AppColors.textPrimaryLight.withOpacity(0.5),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),
@@ -106,7 +108,7 @@ class _ProjectPlanningScreenState extends State<ProjectPlanningScreen> {
                       fontWeight: FontWeight.bold,
                       shadows: [
                         Shadow(
-                          color: Colors.black,
+                          color: AppColors.textPrimaryLight,
                           blurRadius: 4,
                           offset: Offset(1, 1),
                         ),

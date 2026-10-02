@@ -5,6 +5,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/avis_model.dart';
 import '../widgets/animated_star_rating.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class CreateReviewScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -70,7 +72,7 @@ class _CreateReviewScreenState extends ConsumerState<CreateReviewScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Merci pour votre avis sur ${widget.targetName} !'),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
       Navigator.of(context).pop(true);

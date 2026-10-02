@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/create_project_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class StepSummary extends ConsumerWidget {
   const StepSummary({super.key});
@@ -30,7 +32,7 @@ class StepSummary extends ConsumerWidget {
           AppSpacing.vSm,
           Text(
             'Vérifiez les informations avant de publier votre projet.',
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+            style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.grey600),
           ),
           AppSpacing.vXxl,
           

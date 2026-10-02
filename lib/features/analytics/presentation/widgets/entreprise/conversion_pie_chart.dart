@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ConversionPieChart extends ConsumerWidget {
   const ConversionPieChart({super.key});
@@ -20,7 +22,7 @@ class ConversionPieChart extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -41,21 +43,21 @@ class ConversionPieChart extends ConsumerWidget {
                       centerSpaceRadius: 40,
                       sections: [
                         PieChartSectionData(
-                          color: Colors.green,
+                          color: AppColors.success,
                           value: data['acceptes'],
                           title: '${data['acceptes']}%',
                           radius: 50,
                           titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         PieChartSectionData(
-                          color: Colors.redAccent,
+                          color: AppColors.error,
                           value: data['refuses'],
                           title: '${data['refuses']}%',
                           radius: 50,
                           titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         PieChartSectionData(
-                          color: Colors.orangeAccent,
+                          color: AppColors.warning,
                           value: data['attente'],
                           title: '${data['attente']}%',
                           radius: 50,
@@ -73,11 +75,11 @@ class ConversionPieChart extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildLegend(context, 'Acceptés', Colors.green),
+                      _buildLegend(context, 'Acceptés', AppColors.success),
                       AppSpacing.vSm,
-                      _buildLegend(context, 'Refusés', Colors.redAccent),
+                      _buildLegend(context, 'Refusés', AppColors.error),
                       AppSpacing.vSm,
-                      _buildLegend(context, 'En attente', Colors.orangeAccent),
+                      _buildLegend(context, 'En attente', AppColors.warning),
                     ],
                   ),
                 ),

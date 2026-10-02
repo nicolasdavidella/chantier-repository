@@ -15,6 +15,8 @@ import 'widgets/settings_section.dart';
 import 'widgets/security_section.dart';
 import '../../../../core/services/storage_service.dart';
 import 'certification_request_screen.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -34,7 +36,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         content: const Text('Êtes-vous sûr de vouloir vous déconnecter ?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Déconnexion', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Déconnexion', style: TextStyle(color: AppColors.error))),
         ],
       ),
     );
@@ -50,11 +52,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final step1 = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Supprimer le compte', style: TextStyle(color: Colors.red)),
+        title: const Text('Supprimer le compte', style: TextStyle(color: AppColors.error)),
         content: const Text('Cette action supprimera définitivement vos données (conformité RGPD). Voulez-vous continuer ?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuer', style: TextStyle(color: Colors.red))),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Continuer', style: TextStyle(color: AppColors.error))),
         ],
       ),
     );
@@ -63,12 +65,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       final step2 = await showDialog<bool>(
         context: context,
         builder: (ctx) => AlertDialog(
-          title: const Text('Confirmation finale', style: TextStyle(color: Colors.red)),
+          title: const Text('Confirmation finale', style: TextStyle(color: AppColors.error)),
           content: const Text('Veuillez confirmer que vous comprenez que cette action est IRRÉVERSIBLE. Toutes vos données seront perdues.'),
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
               onPressed: () => Navigator.pop(ctx, true), 
               child: const Text('SUPPRIMER DÉFINITIVEMENT'),
             ),
@@ -182,8 +184,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             // Delete Account
             TextButton.icon(
               onPressed: _handleDeleteAccount,
-              icon: const Icon(Icons.delete_forever, color: Colors.red),
-              label: const Text('Supprimer mon compte', style: TextStyle(color: Colors.red)),
+              icon: const Icon(Icons.delete_forever, color: AppColors.error),
+              label: const Text('Supprimer mon compte', style: TextStyle(color: AppColors.error)),
             ),
             
             const SizedBox(height: 100),
@@ -220,7 +222,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           child: Row(
             children: [
-              Icon(Icons.verified, color: status == 'approuve' ? Colors.green : Colors.grey, size: 32),
+              Icon(Icons.verified, color: status == 'approuve' ? AppColors.success : AppColors.textSecondaryLight, size: 32),
               AppSpacing.hMd,
               Expanded(
                 child: Column(
@@ -233,7 +235,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Text(
                       status == 'approuve' ? 'Vérifié' : status == 'en_attente' ? 'En cours de validation' : 'Non certifié',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: status == 'approuve' ? Colors.green : status == 'en_attente' ? Colors.orange : Colors.grey,
+                        color: status == 'approuve' ? AppColors.success : status == 'en_attente' ? AppColors.warning : AppColors.textSecondaryLight,
                       ),
                     ),
                   ],
@@ -268,9 +270,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         AppSpacing.vLg,
         Row(
           children: [
-            Expanded(child: _buildStatCard(context, 'Projets terminés', '12', Icons.task_alt, Colors.green)),
+            Expanded(child: _buildStatCard(context, 'Projets terminés', '12', Icons.task_alt, AppColors.success)),
             AppSpacing.hMd,
-            Expanded(child: _buildStatCard(context, 'Note moyenne', '4.8', Icons.star, Colors.orange)),
+            Expanded(child: _buildStatCard(context, 'Note moyenne', '4.8', Icons.star, AppColors.warning)),
           ],
         ),
         AppSpacing.vMd,

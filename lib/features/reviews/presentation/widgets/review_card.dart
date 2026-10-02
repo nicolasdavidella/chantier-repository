@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../data/models/avis_model.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ReviewCard extends StatelessWidget {
   final AvisModel avis;
@@ -53,7 +55,7 @@ class ReviewCard extends StatelessWidget {
                   itemBuilder: (context) => [
                     const PopupMenuItem(
                       value: 'report',
-                      child: Text('Signaler comme abusif', style: TextStyle(color: Colors.red)),
+                      child: Text('Signaler comme abusif', style: TextStyle(color: AppColors.error)),
                     ),
                   ],
                 ),
@@ -67,12 +69,12 @@ class ReviewCard extends StatelessWidget {
                 ...List.generate(5, (index) => Icon(
                   index < avis.note.round() ? Icons.star : Icons.star_border,
                   size: 16,
-                  color: Colors.amber,
+                  color: AppColors.warning,
                 )),
                 AppSpacing.hSm,
                 Text(
                   dateFormatted,
-                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                  style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight),
                 ),
               ],
             ),
@@ -99,7 +101,7 @@ class ReviewCard extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Icon(Icons.reply, size: 16, color: Colors.grey),
+                        const Icon(Icons.reply, size: 16, color: AppColors.textSecondaryLight),
                         AppSpacing.hXs,
                         Text('Réponse de l\'entreprise', style: theme.textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold)),
                       ],

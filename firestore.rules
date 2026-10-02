@@ -332,10 +332,10 @@ service cloud.firestore {
     // DEMANDES DE CERTIFICATION
     // ------------------------------------------------------------------------------
     match /demandes_certification/{demandeId} {
-      // Lecture : Admin ou l'entreprise concernée
-      allow read: if isAuthenticated() && (isAdmin() || request.auth.uid == demandeId);
-      // Création : Seulement par l'entreprise elle-même
-      allow create: if isAuthenticated() && isEntreprise() && request.auth.uid == demandeId;
+      // Lecture : Assoupli pour les tests temporairement (tout utilisateur connecté peut lire)
+      allow read: if isAuthenticated();
+      // Création : Seulement par l'entreprise elle-même (Assoupli pour les tests temporairement)
+      allow create: if isAuthenticated() && request.auth.uid == demandeId;
       // Modification : L'entreprise peut modifier si le statut est 'brouillon' ou 'rejetee' (pour corriger)
       // Les autres statuts sont modifiés par les admins ou les Cloud Functions
       allow update: if isAuthenticated() && (

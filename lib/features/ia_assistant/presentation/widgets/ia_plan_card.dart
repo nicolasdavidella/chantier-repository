@@ -74,8 +74,8 @@ class _IaPlanCardState extends State<IaPlanCard> with SingleTickerProviderStateM
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
-                        color: Colors.grey[50],
+                        border: Border.all(color: AppColors.grey300),
+                        color: AppColors.grey100,
                       ),
                       child: AnimatedBuilder(
                         animation: _controller,
@@ -182,7 +182,7 @@ class _PlanPainter extends CustomPainter {
       if (itemProgress > 0.8) {
         textPainter.text = TextSpan(
           text: '$nom\n$surf m²',
-          style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: AppColors.textPrimaryLight, fontSize: 10, fontWeight: FontWeight.bold),
         );
         textPainter.textAlign = TextAlign.center;
         textPainter.layout(minWidth: 0, maxWidth: rect.width);
@@ -198,11 +198,11 @@ class _PlanPainter extends CustomPainter {
 
   Color _getColorForRoom(String name) {
     name = name.toLowerCase();
-    if (name.contains('séjour') || name.contains('salon')) return Colors.blue[200]!;
-    if (name.contains('chambre')) return Colors.orange[200]!;
+    if (name.contains('séjour') || name.contains('salon')) return AppColors.primaryLight;
+    if (name.contains('chambre')) return AppColors.warningLight;
     if (name.contains('bain') || name.contains('eau') || name.contains('wc')) return Colors.cyan[200]!;
     if (name.contains('cuisine')) return Colors.yellow[200]!;
-    return Colors.grey[300]!;
+    return AppColors.grey300;
   }
 
   @override

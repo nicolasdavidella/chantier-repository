@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class UserGrowthChart extends ConsumerWidget {
   const UserGrowthChart({super.key});
@@ -30,7 +32,7 @@ class UserGrowthChart extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -63,7 +65,7 @@ class UserGrowthChart extends ConsumerWidget {
                       getTitlesWidget: (value, meta) {
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
-                          child: Text('T${value.toInt() + 1}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                          child: Text('T${value.toInt() + 1}', style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight)),
                         );
                       },
                     ),
@@ -74,7 +76,7 @@ class UserGrowthChart extends ConsumerWidget {
                       reservedSize: 30,
                       getTitlesWidget: (value, meta) {
                         if (value == 0 || value == maxY) return const SizedBox.shrink();
-                        return Text(value.toInt().toString(), style: const TextStyle(fontSize: 10, color: Colors.grey));
+                        return Text(value.toInt().toString(), style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight));
                       },
                     ),
                   ),
@@ -87,9 +89,9 @@ class UserGrowthChart extends ConsumerWidget {
                 minY: 0,
                 maxY: maxY,
                 lineBarsData: [
-                  _buildLine(data, 0, Colors.blue), // Clients
-                  _buildLine(data, 1, Colors.orange), // Entreprises
-                  _buildLine(data, 2, Colors.green), // Chefs
+                  _buildLine(data, 0, AppColors.primary), // Clients
+                  _buildLine(data, 1, AppColors.warning), // Entreprises
+                  _buildLine(data, 2, AppColors.success), // Chefs
                 ],
               ),
               duration: const Duration(milliseconds: 800),
@@ -100,11 +102,11 @@ class UserGrowthChart extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegend(context, 'Clients', Colors.blue),
+              _buildLegend(context, 'Clients', AppColors.primary),
               AppSpacing.hLg,
-              _buildLegend(context, 'Entreprises', Colors.orange),
+              _buildLegend(context, 'Entreprises', AppColors.warning),
               AppSpacing.hLg,
-              _buildLegend(context, 'Chefs', Colors.green),
+              _buildLegend(context, 'Chefs', AppColors.success),
             ],
           )
         ],

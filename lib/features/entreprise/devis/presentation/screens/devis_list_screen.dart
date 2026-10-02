@@ -7,6 +7,8 @@ import '../../../../../data/models/devis_model.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/devis_provider.dart';
 import 'devis_detail_screen.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DevisListScreen extends ConsumerStatefulWidget {
   const DevisListScreen({super.key});
@@ -47,7 +49,7 @@ class _DevisListScreenState extends ConsumerState<DevisListScreen> {
             Expanded(child: Text('Félicitations ! Votre devis a été accepté.')),
           ],
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
         duration: const Duration(seconds: 4),
         action: SnackBarAction(
           label: 'VOIR',
@@ -76,9 +78,9 @@ class _DevisListScreenState extends ConsumerState<DevisListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[400]),
+                  Icon(Icons.assignment_outlined, size: 64, color: AppColors.grey400),
                   AppSpacing.vMd,
-                  Text('Aucun devis envoyé', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey[600])),
+                  Text('Aucun devis envoyé', style: theme.textTheme.titleMedium?.copyWith(color: AppColors.grey600)),
                 ],
               ),
             )
@@ -91,10 +93,10 @@ class _DevisListScreenState extends ConsumerState<DevisListScreen> {
                 
                 Color getStatusColor() {
                   switch (devis.statut) {
-                    case 'accepte': return Colors.green;
-                    case 'refuse': return Colors.red;
-                    case 'en_attente': return Colors.orange;
-                    default: return Colors.grey;
+                    case 'accepte': return AppColors.success;
+                    case 'refuse': return AppColors.error;
+                    case 'en_attente': return AppColors.warning;
+                    default: return AppColors.textSecondaryLight;
                   }
                 }
 
@@ -126,7 +128,7 @@ class _DevisListScreenState extends ConsumerState<DevisListScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(dateFormatter.format(devis.dateEnvoi), style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                              Text(dateFormatter.format(devis.dateEnvoi), style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight)),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                 decoration: BoxDecoration(

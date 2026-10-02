@@ -10,6 +10,8 @@ import '../../../../reviews/presentation/widgets/review_card.dart';
 import '../../../../auth/providers/auth_provider.dart';
 import '../../../../chat/providers/chat_providers.dart';
 import '../../../../chat/presentation/screens/chat_detail_screen.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EntrepriseProfileScreen extends ConsumerWidget {
   final EntrepriseModel entreprise;
@@ -49,7 +51,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                       ),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 28).animate().scale(delay: 200.ms),
+                          const Icon(Icons.star, color: AppColors.warning, size: 28).animate().scale(delay: 200.ms),
                           AppSpacing.hXs,
                           Text(
                             entreprise.noteMoyenne.toString(),
@@ -57,7 +59,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                           ),
                           Text(
                             ' (${entreprise.nombreAvis})',
-                            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey),
+                            style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondaryLight),
                           ),
                         ],
                       ),
@@ -81,7 +83,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                   AppSpacing.vSm,
                   Text(
                     entreprise.description,
-                    style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey.shade800, height: 1.5),
+                    style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.textSecondaryLight, height: 1.5),
                   ),
                   
                   AppSpacing.vXxl,
@@ -126,7 +128,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: AppColors.textPrimaryLight.withOpacity(0.05),
                 blurRadius: 10,
                 offset: const Offset(0, -5),
               ),
@@ -213,7 +215,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade600,
+                        color: AppColors.success,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: const Row(
@@ -285,7 +287,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: Colors.grey.shade800,
+                    color: AppColors.textSecondaryLight,
                     fontWeight: FontWeight.w500,
                     height: 1.4,
                   ),
@@ -304,8 +306,8 @@ class EntrepriseProfileScreen extends ConsumerWidget {
               // URL to a nice Unsplash image of real construction workers building a wall
               imageUrl: 'https://picsum.photos/seed/chantier-ouvriers/800/280',
               fit: BoxFit.cover,
-              placeholder: (context, url) => Container(color: Colors.grey.shade200),
-              errorWidget: (context, error, stackTrace) => Container(color: Colors.grey.shade200, child: const Icon(Icons.engineering, size: 64, color: Colors.grey)),
+              placeholder: (context, url) => Container(color: AppColors.textSecondaryLight),
+              errorWidget: (context, error, stackTrace) => Container(color: AppColors.textSecondaryLight, child: const Icon(Icons.engineering, size: 64, color: AppColors.textSecondaryLight)),
             ),
           ),
           
@@ -356,7 +358,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
         Icon(icon, color: color, size: 28),
         AppSpacing.vXs,
         Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: color)),
-        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey.shade600)),
+        Text(label, style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight)),
       ],
     );
   }
@@ -391,7 +393,7 @@ class EntrepriseProfileScreen extends ConsumerWidget {
       avis: review,
       onReport: () {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Avis signalé aux modérateurs.', style: TextStyle(color: Colors.white)), backgroundColor: Colors.orange),
+          const SnackBar(content: Text('Avis signalé aux modérateurs.', style: TextStyle(color: Colors.white)), backgroundColor: AppColors.warning),
         );
       },
     );

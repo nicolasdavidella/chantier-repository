@@ -8,6 +8,8 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../../data/auth_repository.dart';
 import '../../data/user_repository.dart';
 import '../../../../data/models/user_model.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class SignupScreen extends ConsumerStatefulWidget {
   final String role;
@@ -107,10 +109,10 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Color _getStrengthColor() {
-    if (_passwordStrength <= 0.25) return Colors.red;
-    if (_passwordStrength <= 0.5) return Colors.orange;
+    if (_passwordStrength <= 0.25) return AppColors.error;
+    if (_passwordStrength <= 0.5) return AppColors.warning;
     if (_passwordStrength <= 0.75) return Colors.lightGreen;
-    return Colors.green;
+    return AppColors.success;
   }
 
   @override

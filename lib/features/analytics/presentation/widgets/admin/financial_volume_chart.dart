@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class FinancialVolumeChart extends ConsumerWidget {
   const FinancialVolumeChart({super.key});
@@ -23,7 +25,7 @@ class FinancialVolumeChart extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -53,7 +55,7 @@ class FinancialVolumeChart extends ConsumerWidget {
                       getTitlesWidget: (value, meta) {
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
-                          child: Text('T${value.toInt() + 1}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                          child: Text('T${value.toInt() + 1}', style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight)),
                         );
                       },
                       reservedSize: 28,
@@ -65,7 +67,7 @@ class FinancialVolumeChart extends ConsumerWidget {
                       reservedSize: 40,
                       getTitlesWidget: (value, meta) {
                         if (value == 0 || value == maxY) return const SizedBox.shrink();
-                        return Text('${value.toInt()}M', style: const TextStyle(fontSize: 10, color: Colors.grey));
+                        return Text('${value.toInt()}M', style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight));
                       },
                     ),
                   ),

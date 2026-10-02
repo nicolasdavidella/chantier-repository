@@ -37,6 +37,8 @@ class EntrepriseModel {
   final String? nifDocumentUrl;
   final String? rccmDocumentUrl;
   
+  final String? logoUrl;
+  
   final String? prixMoyen;
   final String? delaiMoyen;
 
@@ -69,6 +71,7 @@ class EntrepriseModel {
     this.verificationDate,
     this.nifDocumentUrl,
     this.rccmDocumentUrl,
+    this.logoUrl,
     this.prixMoyen,
     this.delaiMoyen,
   });
@@ -103,6 +106,7 @@ class EntrepriseModel {
       verificationDate: json['verificationDate'] != null ? (json['verificationDate'] as Timestamp).toDate() : null,
       nifDocumentUrl: json['nifDocumentUrl'] as String?,
       rccmDocumentUrl: json['rccmDocumentUrl'] as String?,
+      logoUrl: json['logoUrl'] as String?,
       prixMoyen: json['prixMoyen'] as String?,
       delaiMoyen: json['delaiMoyen'] as String?,
     );
@@ -138,6 +142,7 @@ class EntrepriseModel {
       'verificationDate': verificationDate != null ? Timestamp.fromDate(verificationDate!) : null,
       'nifDocumentUrl': nifDocumentUrl,
       'rccmDocumentUrl': rccmDocumentUrl,
+      'logoUrl': logoUrl,
       'prixMoyen': prixMoyen,
       'delaiMoyen': delaiMoyen,
     };
@@ -172,6 +177,7 @@ class EntrepriseModel {
     DateTime? verificationDate,
     String? nifDocumentUrl,
     String? rccmDocumentUrl,
+    String? logoUrl,
     String? prixMoyen,
     String? delaiMoyen,
   }) {
@@ -204,6 +210,7 @@ class EntrepriseModel {
       verificationDate: verificationDate ?? this.verificationDate,
       nifDocumentUrl: nifDocumentUrl ?? this.nifDocumentUrl,
       rccmDocumentUrl: rccmDocumentUrl ?? this.rccmDocumentUrl,
+      logoUrl: logoUrl ?? this.logoUrl,
       prixMoyen: prixMoyen ?? this.prixMoyen,
       delaiMoyen: delaiMoyen ?? this.delaiMoyen,
     );

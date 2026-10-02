@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../data/models/message_model.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ChatBubble extends StatelessWidget {
   final MessageModel message;
@@ -38,7 +40,7 @@ class ChatBubble extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
+                color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
                 blurRadius: 2,
                 offset: const Offset(0, 1),
               ),
@@ -67,7 +69,7 @@ class ChatBubble extends StatelessWidget {
               else if (message.type == 'pdf')
                 ListTile(
                   contentPadding: EdgeInsets.zero,
-                  leading: const Icon(Icons.picture_as_pdf, color: Colors.red),
+                  leading: const Icon(Icons.picture_as_pdf, color: AppColors.error),
                   title: const Text(
                     'Fichier PDF',
                     style: TextStyle(decoration: TextDecoration.underline),
@@ -100,7 +102,7 @@ class ChatBubble extends StatelessWidget {
                       fontSize: 10,
                       color: isMe
                           ? theme.colorScheme.primary.withValues(alpha: 0.7)
-                          : Colors.grey,
+                          : AppColors.textSecondaryLight,
                     ),
                   ),
                   if (isMe) ...[
@@ -109,8 +111,8 @@ class ChatBubble extends StatelessWidget {
                       message.status == 'sent' ? Icons.check : Icons.done_all,
                       size: 14,
                       color: message.status == 'read'
-                          ? Colors.blue
-                          : Colors.grey,
+                          ? AppColors.primary
+                          : AppColors.textSecondaryLight,
                     ),
                   ],
                 ],
@@ -170,7 +172,7 @@ class ChatBubble extends StatelessWidget {
             if (isMe)
               const Text(
                 'Devis envoyé, en attente de réponse',
-                style: TextStyle(color: Colors.orange, fontSize: 12),
+                style: TextStyle(color: AppColors.warning, fontSize: 12),
                 textAlign: TextAlign.center,
               )
             else
@@ -180,8 +182,8 @@ class ChatBubble extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => _updateQuoteStatus(context, 'rejected'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
+                        foregroundColor: AppColors.error,
+                        side: const BorderSide(color: AppColors.error),
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                       ),
                       child: const Text('Refuser'),
@@ -192,7 +194,7 @@ class ChatBubble extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () => _updateQuoteStatus(context, 'accepted'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColors.success,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(horizontal: 4),
                       ),
@@ -205,14 +207,14 @@ class ChatBubble extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: AppColors.success.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Center(
                 child: Text(
                   'Devis accepté !',
                   style: TextStyle(
-                    color: Colors.green,
+                    color: AppColors.success,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -222,14 +224,14 @@ class ChatBubble extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.1),
+                color: AppColors.error.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: const Center(
                 child: Text(
                   'Devis refusé',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: AppColors.error,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

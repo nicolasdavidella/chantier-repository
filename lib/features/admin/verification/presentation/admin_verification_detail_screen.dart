@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/verification_request_model.dart';
 import '../../../../data/models/verification_document_model.dart';
 import '../providers/admin_verification_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AdminVerificationDetailScreen extends ConsumerStatefulWidget {
   final VerificationRequestModel request;
@@ -67,7 +69,7 @@ class _AdminVerificationDetailScreenState extends ConsumerState<AdminVerificatio
               children: [
                 Expanded(
                   child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
                     onPressed: () => _handleDecision('REJECTED'),
                     icon: const Icon(Icons.cancel, color: Colors.white),
                     label: const Text('Rejeter', style: TextStyle(color: Colors.white)),
@@ -76,7 +78,7 @@ class _AdminVerificationDetailScreenState extends ConsumerState<AdminVerificatio
                 const SizedBox(width: 16),
                 Expanded(
                   child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.success),
                     onPressed: () => _handleDecision('APPROVED'),
                     icon: const Icon(Icons.check_circle, color: Colors.white),
                     label: const Text('Approuver', style: TextStyle(color: Colors.white)),
@@ -121,19 +123,19 @@ class _AdminVerificationDetailScreenState extends ConsumerState<AdminVerificatio
               children: [
                 OutlinedButton(
                   onPressed: () => _updateDocStatus(doc, 'REJECTED'),
-                  child: const Text('Rejeter (doc)', style: TextStyle(color: Colors.red)),
+                  child: const Text('Rejeter (doc)', style: TextStyle(color: AppColors.error)),
                 ),
                 const SizedBox(width: 8),
                 OutlinedButton(
                   onPressed: () => _updateDocStatus(doc, 'APPROVED'),
-                  child: const Text('Valider (doc)', style: TextStyle(color: Colors.green)),
+                  child: const Text('Valider (doc)', style: TextStyle(color: AppColors.success)),
                 ),
               ],
             ),
             if (doc.rejectionReason != null)
               Padding(
                 padding: const EdgeInsets.only(top: 8),
-                child: Text('Motif du rejet: \${doc.rejectionReason}', style: const TextStyle(color: Colors.red)),
+                child: Text('Motif du rejet: \${doc.rejectionReason}', style: const TextStyle(color: AppColors.error)),
               ),
           ],
         ),
@@ -145,13 +147,13 @@ class _AdminVerificationDetailScreenState extends ConsumerState<AdminVerificatio
     Color color;
     switch (status) {
       case 'APPROVED':
-        color = Colors.green;
+        color = AppColors.success;
         break;
       case 'REJECTED':
-        color = Colors.red;
+        color = AppColors.error;
         break;
       default:
-        color = Colors.orange;
+        color = AppColors.warning;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

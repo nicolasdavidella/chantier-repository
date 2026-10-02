@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class InsightCard extends StatelessWidget {
   final String titre;
@@ -26,16 +28,16 @@ class InsightCard extends StatelessWidget {
     if (type == 'anomalie') {
       icon = Icons.warning_amber_rounded;
       if (severite == 'haute') {
-        iconColor = Colors.red;
-        bgColor = Colors.red.withValues(alpha: 0.05);
+        iconColor = AppColors.error;
+        bgColor = AppColors.error.withValues(alpha: 0.05);
       } else {
-        iconColor = Colors.orange;
-        bgColor = Colors.orange.withValues(alpha: 0.05);
+        iconColor = AppColors.warning;
+        bgColor = AppColors.warning.withValues(alpha: 0.05);
       }
     } else {
       icon = Icons.lightbulb_outline;
-      iconColor = Colors.blue;
-      bgColor = Colors.blue.withValues(alpha: 0.05);
+      iconColor = AppColors.primary;
+      bgColor = AppColors.primary.withValues(alpha: 0.05);
     }
 
     return Container(
@@ -47,7 +49,7 @@ class InsightCard extends StatelessWidget {
         border: Border.all(color: bgColor, width: 2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.03),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

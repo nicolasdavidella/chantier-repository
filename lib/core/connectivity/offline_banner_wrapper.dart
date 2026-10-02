@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'connectivity_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class OfflineBannerWrapper extends ConsumerWidget {
   final Widget child;
@@ -29,7 +31,7 @@ class OfflineBannerWrapper extends ConsumerWidget {
                 color: Colors.transparent,
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  color: Colors.redAccent,
+                  color: AppColors.error,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

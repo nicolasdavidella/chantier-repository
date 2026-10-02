@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/features/admin/providers/admin_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ActivityLogsScreen extends ConsumerWidget {
   const ActivityLogsScreen({super.key});
@@ -23,7 +25,7 @@ class ActivityLogsScreen extends ConsumerWidget {
         itemBuilder: (context, index) {
           final log = logs[index];
           return ListTile(
-            leading: const Icon(Icons.history, color: Colors.grey),
+            leading: const Icon(Icons.history, color: AppColors.textSecondaryLight),
             title: Text(log.action, style: const TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text('Par ${log.user} - ${dateFormatter.format(log.timestamp)}'),
           );

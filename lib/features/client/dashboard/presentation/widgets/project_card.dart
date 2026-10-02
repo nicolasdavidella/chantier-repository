@@ -4,6 +4,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../data/models/project_model.dart';
 import '../../providers/dashboard_providers.dart';
 import 'package:intl/intl.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ProjectCard extends ConsumerWidget {
   final ProjectModel project;
@@ -45,7 +47,7 @@ class ProjectCard extends ConsumerWidget {
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withValues(alpha: 0.8),
+                      AppColors.textPrimaryLight.withValues(alpha: 0.8),
                       Colors.transparent,
                     ],
                   ),
@@ -77,12 +79,12 @@ class ProjectCard extends ConsumerWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
+                  color: AppColors.textPrimaryLight.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(100),
                 ),
                 child: Row(
                   children: [
-                    const FaIcon(FontAwesomeIcons.solidStar, size: 10, color: Colors.amber),
+                    const FaIcon(FontAwesomeIcons.solidStar, size: 10, color: AppColors.warning),
                     const SizedBox(width: 4),
                     Text(
                       '4.8',

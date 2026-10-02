@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../../data/models/verification_document_model.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DocumentUploadWidget extends StatefulWidget {
   final String title;
@@ -65,7 +67,7 @@ class _DocumentUploadWidgetState extends State<DocumentUploadWidget> {
                   ),
                 ),
                 if (widget.isRequired)
-                  const Text('* Requis', style: TextStyle(color: Colors.red, fontSize: 12)),
+                  const Text('* Requis', style: TextStyle(color: AppColors.error, fontSize: 12)),
               ],
             ),
             if (widget.currentDocument != null) ...[
@@ -74,13 +76,13 @@ class _DocumentUploadWidgetState extends State<DocumentUploadWidget> {
                 children: [
                   Icon(
                     isApproved ? Icons.check_circle : (isRejected ? Icons.error : Icons.access_time),
-                    color: isApproved ? Colors.green : (isRejected ? Colors.red : Colors.orange),
+                    color: isApproved ? AppColors.success : (isRejected ? AppColors.error : AppColors.warning),
                   ),
                   const SizedBox(width: 8),
                   Text(
                     isApproved ? 'Validé' : (isRejected ? 'Rejeté' : 'En attente de vérification'),
                     style: TextStyle(
-                      color: isApproved ? Colors.green : (isRejected ? Colors.red : Colors.orange),
+                      color: isApproved ? AppColors.success : (isRejected ? AppColors.error : AppColors.warning),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -91,7 +93,7 @@ class _DocumentUploadWidgetState extends State<DocumentUploadWidget> {
                   padding: const EdgeInsets.only(top: 8.0),
                   child: Text(
                     'Motif : \${widget.currentDocument!.rejectionReason}',
-                    style: const TextStyle(color: Colors.redAccent),
+                    style: const TextStyle(color: AppColors.error),
                   ),
                 ),
             ],

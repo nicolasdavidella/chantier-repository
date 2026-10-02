@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/create_project_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class StepLocation extends ConsumerStatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -124,7 +126,7 @@ class _StepLocationState extends ConsumerState<StepLocation> {
             AppSpacing.vSm,
             Text(
               'La localisation aide les entreprises proches à vous trouver facilement.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.grey600),
             ),
             AppSpacing.vXxl,
             DropdownButtonFormField<String>(
@@ -167,9 +169,9 @@ class _StepLocationState extends ConsumerState<StepLocation> {
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                   side: BorderSide(
-                    color: _latitude != null ? Colors.green : Theme.of(context).colorScheme.primary,
+                    color: _latitude != null ? AppColors.success : Theme.of(context).colorScheme.primary,
                   ),
-                  foregroundColor: _latitude != null ? Colors.green : null,
+                  foregroundColor: _latitude != null ? AppColors.success : null,
                 ),
               ),
             ),

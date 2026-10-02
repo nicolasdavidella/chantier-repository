@@ -1,23 +1,4 @@
 import 'package:flutter/material.dart';
-
-class TaskManagementScreen extends StatelessWidget {
-  const TaskManagementScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF111111),
-      appBar: AppBar(
-        title: const Text('Gestion des Tâches'),
-        backgroundColor: const Color(0xFF1E1E1E),
-        foregroundColor: Colors.white,
-      ),
-      body: const Center(
-        child: Text(
-          'Vue de Gestion des Tâches',
-          style: TextStyle(color: Colors.white, fontSize: 24),
-        ),
-      ),
-    );
-  }
-}
+// This file redirects to MesChantierScreen
+// (Task management is now fully handled in mes_chantiers_screen.dart + chantier_detail_screen.dart)
+export 'mes_chantiers_screen.dart' show MesChantierScreen;

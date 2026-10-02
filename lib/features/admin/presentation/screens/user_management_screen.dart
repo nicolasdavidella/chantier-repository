@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/features/admin/providers/admin_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class UserManagementScreen extends ConsumerStatefulWidget {
   const UserManagementScreen({super.key});
@@ -55,20 +57,20 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                 Color roleColor;
                 switch (user.role) {
                   case 'admin': roleColor = Colors.purple; break;
-                  case 'entreprise': roleColor = Colors.orange; break;
-                  case 'chef_chantier': roleColor = Colors.blue; break;
-                  default: roleColor = Colors.green;
+                  case 'entreprise': roleColor = AppColors.warning; break;
+                  case 'chef_chantier': roleColor = AppColors.primary; break;
+                  default: roleColor = AppColors.success;
                 }
 
                 return ListTile(
                   contentPadding: EdgeInsets.zero,
                   leading: CircleAvatar(
-                    backgroundColor: user.isActive ? theme.colorScheme.primaryContainer : Colors.grey[300],
-                    child: Icon(Icons.person, color: user.isActive ? theme.colorScheme.primary : Colors.grey),
+                    backgroundColor: user.isActive ? theme.colorScheme.primaryContainer : AppColors.grey300,
+                    child: Icon(Icons.person, color: user.isActive ? theme.colorScheme.primary : AppColors.textSecondaryLight),
                   ),
                   title: Row(
                     children: [
-                      Text(user.nom, style: TextStyle(fontWeight: FontWeight.bold, decoration: user.isActive ? null : TextDecoration.lineThrough, color: user.isActive ? null : Colors.grey)),
+                      Text(user.nom, style: TextStyle(fontWeight: FontWeight.bold, decoration: user.isActive ? null : TextDecoration.lineThrough, color: user.isActive ? null : AppColors.textSecondaryLight)),
                       AppSpacing.hSm,
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -93,7 +95,7 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                     itemBuilder: (context) => [
                       PopupMenuItem(
                         value: 'toggle_status',
-                        child: Text(user.isActive ? 'Désactiver le compte' : 'Réactiver le compte', style: TextStyle(color: user.isActive ? Colors.red : Colors.green)),
+                        child: Text(user.isActive ? 'Désactiver le compte' : 'Réactiver le compte', style: TextStyle(color: user.isActive ? AppColors.error : AppColors.success)),
                       ),
                       const PopupMenuDivider(),
                       const PopupMenuItem(enabled: false, child: Text('Changer de rôle :')),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/features/admin/providers/admin_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ModerationScreen extends ConsumerWidget {
   const ModerationScreen({super.key});
@@ -23,7 +25,7 @@ class ModerationScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shield_outlined, size: 64, color: Colors.green[300]),
+                  Icon(Icons.shield_outlined, size: 64, color: AppColors.successVariant),
                   AppSpacing.vMd,
                   Text('Aucun signalement en attente', style: theme.textTheme.titleMedium),
                 ],
@@ -40,7 +42,7 @@ class ModerationScreen extends ConsumerWidget {
                   margin: const EdgeInsets.only(bottom: AppSpacing.md),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    side: const BorderSide(color: Colors.redAccent, width: 1),
+                    side: const BorderSide(color: AppColors.error, width: 1),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
@@ -49,9 +51,9 @@ class ModerationScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.warning, color: Colors.red),
+                            const Icon(Icons.warning, color: AppColors.error),
                             AppSpacing.hSm,
-                            Text('Signalé pour : ${flag.reason}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+                            Text('Signalé pour : ${flag.reason}', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.error)),
                             const Spacer(),
                             Text(dateFormatter.format(flag.flaggedAt), style: theme.textTheme.bodySmall),
                           ],
@@ -76,7 +78,7 @@ class ModerationScreen extends ConsumerWidget {
                                       (i) => Icon(
                                         i < review.note ? Icons.star : Icons.star_border,
                                         size: 16,
-                                        color: Colors.amber,
+                                        color: AppColors.warning,
                                       ),
                                     ),
                                   ),
@@ -106,7 +108,7 @@ class ModerationScreen extends ConsumerWidget {
                               },
                               icon: const Icon(Icons.delete),
                               label: const Text('Supprimer l\'avis'),
-                              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+                              style: FilledButton.styleFrom(backgroundColor: AppColors.error),
                             ),
                           ],
                         )

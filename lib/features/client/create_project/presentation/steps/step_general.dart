@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/create_project_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class StepGeneral extends ConsumerStatefulWidget {
   final GlobalKey<FormState> formKey;
@@ -67,7 +69,7 @@ class _StepGeneralState extends ConsumerState<StepGeneral> {
             AppSpacing.vSm,
             Text(
               'Donnez un nom et une description claire pour attirer les meilleures entreprises.',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(color: AppColors.grey600),
             ),
             AppSpacing.vXxl,
             TextFormField(

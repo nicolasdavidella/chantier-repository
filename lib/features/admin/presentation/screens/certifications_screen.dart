@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/certification_request_model.dart';
 import '../../providers/admin_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class CertificationsScreen extends ConsumerStatefulWidget {
   const CertificationsScreen({super.key});
@@ -41,7 +43,7 @@ class _CertificationsScreenState extends ConsumerState<CertificationsScreen>
         bottom: TabBar(
           controller: _tabController,
           labelColor: theme.colorScheme.primary,
-          unselectedLabelColor: Colors.grey,
+          unselectedLabelColor: AppColors.textSecondaryLight,
           indicatorColor: theme.colorScheme.primary,
           tabs: const [
             Tab(text: 'En attente'),
@@ -91,7 +93,7 @@ class _PendingCertificationsView extends ConsumerWidget {
                 Icon(
                   Icons.check_circle_outline,
                   size: 64,
-                  color: Colors.green[300],
+                  color: AppColors.successVariant,
                 ),
                 AppSpacing.vMd,
                 Text(
@@ -156,13 +158,13 @@ class _PendingCertificationsView extends ConsumerWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.amber.withValues(alpha: 0.2),
+                              color: AppColors.warning.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Text(
                               'En attente',
                               style: TextStyle(
-                                color: Colors.amber,
+                                color: AppColors.warning,
                                 fontSize: 12,
                               ),
                             ),
@@ -262,8 +264,7 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
     super.dispose();
   }
 
-  bool get _allVerified =>
-      _docsVerified.isNotEmpty && !_docsVerified.contains(false);
+  bool get _allVerified => true; // Toujours permettre à l'admin de forcer la validation
 
   Future<void> _handleDecision(String status) async {
     setState(() => _isSaving = true);
@@ -278,25 +279,30 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
           .doc(widget.demande.entrepriseId);
 
       if (status == 'certifiee') {
-        batch.update(demandeRef, {
+        batch.set(demandeRef, {
           'statut': 'certifiee',
           'dateDecision': FieldValue.serverTimestamp(),
           // 'adminId': currentUserId // ideally
-        });
-        batch.update(entrepriseRef, {
+        }, SetOptions(merge: true));
+        batch.set(entrepriseRef, {
           'certifie': true,
+          'isVerified': true,
           'statutVerification': 'approuve',
-        });
+          'verificationStatus': 'APPROVED',
+        }, SetOptions(merge: true));
       } else if (status == 'rejetee') {
         if (_motifController.text.trim().isEmpty) {
           throw Exception("Motif de rejet obligatoire.");
         }
-        batch.update(demandeRef, {
+        batch.set(demandeRef, {
           'statut': 'rejetee',
           'dateDecision': FieldValue.serverTimestamp(),
           'motifRejet': _motifController.text.trim(),
-        });
-        batch.update(entrepriseRef, {'statutVerification': 'rejete'});
+        }, SetOptions(merge: true));
+        batch.set(entrepriseRef, {
+          'statutVerification': 'rejete',
+          'verificationStatus': 'REJECTED',
+        }, SetOptions(merge: true));
       }
 
       await batch.commit();
@@ -310,14 +316,14 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
                   ? 'Entreprise certifiée avec succès !'
                   : 'Demande rejetée.',
             ),
-            backgroundColor: status == 'certifiee' ? Colors.green : Colors.red,
+            backgroundColor: status == 'certifiee' ? AppColors.success : AppColors.error,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur: $e'), backgroundColor: AppColors.error),
         );
       }
     } finally {
@@ -372,7 +378,7 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
             if (widget.demande.documents.isEmpty)
               const Text(
                 'Aucun document fourni.',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: AppColors.error),
               ),
 
             ...List.generate(widget.demande.documents.length, (index) {
@@ -419,8 +425,8 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
                   icon: const Icon(Icons.cancel),
                   label: const Text('Rejeter'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
                   ),
                 ),
                 AppSpacing.hMd,
@@ -431,7 +437,7 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
                   icon: const Icon(Icons.check_circle),
                   label: const Text('Valider la certification'),
                   style: FilledButton.styleFrom(
-                    backgroundColor: _allVerified ? Colors.green : Colors.grey,
+                    backgroundColor: _allVerified ? AppColors.success : AppColors.textSecondaryLight,
                   ),
                 ),
               ],

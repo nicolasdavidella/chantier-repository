@@ -7,6 +7,8 @@ import '../../../../../data/models/project_model.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../providers/devis_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class SubmitDevisScreen extends ConsumerStatefulWidget {
   final ProjectModel project;
@@ -143,11 +145,11 @@ class _SubmitDevisScreenState extends ConsumerState<SubmitDevisScreen> {
             
             OutlinedButton.icon(
               onPressed: _attachPdf,
-              icon: Icon(_pdfAttached ? Icons.check_circle : Icons.upload_file, color: _pdfAttached ? Colors.green : null),
+              icon: Icon(_pdfAttached ? Icons.check_circle : Icons.upload_file, color: _pdfAttached ? AppColors.success : null),
               label: Text(_pdfAttached ? 'Devis_officiel.pdf joint' : 'Joindre un fichier PDF (Optionnel)'),
               style: OutlinedButton.styleFrom(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                side: BorderSide(color: _pdfAttached ? Colors.green : theme.colorScheme.outline),
+                side: BorderSide(color: _pdfAttached ? AppColors.success : theme.colorScheme.outline),
               ),
             ).animate().slideX(begin: 0.1).fadeIn(delay: 400.ms),
 

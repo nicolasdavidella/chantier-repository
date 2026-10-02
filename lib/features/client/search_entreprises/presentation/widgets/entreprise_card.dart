@@ -6,6 +6,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../../data/models/entreprise_model.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/search_entreprises_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EntrepriseCard extends ConsumerWidget {
   final EntrepriseModel entreprise;
@@ -45,7 +47,7 @@ class EntrepriseCard extends ConsumerWidget {
                               fit: BoxFit.cover,
                               errorWidget: (c, e, s) => const Icon(Icons.business),
                             )
-                          : const Icon(Icons.business_center, size: 48, color: Colors.grey),
+                          : const Icon(Icons.business_center, size: 48, color: AppColors.textSecondaryLight),
                     ),
                   ),
                   if (entreprise.isVerified)
@@ -55,7 +57,7 @@ class EntrepriseCard extends ConsumerWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: Colors.green,
+                          color: AppColors.success,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -110,7 +112,7 @@ class EntrepriseCard extends ConsumerWidget {
                       ),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 20).animate().scale(delay: 300.ms),
+                          const Icon(Icons.star, color: AppColors.warning, size: 20).animate().scale(delay: 300.ms),
                           const SizedBox(width: 4),
                           Text(
                             entreprise.noteMoyenne.toString(),
@@ -149,12 +151,12 @@ class EntrepriseCard extends ConsumerWidget {
                       Expanded(
                         child: Row(
                           children: [
-                            const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                            const Icon(Icons.location_on, size: 16, color: AppColors.textSecondaryLight),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 entreprise.zoneIntervention.join(', '),
-                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700]),
+                                style: theme.textTheme.bodySmall?.copyWith(color: AppColors.grey700),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),

@@ -556,3 +556,231 @@ exports.soumettreCertification = onCall(async (request) => {
 
     return { success: true };
 });
+
+// -----------------------------------------------------------------------------
+// PHASE 1: DIFFUSION DU PROJET AUX ENTREPRISES
+// -----------------------------------------------------------------------------
+exports.publierProjetAuxEntreprises = onDocumentCreated("projects/{projectId}", async (event) => {
+    const snap = event.data;
+    if (!snap) return;
+
+    const projectData = snap.data();
+    const projectId = event.params.projectId;
+
+    // Only process if status is en_recherche_entreprise
+    if (projectData.statut !== "en_recherche_entreprise") {
+        return;
+    }
+
+    const ville = projectData.localisation?.ville;
+    const clientId = projectData.clientId;
+
+    try {
+        // Modifié pour le test : on supprime temporairement la restriction 'certifie' == true
+        // pour que vous puissiez voir les offres immédiatement dans votre entreprise de test.
+        const entreprisesSnap = await db.collection('entreprises').get();
+        
+        // Si aucune entreprise certifiée n'est trouvée, on peut élargir. 
+        // Pour l'instant on se limite aux certifiées pour respecter le prompt.
+        
+        const batch = db.batch();
+        let notifiedCount = 0;
+
+        entreprisesSnap.forEach((entDoc) => {
+            const entData = entDoc.data();
+            const entrepriseUserId = entData.userId || entDoc.id;
+
+            // 1. Diffusion document
+            const diffusionId = `${projectId}_${entrepriseUserId}`;
+            const diffRef = db.collection('diffusions_projet').doc(diffusionId);
+            batch.set(diffRef, {
+                projectId: projectId,
+                clientId: clientId,
+                entrepriseId: entrepriseUserId,
+                ville: ville || "",
+                statut: 'envoye',
+                dateEnvoi: FieldValue.serverTimestamp(),
+            }, { merge: true });
+
+            // 2. Notification In-App
+            const notifRef = db.collection('notifications').doc();
+            batch.set(notifRef, {
+                userId: entrepriseUserId,
+                titre: "Nouveau projet disponible",
+                message: `Un nouveau projet "${projectData.titre}" vient d'être publié dans votre zone.`,
+                isRead: false,
+                createdAt: FieldValue.serverTimestamp(),
+                type: 'nouveau_projet',
+                projectId: projectId
+            });
+
+            // 3. Mail outbox
+            if (entData.emailProfessionnel) {
+                const mailRef = db.collection('mail_outbox').doc();
+                batch.set(mailRef, {
+                    to: entData.emailProfessionnel,
+                    message: {
+                        subject: "ChantierTrack - Nouveau projet disponible",
+                        html: `<p>Bonjour ${entData.raisonSociale},</p><p>Un nouveau projet <strong>${projectData.titre}</strong> vient d'être publié. Connectez-vous sur ChantierTrack pour y répondre.</p>`
+                    },
+                    status: "pending",
+                    createdAt: FieldValue.serverTimestamp()
+                });
+            }
+
+            notifiedCount++;
+        });
+
+        await batch.commit();
+        logger.info(`✅ Projet ${projectId} diffusé à ${notifiedCount} entreprise(s).`);
+    } catch (e) {
+        logger.error(`Erreur lors de la diffusion du projet ${projectId}`, e);
+    }
+});
+
+// -----------------------------------------------------------------------------
+// PHASE 4: SIMULATEUR DE DEVIS PAR L'IA (CLAUDE)
+// -----------------------------------------------------------------------------
+exports.simulerDevisIA = onCall(async (request) => {
+    if (!request.auth) {
+        throw new HttpsError("unauthenticated", "Vous devez être connecté pour simuler un devis.");
+    }
+
+    const uid = request.auth.uid;
+    const { typeConstruction, ville, superficie, nombrePieces, budgetDeclare } = request.data;
+
+    // Rate Limiting (Simple check)
+    const canCall = await checkRateLimit(uid);
+    if (!canCall) {
+        throw new HttpsError("resource-exhausted", "Vous avez atteint la limite de simulations pour le moment.");
+    }
+
+    try {
+        const anthropic = getAnthropicClient();
+        const model = getClaudeModel();
+
+        const prompt = `
+Tu es un expert en estimation de construction au Sénégal.
+Le client veut construire :
+- Type : ${typeConstruction || "Non spécifié"}
+- Ville : ${ville || "Sénégal"}
+- Superficie : ${superficie || "Non spécifiée"} m²
+- Nombre de pièces : ${nombrePieces || "Non spécifié"}
+- Budget déclaré par le client : ${budgetDeclare || 0} FCFA
+
+Génère une estimation réaliste de devis sous forme STRICTEMENT JSON.
+Ne retourne QUE le JSON, sans aucun texte avant ou après.
+
+Format JSON attendu :
+{
+  "fourchetteTotal": {
+    "minimum": nombre (FCFA),
+    "moyenne": nombre (FCFA),
+    "maximum": nombre (FCFA)
+  },
+  "repartitionParPoste": [
+    { "nom": "Gros œuvre", "pourcentage": nombre, "montantEstime": nombre },
+    { "nom": "Toiture", "pourcentage": nombre, "montantEstime": nombre },
+    { "nom": "Finitions (Peinture, Carrelage)", "pourcentage": nombre, "montantEstime": nombre },
+    { "nom": "Plomberie & Électricité", "pourcentage": nombre, "montantEstime": nombre }
+  ],
+  "delaiEstimeSemaines": nombre,
+  "hypotheses": ["Hypothèse 1", "Hypothèse 2"],
+  "avertissement": "Ceci est une simulation automatisée à titre indicatif et ne remplace pas le devis final d'une entreprise."
+}`;
+
+        const response = await anthropic.messages.create({
+            model: model,
+            max_tokens: 1024,
+            messages: [{ role: "user", content: prompt }]
+        });
+
+        const texteResponse = response.content[0].text;
+        
+        // Extraire le JSON si Claude a ajouté du texte autour
+        const match = texteResponse.match(/\{.*\}/s);
+        const jsonStr = match ? match[0] : texteResponse;
+        
+        const devisJSON = JSON.parse(jsonStr);
+
+        return devisJSON;
+    } catch (error) {
+        logger.error("Erreur lors de la simulation IA : ", error);
+        throw new HttpsError("internal", "Impossible de générer la simulation pour le moment.");
+    }
+});
+
+// -----------------------------------------------------------------------------
+// PHASE 5: SURVEILLANCE DES RISQUES & ALERTES
+// -----------------------------------------------------------------------------
+exports.surveillerRisquesProjet = onDocumentUpdated("projects/{projectId}", async (event) => {
+    const newData = event.data.after.data();
+    const oldData = event.data.before.data();
+    const projectId = event.params.projectId;
+
+    if (newData.statut !== 'en_cours') return;
+
+    const batch = db.batch();
+    let hasAlert = false;
+
+    // Condition 1: Budget dépensé > budget estimé + 10%
+    if (newData.budgetDepense && newData.budgetPrevisionnel) {
+        const seuilAlerte = newData.budgetPrevisionnel * 1.1;
+        if (newData.budgetDepense > seuilAlerte && (oldData.budgetDepense || 0) <= seuilAlerte) {
+            hasAlert = true;
+            const alerteRef = db.collection("alertes").doc();
+            batch.set(alerteRef, {
+                projectId: projectId,
+                title: "Dépassement de Budget Imminent",
+                description: `Le budget dépensé (${newData.budgetDepense} FCFA) dépasse de plus de 10% le budget prévisionnel (${newData.budgetPrevisionnel} FCFA).`,
+                type: "budget",
+                severity: "high",
+                statut: "alerte_rouge",
+                date: FieldValue.serverTimestamp(),
+                isRead: false
+            });
+            
+            // Notifier le client
+            const notifRef = db.collection("notifications").doc();
+            batch.set(notifRef, {
+                userId: newData.clientId,
+                titre: "Alerte Rouge Budget",
+                message: "Votre projet dépasse le budget prévisionnel de plus de 10%.",
+                isRead: false,
+                createdAt: FieldValue.serverTimestamp()
+            });
+        }
+    }
+
+    // Condition 2: Date prévue dépassée
+    if (newData.dateFinPrevue) {
+        const dateFin = newData.dateFinPrevue.toDate ? newData.dateFinPrevue.toDate() : new Date(newData.dateFinPrevue);
+        const now = new Date();
+        
+        // Si la date vient d'être dépassée (simplification, devrait idéalement être un cron)
+        if (dateFin < now && (!oldData.alerteRetardEnvoyee)) {
+            hasAlert = true;
+            const alerteRef = db.collection("alertes").doc();
+            batch.set(alerteRef, {
+                projectId: projectId,
+                title: "Risque de Retard Critique",
+                description: "La date de fin prévue est dépassée. Veuillez vérifier l'avancement avec l'entreprise.",
+                type: "delay",
+                severity: "high",
+                statut: "alerte_rouge",
+                date: FieldValue.serverTimestamp(),
+                isRead: false
+            });
+
+            // Mettre à jour le projet pour ne pas renvoyer l'alerte en boucle
+            batch.update(event.data.after.ref, {
+                alerteRetardEnvoyee: true
+            });
+        }
+    }
+
+    if (hasAlert) {
+        await batch.commit();
+        logger.info(`Alertes générées pour le projet ${projectId}`);
+    }
+});

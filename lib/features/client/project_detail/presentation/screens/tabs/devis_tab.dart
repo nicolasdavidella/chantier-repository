@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:chantier_track/data/models/project_model.dart';
 import '../../../providers/project_detail_provider.dart';
 import '../../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DevisTab extends ConsumerWidget {
   final ProjectModel project;
@@ -57,7 +59,7 @@ class DevisTab extends ConsumerWidget {
                       children: [
                         Expanded(child: Text(data['raisonSociale'] ?? 'Entreprise inconnue', style: const TextStyle(fontWeight: FontWeight.bold))),
                         if (data['isVerified'] == true) 
-                          const Icon(Icons.verified, color: Colors.blue, size: 16),
+                          const Icon(Icons.verified, color: AppColors.primary, size: 16),
                       ],
                     ),
                     subtitle: Text('Note: ${data['noteMoyenne'] ?? 'N/A'} • Exp: ${data['anneesExperience'] ?? 0} ans'),
@@ -124,9 +126,9 @@ class DevisTab extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
-                    const Icon(Icons.timer_outlined, size: 16, color: Colors.grey),
+                    const Icon(Icons.timer_outlined, size: 16, color: AppColors.textSecondaryLight),
                     const SizedBox(width: 4),
-                    Text('Délai estimé: ${devis.delaiEstime}', style: const TextStyle(color: Colors.grey)),
+                    Text('Délai estimé: ${devis.delaiEstime}', style: const TextStyle(color: AppColors.textSecondaryLight)),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
@@ -180,7 +182,7 @@ class DevisTab extends ConsumerWidget {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('En attente de réponse', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: Colors.grey)),
+                Text('En attente de réponse', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: AppColors.textSecondaryLight)),
                 const SizedBox(height: AppSpacing.md),
                 ...snapshot.data!.docs.map((doc) {
                   final entrepriseId = doc['entrepriseId'];
@@ -190,8 +192,8 @@ class DevisTab extends ConsumerWidget {
                       if (!entSnapshot.hasData || !entSnapshot.data!.exists) return const SizedBox.shrink();
                       final data = entSnapshot.data!.data() as Map<String, dynamic>;
                       return ListTile(
-                        leading: const Icon(Icons.hourglass_empty, color: Colors.grey),
-                        title: Text(data['raisonSociale'] ?? 'Entreprise', style: const TextStyle(color: Colors.grey)),
+                        leading: const Icon(Icons.hourglass_empty, color: AppColors.textSecondaryLight),
+                        title: Text(data['raisonSociale'] ?? 'Entreprise', style: const TextStyle(color: AppColors.textSecondaryLight)),
                       );
                     }
                   );
@@ -232,12 +234,12 @@ class DevisTab extends ConsumerWidget {
   Color _getStatusColor(String statut) {
     switch (statut) {
       case 'accepte':
-        return Colors.green;
+        return AppColors.success;
       case 'refuse':
-        return Colors.red;
+        return AppColors.error;
       case 'en_attente':
       default:
-        return Colors.orange;
+        return AppColors.warning;
     }
   }
 

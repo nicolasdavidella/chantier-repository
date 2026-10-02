@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/features/ia_assistant/providers/ia_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DevisSimulatorScreen extends ConsumerStatefulWidget {
   const DevisSimulatorScreen({super.key});
@@ -214,7 +216,7 @@ class _DevisSimulatorScreenState extends ConsumerState<DevisSimulatorScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const FaIcon(FontAwesomeIcons.wandMagicSparkles, color: Colors.orange),
+                  const FaIcon(FontAwesomeIcons.wandMagicSparkles, color: AppColors.warning),
                   const SizedBox(width: 12),
                   Text('Estimation IA', style: theme.textTheme.titleLarge),
                 ],
@@ -228,7 +230,7 @@ class _DevisSimulatorScreenState extends ConsumerState<DevisSimulatorScreen> {
               else if (snapshot.hasError)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text('Erreur : ${snapshot.error}', style: const TextStyle(color: Colors.red), textAlign: TextAlign.center),
+                  child: Text('Erreur : ${snapshot.error}', style: const TextStyle(color: AppColors.error), textAlign: TextAlign.center),
                 )
               else
                 _buildResultData(snapshot.data!, theme, context),

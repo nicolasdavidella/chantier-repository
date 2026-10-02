@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AnimatedStarRating extends StatefulWidget {
   final int initialRating;
@@ -40,7 +42,7 @@ class _AnimatedStarRatingState extends State<AnimatedStarRating> {
         
         Widget star = Icon(
           isSelected ? Icons.star : Icons.star_border,
-          color: isSelected ? Colors.amber : Colors.grey.shade400,
+          color: isSelected ? AppColors.warning : AppColors.textSecondaryLight,
           size: widget.starSize,
         );
 

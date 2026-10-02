@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DocumentsTab extends StatelessWidget {
   final String projectId;
@@ -35,13 +37,13 @@ class DocumentsTab extends StatelessWidget {
     Color getFileColor(String type) {
       switch (type) {
         case 'pdf':
-          return Colors.red;
+          return AppColors.error;
         case 'image':
-          return Colors.blue;
+          return AppColors.primary;
         case 'word':
-          return Colors.blueAccent;
+          return AppColors.primary;
         default:
-          return Colors.grey;
+          return AppColors.textSecondaryLight;
       }
     }
 

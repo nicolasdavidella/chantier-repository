@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../data/models/notification_model.dart';
 import '../../providers/notification_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
@@ -33,9 +35,9 @@ class NotificationsScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.notifications_off_outlined, size: 64, color: Colors.grey[400]),
+                  Icon(Icons.notifications_off_outlined, size: 64, color: AppColors.grey400),
                   AppSpacing.vMd,
-                  Text('Aucune notification', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey)),
+                  Text('Aucune notification', style: theme.textTheme.titleMedium?.copyWith(color: AppColors.textSecondaryLight)),
                 ],
               ),
             )
@@ -101,19 +103,19 @@ class NotificationsScreen extends ConsumerWidget {
     switch (notif.type) {
       case 'alerte_ia':
         icon = Icons.warning_rounded;
-        iconColor = Colors.red;
+        iconColor = AppColors.error;
         break;
       case 'message':
         icon = Icons.chat_bubble_outline;
-        iconColor = Colors.blue;
+        iconColor = AppColors.primary;
         break;
       case 'statut_devis':
         icon = Icons.request_quote;
-        iconColor = Colors.orange;
+        iconColor = AppColors.warning;
         break;
       case 'rapport':
         icon = Icons.assignment;
-        iconColor = Colors.green;
+        iconColor = AppColors.success;
         break;
       default:
         icon = Icons.notifications;
@@ -126,7 +128,7 @@ class NotificationsScreen extends ConsumerWidget {
       key: Key(notif.id),
       direction: DismissDirection.endToStart,
       background: Container(
-        color: Colors.red,
+        color: AppColors.error,
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: AppSpacing.lg),
         child: const Icon(Icons.delete, color: Colors.white),
@@ -154,9 +156,9 @@ class NotificationsScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             AppSpacing.vXs,
-            Text(notif.corps, style: TextStyle(color: notif.lu ? Colors.grey : theme.colorScheme.onSurface)),
+            Text(notif.corps, style: TextStyle(color: notif.lu ? AppColors.textSecondaryLight : theme.colorScheme.onSurface)),
             AppSpacing.vXs,
-            Text(timeFormatter.format(notif.dateEnvoi), style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            Text(timeFormatter.format(notif.dateEnvoi), style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight)),
           ],
         ),
         isThreeLine: true,

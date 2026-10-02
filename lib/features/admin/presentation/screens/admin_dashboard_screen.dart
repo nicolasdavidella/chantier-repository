@@ -7,6 +7,9 @@ import 'package:chantier_track/features/admin/providers/admin_providers.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../auth/data/auth_repository.dart';
+import '../../../auth/providers/auth_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AdminDashboardScreen extends ConsumerWidget {
   const AdminDashboardScreen({super.key});
@@ -29,15 +32,36 @@ class AdminDashboardScreen extends ConsumerWidget {
         centerTitle: false,
         actions: [
           if (!isWideScreen)
-            IconButton(
-              icon: const Icon(Icons.logout, color: Colors.redAccent),
-              tooltip: 'Déconnexion',
-              onPressed: () async {
-                await ref.read(authRepositoryProvider).signOut();
-                if (context.mounted) {
-                  context.go('/login');
-                }
-              },
+            Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final userState = ref.watch(currentUserProfileProvider);
+                  final user = userState.value;
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      // Handled by bottom navigation profile tab
+                    },
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      backgroundImage: user?.photoUrl != null && user!.photoUrl!.isNotEmpty
+                          ? NetworkImage(user.photoUrl!)
+                          : null,
+                      child: user?.photoUrl == null || user!.photoUrl!.isEmpty
+                          ? Text(
+                              user?.prenom.isNotEmpty == true ? user!.prenom[0].toUpperCase() : 'A',
+                              style: const TextStyle(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            )
+                          : null,
+                    ),
+                  );
+                },
+              ),
             ),
         ],
       ),
@@ -152,7 +176,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: activityLogs.length,
-                separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade100),
+                separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.textSecondaryLight),
                 itemBuilder: (context, index) {
                   final log = activityLogs[index];
                   final isRecent = DateTime.now().difference(log.timestamp).inHours < 1;

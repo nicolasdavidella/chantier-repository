@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import '../../../../../data/models/devis_model.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/widgets/app_button.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DevisDetailScreen extends StatelessWidget {
   final DevisModel devis;
@@ -30,20 +32,20 @@ class DevisDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: isAccepted 
-                  ? Colors.green.withValues(alpha: 0.1) 
-                  : (devis.statut == 'refuse' ? Colors.red.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1)),
+                  ? AppColors.success.withValues(alpha: 0.1) 
+                  : (devis.statut == 'refuse' ? AppColors.error.withValues(alpha: 0.1) : AppColors.warning.withValues(alpha: 0.1)),
               borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               border: Border.all(
                 color: isAccepted 
-                    ? Colors.green 
-                    : (devis.statut == 'refuse' ? Colors.red : Colors.orange),
+                    ? AppColors.success 
+                    : (devis.statut == 'refuse' ? AppColors.error : AppColors.warning),
               ),
             ),
             child: Row(
               children: [
                 Icon(
                   isAccepted ? Icons.check_circle : (devis.statut == 'refuse' ? Icons.cancel : Icons.hourglass_bottom),
-                  color: isAccepted ? Colors.green : (devis.statut == 'refuse' ? Colors.red : Colors.orange),
+                  color: isAccepted ? AppColors.success : (devis.statut == 'refuse' ? AppColors.error : AppColors.warning),
                   size: 32,
                 ),
                 AppSpacing.hMd,
@@ -56,7 +58,7 @@ class DevisDetailScreen extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
-                          color: isAccepted ? Colors.green : (devis.statut == 'refuse' ? Colors.red : Colors.orange),
+                          color: isAccepted ? AppColors.success : (devis.statut == 'refuse' ? AppColors.error : AppColors.warning),
                         ),
                       ),
                       AppSpacing.vXs,
@@ -92,7 +94,7 @@ class DevisDetailScreen extends StatelessWidget {
                   AppSpacing.vMd,
                   _buildDetailRow('Délai estimé', devis.delaiEstime, theme),
                   AppSpacing.vMd,
-                  const Text('Description détaillée', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                  const Text('Description détaillée', style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 12)),
                   AppSpacing.vXs,
                   Text(devis.description, style: const TextStyle(fontSize: 14, height: 1.5)),
                   
@@ -102,7 +104,7 @@ class DevisDetailScreen extends StatelessWidget {
                     AppSpacing.vMd,
                     Row(
                       children: [
-                        const Icon(Icons.picture_as_pdf, color: Colors.red),
+                        const Icon(Icons.picture_as_pdf, color: AppColors.error),
                         AppSpacing.hSm,
                         const Expanded(child: Text('Devis_officiel.pdf', style: TextStyle(fontWeight: FontWeight.bold))),
                         IconButton(
@@ -134,8 +136,8 @@ class DevisDetailScreen extends StatelessWidget {
             OutlinedButton(
               onPressed: () {},
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.red,
-                side: const BorderSide(color: Colors.red),
+                foregroundColor: AppColors.error,
+                side: const BorderSide(color: AppColors.error),
               ),
               child: const Text('Annuler le devis'),
             ).animate().fadeIn(delay: 400.ms)
@@ -148,7 +150,7 @@ class DevisDetailScreen extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(label, style: const TextStyle(color: AppColors.textSecondaryLight, fontSize: 14)),
         Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
       ],
     );

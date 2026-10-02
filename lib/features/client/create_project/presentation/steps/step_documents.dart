@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/create_project_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class StepDocuments extends ConsumerWidget {
   const StepDocuments({super.key});
@@ -27,7 +29,7 @@ class StepDocuments extends ConsumerWidget {
           AppSpacing.vSm,
           Text(
             'Ajoutez des plans, esquisses ou photos du terrain pour aider les entreprises à évaluer votre projet.',
-            style: theme.textTheme.bodyLarge?.copyWith(color: Colors.grey[600]),
+            style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.grey600),
           ),
           AppSpacing.vXxl,
           

@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/connectivity/sync_queue_provider.dart';
 import '../../../../core/connectivity/connectivity_provider.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class SyncQueueIndicator extends ConsumerWidget {
   const SyncQueueIndicator({super.key});
@@ -21,20 +23,20 @@ class SyncQueueIndicator extends ConsumerWidget {
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: isOnline ? Colors.blue.withValues(alpha: 0.1) : Colors.orange.withValues(alpha: 0.1),
+        color: isOnline ? AppColors.primary.withValues(alpha: 0.1) : AppColors.warning.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(
-          color: isOnline ? Colors.blue.withValues(alpha: 0.3) : Colors.orange.withValues(alpha: 0.3),
+          color: isOnline ? AppColors.primary.withValues(alpha: 0.3) : AppColors.warning.withValues(alpha: 0.3),
         ),
       ),
       child: Row(
         children: [
           if (isOnline)
-            const Icon(Icons.sync, color: Colors.blue)
+            const Icon(Icons.sync, color: AppColors.primary)
                 .animate(onPlay: (c) => c.repeat())
                 .rotate(duration: 2.seconds)
           else
-            const Icon(Icons.cloud_off, color: Colors.orange),
+            const Icon(Icons.cloud_off, color: AppColors.warning),
           AppSpacing.hMd,
           Expanded(
             child: Column(
@@ -44,13 +46,13 @@ class SyncQueueIndicator extends ConsumerWidget {
                   '${queue.length} action(s) en attente',
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: isOnline ? Colors.blue[700] : Colors.orange[700],
+                    color: isOnline ? AppColors.primaryDark : AppColors.warningDark,
                   ),
                 ),
                 Text(
                   isOnline ? 'Synchronisation en cours...' : 'En attente de connexion réseau',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isOnline ? Colors.blue[600] : Colors.orange[600],
+                    color: isOnline ? AppColors.primary : AppColors.warningDark,
                   ),
                 ),
               ],

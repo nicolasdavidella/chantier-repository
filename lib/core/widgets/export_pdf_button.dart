@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:printing/printing.dart';
 import '../theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ExportPdfButton extends StatefulWidget {
   final Future<Uint8List> Function() onGenerate;
@@ -39,7 +41,7 @@ class _ExportPdfButtonState extends State<ExportPdfButton> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur lors de la génération: $e'), backgroundColor: Colors.red),
+          SnackBar(content: Text('Erreur lors de la génération: $e'), backgroundColor: AppColors.error),
         );
       }
     } finally {

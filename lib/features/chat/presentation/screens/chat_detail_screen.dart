@@ -8,6 +8,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/chat_providers.dart';
 import '../widgets/chat_bubble.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ChatDetailScreen extends ConsumerStatefulWidget {
   final String conversationId;
@@ -177,7 +179,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                   if (isTyping)
                     const Text(
                           'En train d\'écrire...',
-                          style: TextStyle(fontSize: 12, color: Colors.green),
+                          style: TextStyle(fontSize: 12, color: AppColors.success),
                         )
                         .animate(onPlay: (controller) => controller.repeat())
                         .fade(duration: 1.seconds)
@@ -251,7 +253,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color: AppColors.textSecondaryLight,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -301,7 +303,7 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             offset: const Offset(0, -1),
             blurRadius: 4,
           ),

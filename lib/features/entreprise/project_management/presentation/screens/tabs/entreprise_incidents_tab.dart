@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EntrepriseIncidentsTab extends ConsumerStatefulWidget {
   final String projectId;
@@ -20,7 +22,7 @@ class _EntrepriseIncidentsTabState extends ConsumerState<EntrepriseIncidentsTab>
       builder: (ctx) {
         final textController = TextEditingController();
         return AlertDialog(
-          title: const Text('Signaler un incident/retard', style: TextStyle(color: Colors.red)),
+          title: const Text('Signaler un incident/retard', style: TextStyle(color: AppColors.error)),
           content: TextField(
             controller: textController,
             decoration: const InputDecoration(
@@ -35,7 +37,7 @@ class _EntrepriseIncidentsTabState extends ConsumerState<EntrepriseIncidentsTab>
               child: const Text('Annuler'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
               onPressed: () {
                 if (textController.text.isNotEmpty) {
                   setState(() {
@@ -68,9 +70,9 @@ class _EntrepriseIncidentsTabState extends ConsumerState<EntrepriseIncidentsTab>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  FaIcon(FontAwesomeIcons.checkDouble, size: 48, color: Colors.green.withValues(alpha: 0.5)),
+                  FaIcon(FontAwesomeIcons.checkDouble, size: 48, color: AppColors.success.withValues(alpha: 0.5)),
                   AppSpacing.vMd,
-                  const Text('Aucun incident signalé', style: TextStyle(color: Colors.grey)),
+                  const Text('Aucun incident signalé', style: TextStyle(color: AppColors.textSecondaryLight)),
                 ],
               ),
             )
@@ -86,17 +88,17 @@ class _EntrepriseIncidentsTabState extends ConsumerState<EntrepriseIncidentsTab>
                   elevation: 1,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    side: BorderSide(color: isResolved ? Colors.green : Colors.red),
+                    side: BorderSide(color: isResolved ? AppColors.success : AppColors.error),
                   ),
                   child: ListTile(
                     leading: Icon(
                       isResolved ? Icons.check_circle : Icons.warning_rounded,
-                      color: isResolved ? Colors.green : Colors.red,
+                      color: isResolved ? AppColors.success : AppColors.error,
                     ),
                     title: Text(incident['date']),
                     subtitle: Text(incident['desc']),
                     trailing: isResolved
-                        ? const Text('Résolu', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold))
+                        ? const Text('Résolu', style: TextStyle(color: AppColors.success, fontWeight: FontWeight.bold))
                         : TextButton(
                             onPressed: () {
                               setState(() {
@@ -111,7 +113,7 @@ class _EntrepriseIncidentsTabState extends ConsumerState<EntrepriseIncidentsTab>
             ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _reportIncident,
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.error,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.warning),
         label: const Text('Signaler'),

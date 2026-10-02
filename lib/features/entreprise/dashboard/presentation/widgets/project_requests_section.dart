@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../core/widgets/app_button.dart';
 import '../../providers/entreprise_dashboard_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ProjectRequestsSection extends ConsumerWidget {
   const ProjectRequestsSection({super.key});
@@ -46,7 +48,7 @@ class ProjectRequestsSection extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                   border: Border.all(color: theme.colorScheme.outlineVariant),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
+                    BoxShadow(color: AppColors.textPrimaryLight.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
                   ],
                 ),
                 child: Padding(
@@ -75,9 +77,9 @@ class ProjectRequestsSection extends ConsumerWidget {
                       AppSpacing.vSm,
                       Row(
                         children: [
-                          const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                          const Icon(Icons.location_on, size: 14, color: AppColors.textSecondaryLight),
                           AppSpacing.hXs,
-                          Text('${project.localisation['ville']} - ${project.localisation['quartier']}', style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[700])),
+                          Text('${project.localisation['ville']} - ${project.localisation['quartier']}', style: theme.textTheme.bodySmall?.copyWith(color: AppColors.grey700)),
                         ],
                       ),
                       AppSpacing.vXs,

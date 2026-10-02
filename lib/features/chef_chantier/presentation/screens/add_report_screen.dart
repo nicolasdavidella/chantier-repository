@@ -6,6 +6,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/connectivity/sync_queue_provider.dart';
 import '../../providers/chef_chantier_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AddReportScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -100,9 +102,9 @@ class _AddReportScreenState extends ConsumerState<AddReportScreen> {
             child: Container(
               height: 200,
               decoration: BoxDecoration(
-                color: _photoTaken ? Colors.green.withValues(alpha: 0.1) : theme.colorScheme.surfaceContainerHighest,
+                color: _photoTaken ? AppColors.success.withValues(alpha: 0.1) : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(color: _photoTaken ? Colors.green : theme.colorScheme.outline, width: 2),
+                border: Border.all(color: _photoTaken ? AppColors.success : theme.colorScheme.outline, width: 2),
                 image: _photoTaken 
                     ? const DecorationImage(
                         image: NetworkImage('https://picsum.photos/seed/rapport-photo/500/350'), 
@@ -122,8 +124,8 @@ class _AddReportScreenState extends ConsumerState<AddReportScreen> {
                         const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.location_on, size: 14, color: Colors.grey),
-                            Text(' Position GPS activée', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            Icon(Icons.location_on, size: 14, color: AppColors.textSecondaryLight),
+                            Text(' Position GPS activée', style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 12)),
                           ],
                         )
                       ],
@@ -169,7 +171,7 @@ class _AddReportScreenState extends ConsumerState<AddReportScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: _isRecording ? Colors.red : theme.colorScheme.primary,
+                    color: _isRecording ? AppColors.error : theme.colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(

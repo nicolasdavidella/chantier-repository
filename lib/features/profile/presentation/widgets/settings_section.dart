@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class SettingsSection extends ConsumerWidget {
   const SettingsSection({super.key});
@@ -28,7 +30,7 @@ class SettingsSection extends ConsumerWidget {
           contentPadding: EdgeInsets.zero,
           leading: (themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && theme.brightness == Brightness.dark))
               ? const Icon(Icons.dark_mode).animate().rotate(duration: 500.ms, begin: -0.5, end: 0)
-              : const Icon(Icons.light_mode, color: Colors.orange).animate().rotate(duration: 500.ms, begin: 0.5, end: 0),
+              : const Icon(Icons.light_mode, color: AppColors.warning).animate().rotate(duration: 500.ms, begin: 0.5, end: 0),
           title: const Text('Thème sombre'),
           trailing: Switch(
             value: themeMode == ThemeMode.dark || (themeMode == ThemeMode.system && theme.brightness == Brightness.dark),

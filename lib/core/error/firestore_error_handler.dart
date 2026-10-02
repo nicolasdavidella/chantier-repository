@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class FirestoreErrorHandler {
   static Future<T> execute<T>(Future<T> Function() action) async {
@@ -39,7 +41,7 @@ class FirestoreErrorHandler {
           error.toString(),
           style: const TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.redAccent,
+        backgroundColor: AppColors.error,
         behavior: SnackBarBehavior.floating,
       ),
     );

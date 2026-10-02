@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 // Liste des phases inspirée de l'image (traduite en français)
 final mockTasksProvider = Provider((ref) => [
@@ -54,7 +56,7 @@ class _EntrepriseTasksTabState extends ConsumerState<EntrepriseTasksTab> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: AppColors.textPrimaryLight.withOpacity(0.04),
                   blurRadius: 20,
                   offset: const Offset(0, 4),
                 ),
@@ -119,7 +121,7 @@ class _EntrepriseTasksTabState extends ConsumerState<EntrepriseTasksTab> {
                 ),
           // Léger effet de fond pour les éléments terminés
           color: isCompleted 
-              ? Colors.orange.withOpacity(0.05) 
+              ? AppColors.warning.withOpacity(0.05) 
               : Colors.transparent,
         ),
         child: Row(
@@ -131,16 +133,16 @@ class _EntrepriseTasksTabState extends ConsumerState<EntrepriseTasksTab> {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isCompleted ? const Color(0xFFF59E0B) : theme.colorScheme.surface,
+                color: isCompleted ? AppColors.warning : theme.colorScheme.surface,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isCompleted ? const Color(0xFFF59E0B) : theme.colorScheme.outline.withOpacity(0.5),
+                  color: isCompleted ? AppColors.warning : theme.colorScheme.outline.withOpacity(0.5),
                   width: 2,
                 ),
                 boxShadow: isCompleted
                     ? [
                         BoxShadow(
-                          color: const Color(0xFFF59E0B).withOpacity(0.4),
+                          color: AppColors.warning.withOpacity(0.4),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         )

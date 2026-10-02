@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../../../../data/models/reclamation_model.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 // Mock Provider for Reclamations
 final reclamationsProvider = Provider<List<ReclamationModel>>((ref) {
@@ -72,7 +74,7 @@ class ReclamationsScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     'Date : ${DateFormat('dd MMM yyyy').format(reclamation.dateCreation)}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                    style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(reclamation.description),
@@ -130,16 +132,16 @@ class ReclamationsScreen extends ConsumerWidget {
     String label;
     switch (statut) {
       case 'resolue':
-        color = Colors.green;
+        color = AppColors.success;
         label = 'Résolue';
         break;
       case 'en_traitement':
-        color = Colors.orange;
+        color = AppColors.warning;
         label = 'En traitement';
         break;
       case 'ouverte':
       default:
-        color = Colors.red;
+        color = AppColors.error;
         label = 'Ouverte';
         break;
     }

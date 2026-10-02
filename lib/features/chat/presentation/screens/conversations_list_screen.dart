@@ -4,8 +4,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/chat_providers.dart';
-import '../../auth/providers/auth_provider.dart';
+import '../../../auth/providers/auth_provider.dart';
 import 'chat_detail_screen.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ConversationsListScreen extends ConsumerWidget {
   const ConversationsListScreen({super.key});
@@ -66,7 +68,7 @@ class ConversationsListScreen extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: unreadCount > 0 ? theme.colorScheme.onSurface : Colors.grey,
+                    color: unreadCount > 0 ? theme.colorScheme.onSurface : AppColors.textSecondaryLight,
                     fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
@@ -78,7 +80,7 @@ class ConversationsListScreen extends ConsumerWidget {
                       timeFormatter.format(conv.lastMessageTime),
                       style: TextStyle(
                         fontSize: 12,
-                        color: unreadCount > 0 ? theme.colorScheme.primary : Colors.grey,
+                        color: unreadCount > 0 ? theme.colorScheme.primary : AppColors.textSecondaryLight,
                         fontWeight: unreadCount > 0 ? FontWeight.bold : FontWeight.normal,
                       ),
                     ),

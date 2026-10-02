@@ -11,6 +11,7 @@ import '../../features/auth/presentation/screens/signup_screen.dart';
 import '../../features/auth/presentation/screens/phone_auth_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/entreprise_details_screen.dart';
+import '../../features/auth/presentation/screens/entreprise_certification_form_screen.dart';
 import '../../features/client/dashboard/presentation/client_dashboard_screen.dart';
 import '../../features/client/create_project/presentation/project_creation_wizard.dart';
 import '../../features/ia_assistant/presentation/screens/ia_project_chat_screen.dart';
@@ -26,13 +27,18 @@ import '../../data/models/entreprise_model.dart';
 import '../../data/models/project_model.dart';
 import '../../features/entreprise/dashboard/presentation/screens/entreprise_dashboard_screen.dart';
 import '../../features/entreprise/dashboard/presentation/screens/project_planning_screen.dart';
-import '../../features/entreprise/dashboard/presentation/screens/task_management_screen.dart';
+import '../../features/entreprise/dashboard/presentation/screens/mes_chantiers_screen.dart';
+import '../../features/entreprise/dashboard/presentation/screens/equipe_screen.dart';
 import '../../features/entreprise/dashboard/presentation/screens/documents_reports_screen.dart';
+import '../../features/entreprise/dashboard/presentation/screens/entreprise_profil_screen.dart';
 import '../../features/entreprise/project_management/presentation/screens/entreprise_project_detail_screen.dart';
 import '../../features/entreprise/offres/presentation/screens/offres_screen.dart';
 import '../../features/entreprise/offres/presentation/screens/offre_detail_screen.dart';
+import '../../features/entreprise/offres/providers/offres_provider.dart'; // Added for ProjectDiffusion
+import '../../features/entreprise/devis/presentation/screens/devis_screen.dart';
 import '../../features/admin/presentation/screens/admin_shell_screen.dart';
 import '../../features/admin/presentation/screens/admin_login_screen.dart';
+import '../../features/chat/presentation/screens/conversations_list_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -120,6 +126,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           return EntrepriseDetailsScreen(userId: userId ?? '');
         },
       ),
+      GoRoute(
+        path: '/entreprise_certification',
+        name: 'entreprise_certification',
+        builder: (context, state) {
+          final entrepriseId = state.extra as String;
+          return EntrepriseCertificationFormScreen(entrepriseId: entrepriseId);
+        },
+      ),
       // Dashboards - place holders
       GoRoute(
         path: '/',
@@ -156,12 +170,32 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'task_management',
             name: 'task_management',
-            pageBuilder: (context, state) => _buildPageWithTransition(const TaskManagementScreen(), state),
+            pageBuilder: (context, state) => _buildPageWithTransition(const MesChantierScreen(), state),
           ),
           GoRoute(
             path: 'documents_reports',
             name: 'documents_reports',
-            pageBuilder: (context, state) => _buildPageWithTransition(const DocumentsReportsScreen(), state),
+            pageBuilder: (context, state) => _buildPageWithTransition(const RapportsScreen(), state),
+          ),
+          GoRoute(
+            path: 'devis',
+            name: 'entreprise_devis',
+            pageBuilder: (context, state) => _buildPageWithTransition(const DevisScreen(), state),
+          ),
+          GoRoute(
+            path: 'mes_chantiers',
+            name: 'mes_chantiers',
+            pageBuilder: (context, state) => _buildPageWithTransition(const MesChantierScreen(), state),
+          ),
+          GoRoute(
+            path: 'equipe',
+            name: 'equipe',
+            pageBuilder: (context, state) => _buildPageWithTransition(const EquipeScreen(), state),
+          ),
+          GoRoute(
+            path: 'profil',
+            name: 'entreprise_profil',
+            pageBuilder: (context, state) => _buildPageWithTransition(const EntrepriseProfilScreen(), state),
           ),
           GoRoute(
             path: 'offres',
@@ -171,7 +205,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'detail',
                 name: 'offre_detail',
-                pageBuilder: (context, state) => _buildPageWithTransition(OffreDetailScreen(projet: state.extra as ProjectModel), state),
+                pageBuilder: (context, state) => _buildPageWithTransition(OffreDetailScreen(diffusion: state.extra as ProjectDiffusion), state),
               ),
             ],
           ),
@@ -190,7 +224,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'create_project',
             name: 'create_project',
-            pageBuilder: (context, state) => _buildPageWithTransition(const IaProjectChatScreen(), state),
+            pageBuilder: (context, state) => _buildPageWithTransition(const ProjectCreationWizardScreen(), state),
           ),
           GoRoute(
             path: 'entreprise_profile',
@@ -208,6 +242,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/profile',
         name: 'profile',
         pageBuilder: (context, state) => _buildPageWithTransition(const ProfileScreen(), state),
+      ),
+      GoRoute(
+        path: '/chat',
+        name: 'chat',
+        pageBuilder: (context, state) => _buildPageWithTransition(const ConversationsListScreen(), state),
       ),
     ],
   );

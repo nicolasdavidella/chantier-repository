@@ -7,6 +7,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../features/ia_assistant/providers/ia_providers.dart';
 import '../providers/ai_project_creation_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AiProjectCreationScreen extends ConsumerStatefulWidget {
   const AiProjectCreationScreen({super.key});
@@ -112,7 +114,7 @@ class _AiProjectCreationScreenState extends ConsumerState<AiProjectCreationScree
         color: theme.colorScheme.surface,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: AppColors.textPrimaryLight.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -209,7 +211,7 @@ class _AiProjectCreationScreenState extends ConsumerState<AiProjectCreationScree
                   Container(
                     height: 150,
                     color: theme.colorScheme.surfaceContainerHighest,
-                    child: const Icon(Icons.home_work, size: 50, color: Colors.grey), // Placeholder pour l'image
+                    child: const Icon(Icons.home_work, size: 50, color: AppColors.textSecondaryLight), // Placeholder pour l'image
                   ),
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.md),

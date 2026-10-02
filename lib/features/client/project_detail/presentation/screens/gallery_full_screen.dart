@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class GalleryFullScreen extends StatefulWidget {
   final List<String> images;
@@ -31,7 +33,7 @@ class _GalleryFullScreenState extends State<GalleryFullScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColors.textPrimaryLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

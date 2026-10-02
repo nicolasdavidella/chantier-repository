@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 // Note: We might need to import a provider if we had a real backend, 
 // for now we will simulate the submission.
 // import '../../../../data/repositories/entreprise_repository.dart';
@@ -154,13 +156,13 @@ class _CertificationRequestScreenState extends ConsumerState<CertificationReques
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: isUploaded ? Colors.green : Colors.grey.withValues(alpha: 0.3)),
+        border: Border.all(color: isUploaded ? AppColors.success : AppColors.textSecondaryLight.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
           Icon(
             isUploaded ? Icons.check_circle : Icons.upload_file,
-            color: isUploaded ? Colors.green : Colors.grey,
+            color: isUploaded ? AppColors.success : AppColors.textSecondaryLight,
             size: 32,
           ),
           AppSpacing.hMd,
@@ -176,7 +178,7 @@ class _CertificationRequestScreenState extends ConsumerState<CertificationReques
                 Text(
                   isUploaded ? file.name : 'Format PDF, JPG ou PNG',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: isUploaded ? Colors.green[700] : Colors.grey,
+                    color: isUploaded ? AppColors.successDark : AppColors.textSecondaryLight,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -188,8 +190,8 @@ class _CertificationRequestScreenState extends ConsumerState<CertificationReques
           OutlinedButton(
             onPressed: () => _pickFile(documentType),
             style: OutlinedButton.styleFrom(
-              side: BorderSide(color: isUploaded ? Colors.green : theme.colorScheme.primary),
-              foregroundColor: isUploaded ? Colors.green : theme.colorScheme.primary,
+              side: BorderSide(color: isUploaded ? AppColors.success : theme.colorScheme.primary),
+              foregroundColor: isUploaded ? AppColors.success : theme.colorScheme.primary,
             ),
             child: Text(isUploaded ? 'Modifier' : 'Ajouter'),
           ),

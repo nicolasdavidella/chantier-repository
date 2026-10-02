@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/features/ia_assistant/providers/ia_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class EntrepriseReportsTab extends ConsumerStatefulWidget {
   final String projectId;
@@ -45,16 +47,16 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
                   final reportText = await anthropicService.generateReport();
                   textController.text = reportText;
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rapport généré par l\'IA !', style: TextStyle(color: Colors.amber))));
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rapport généré par l\'IA !', style: TextStyle(color: AppColors.warning))));
                   }
                 } catch (e) {
                   if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: Colors.red))));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: AppColors.error))));
                   }
                 }
               },
-              icon: const Icon(Icons.auto_awesome, color: Colors.amber),
-              label: const Text('Générer avec l\'IA', style: TextStyle(color: Colors.amber)),
+              icon: const Icon(Icons.auto_awesome, color: AppColors.warning),
+              label: const Text('Générer avec l\'IA', style: TextStyle(color: AppColors.warning)),
             ),
             Row(
               children: [
@@ -141,11 +143,11 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
                     Container(
                       height: 120,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: AppColors.textSecondaryLight,
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Center(
-                        child: Icon(Icons.image, size: 48, color: Colors.grey),
+                        child: Icon(Icons.image, size: 48, color: AppColors.textSecondaryLight),
                       ),
                     ),
                   ]

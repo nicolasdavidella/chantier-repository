@@ -4,6 +4,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import '../gallery_full_screen.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AvancementTab extends StatelessWidget {
   final String projectId;
@@ -211,7 +213,7 @@ class AvancementTab extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(report['date'] as String, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+                                    Text(report['date'] as String, style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight)),
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(

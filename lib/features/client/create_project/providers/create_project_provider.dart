@@ -157,37 +157,8 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
       final db = FirebaseFirestore.instance;
       await db.collection('projects').doc(newProject.id).set(newProject.toJson());
 
-      // Diffusion directe aux entreprises (sans Cloud Function)
-      try {
-        final entreprisesSnap = await db.collection('entreprises').get();
-        final batch = db.batch();
-        final ville = current.ville;
-
-        for (final entDoc in entreprisesSnap.docs) {
-          final entData = entDoc.data();
-          // On utilise le userId (Firebase Auth UID) pour que le dashboard puisse le retrouver
-          final entrepriseUserId = entData['userId'] as String?;
-          if (entrepriseUserId == null || entrepriseUserId.isEmpty) continue;
-
-          final diffusionId = '${projectId}_$entrepriseUserId';
-          batch.set(
-            db.collection('diffusions_projet').doc(diffusionId),
-            {
-              'projectId': projectId,
-              'clientId': authUser.uid,
-              'entrepriseId': entrepriseUserId,
-              'ville': ville,
-              'statut': 'envoye',
-              'dateEnvoi': FieldValue.serverTimestamp(),
-            },
-            SetOptions(merge: true),
-          );
-        }
-        await batch.commit();
-        debugPrint('✅ Projet diffusé à ${entreprisesSnap.docs.length} entreprise(s)');
-      } catch (e) {
-        debugPrint('⚠️ Erreur diffusion: $e');
-      }
+      // Diffusion is now handled by the Cloud Function 'publierProjetAuxEntreprises'
+      // which triggers on project creation.
 
       // Reset state on success
       state = AsyncData(ProjectFormData());

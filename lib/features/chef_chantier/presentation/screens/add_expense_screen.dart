@@ -6,6 +6,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/connectivity/sync_queue_provider.dart';
 import '../../providers/chef_chantier_providers.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AddExpenseScreen extends ConsumerStatefulWidget {
   final String projectId;
@@ -135,17 +137,17 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             child: Container(
               height: 150,
               decoration: BoxDecoration(
-                color: _photoTaken ? Colors.green.withValues(alpha: 0.1) : theme.colorScheme.surfaceContainerHighest,
+                color: _photoTaken ? AppColors.success.withValues(alpha: 0.1) : theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(color: _photoTaken ? Colors.green : theme.colorScheme.outline, width: 2),
+                border: Border.all(color: _photoTaken ? AppColors.success : theme.colorScheme.outline, width: 2),
               ),
               child: _photoTaken
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.check_circle, color: Colors.green, size: 48),
+                        const Icon(Icons.check_circle, color: AppColors.success, size: 48),
                         AppSpacing.hMd,
-                        Text('Justificatif scanné', style: TextStyle(color: Colors.green[800], fontWeight: FontWeight.bold)),
+                        Text('Justificatif scanné', style: TextStyle(color: AppColors.successDark, fontWeight: FontWeight.bold)),
                       ],
                     )
                   : Column(
@@ -158,8 +160,8 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                         const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.location_on, size: 14, color: Colors.grey),
-                            Text(' Position GPS activée', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                            Icon(Icons.location_on, size: 14, color: AppColors.textSecondaryLight),
+                            Text(' Position GPS activée', style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 12)),
                           ],
                         )
                       ],

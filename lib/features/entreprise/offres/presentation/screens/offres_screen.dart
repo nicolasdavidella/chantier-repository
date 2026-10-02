@@ -5,6 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/data/models/project_model.dart';
 import 'package:chantier_track/features/entreprise/offres/providers/offres_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class OffresScreen extends ConsumerWidget {
   const OffresScreen({super.key});
@@ -29,8 +31,8 @@ class OffresScreen extends ConsumerWidget {
             itemCount: projets.length,
             separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.lg),
             itemBuilder: (context, index) {
-              final projet = projets[index];
-              return _buildOffreCard(context, theme, projet);
+              final diffusion = projets[index];
+              return _buildOffreCard(context, theme, diffusion);
             },
           );
         },
@@ -62,10 +64,11 @@ class OffresScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildOffreCard(BuildContext context, ThemeData theme, ProjectModel projet) {
+  Widget _buildOffreCard(BuildContext context, ThemeData theme, ProjectDiffusion diffusion) {
+    final projet = diffusion.project;
     return InkWell(
       onTap: () {
-        context.push('/entreprise/offres/detail', extra: projet);
+        context.push('/entreprise/offres/detail', extra: diffusion);
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(
@@ -76,7 +79,7 @@ class OffresScreen extends ConsumerWidget {
           border: Border.all(color: theme.colorScheme.outline.withOpacity(0.3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: AppColors.textPrimaryLight.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             )
@@ -111,22 +114,22 @@ class OffresScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
             Row(
               children: [
-                const FaIcon(FontAwesomeIcons.locationDot, size: 14, color: Colors.grey),
+                const FaIcon(FontAwesomeIcons.locationDot, size: 14, color: AppColors.textSecondaryLight),
                 const SizedBox(width: 8),
                 Text(
                   '${projet.localisation['ville'] ?? ''}, ${projet.localisation['quartier'] ?? ''}',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600]),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                const FaIcon(FontAwesomeIcons.wallet, size: 14, color: Colors.grey),
+                const FaIcon(FontAwesomeIcons.wallet, size: 14, color: AppColors.textSecondaryLight),
                 const SizedBox(width: 8),
                 Text(
                   '${projet.budgetPrevisionnel.toStringAsFixed(0)} FCFA',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[600], fontWeight: FontWeight.w600),
+                  style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.grey600, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -142,7 +145,7 @@ class OffresScreen extends ConsumerWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  context.push('/entreprise/offres/detail', extra: projet);
+                  context.push('/entreprise/offres/detail', extra: diffusion);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: theme.colorScheme.primary,
@@ -150,7 +153,7 @@ class OffresScreen extends ConsumerWidget {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                child: const Text('Voir les détails'),
+                child: const Text('Voir les détails et accepter'),
               ),
             ),
           ],

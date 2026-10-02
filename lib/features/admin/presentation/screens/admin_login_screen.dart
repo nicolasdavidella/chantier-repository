@@ -7,6 +7,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/providers/auth_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
   const AdminLoginScreen({super.key});
@@ -63,7 +65,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur de connexion : ${e.toString().replaceAll('Exception: ', '')}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -99,7 +101,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
               borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5),
+                  color: AppColors.textPrimaryLight.withValues(alpha: 0.5),
                   blurRadius: 30,
                   offset: const Offset(0, 15),
                 ),
@@ -201,8 +203,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                 AppSpacing.vLg,
                 
                 // Forgot password & Toggle Mode
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     TextButton(
                       onPressed: () {

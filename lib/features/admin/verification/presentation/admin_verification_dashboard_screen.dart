@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/admin_verification_providers.dart';
 import 'admin_verification_detail_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AdminVerificationDashboardScreen extends ConsumerStatefulWidget {
   const AdminVerificationDashboardScreen({super.key});
@@ -32,9 +34,9 @@ class _AdminVerificationDashboardScreenState extends ConsumerState<AdminVerifica
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  _buildStatCard('En attente', stats['pending'] ?? 0, Colors.orange),
-                  _buildStatCard('Vérifiées', stats['approved'] ?? 0, Colors.green),
-                  _buildStatCard('Rejetées', stats['rejected'] ?? 0, Colors.red),
+                  _buildStatCard('En attente', stats['pending'] ?? 0, AppColors.warning),
+                  _buildStatCard('Vérifiées', stats['approved'] ?? 0, AppColors.success),
+                  _buildStatCard('Rejetées', stats['rejected'] ?? 0, AppColors.error),
                 ],
               ),
             ),
@@ -80,7 +82,7 @@ class _AdminVerificationDashboardScreenState extends ConsumerState<AdminVerifica
                       child: ListTile(
                         leading: _getStatusIcon(request.status),
                         title: Text('Entreprise ID: \${request.entrepriseId}'),
-                        subtitle: Text('Soumis le: \${DateFormat('dd/MM/yyyy HH:mm').format(request.createdAt)}'),
+                        subtitle: Text('Soumis le: ${DateFormat("dd/MM/yyyy HH:mm").format(request.createdAt)}'),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () {
                           Navigator.push(
@@ -144,11 +146,11 @@ class _AdminVerificationDashboardScreenState extends ConsumerState<AdminVerifica
     switch (status) {
       case 'SUBMITTED':
       case 'UNDER_REVIEW':
-        return const Icon(Icons.hourglass_top, color: Colors.orange);
+        return const Icon(Icons.hourglass_top, color: AppColors.warning);
       case 'APPROVED':
-        return const Icon(Icons.check_circle, color: Colors.green);
+        return const Icon(Icons.check_circle, color: AppColors.success);
       case 'REJECTED':
-        return const Icon(Icons.cancel, color: Colors.red);
+        return const Icon(Icons.cancel, color: AppColors.error);
       default:
         return const Icon(Icons.help_outline);
     }

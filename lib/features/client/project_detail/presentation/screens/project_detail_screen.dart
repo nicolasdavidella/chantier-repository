@@ -13,6 +13,8 @@ import '../../../../../../core/services/pdf_export_service.dart';
 import '../../../../../../core/widgets/export_pdf_button.dart';
 import '../../../../../../data/models/rapport_avancement_model.dart';
 import '../../../../../../data/models/depense_model.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ProjectDetailScreen extends ConsumerStatefulWidget {
   final ProjectModel project;
@@ -47,7 +49,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
       builder: (ctx) => AlertDialog(
         title: Row(
           children: const [
-            Icon(Icons.check_circle_rounded, color: Color(0xFF0F6E56), size: 22),
+            Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 22),
             SizedBox(width: 8),
             Text('Félicitations !'),
           ],
@@ -197,7 +199,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                   controller: _tabController,
                   isScrollable: true,
                   labelColor: theme.colorScheme.primary,
-                  unselectedLabelColor: Colors.grey,
+                  unselectedLabelColor: AppColors.textSecondaryLight,
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicatorWeight: 3,
                   tabs: isSearching 

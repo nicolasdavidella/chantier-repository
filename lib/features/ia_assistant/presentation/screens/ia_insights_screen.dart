@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/ia_providers.dart';
 import '../widgets/insight_card.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class IaInsightsScreen extends ConsumerWidget {
   final String projectId;
@@ -44,7 +46,7 @@ class IaInsightsScreen extends ConsumerWidget {
           AppSpacing.vMd,
           Text(
             'L\'IA analyse votre chantier...',
-            style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey),
+            style: theme.textTheme.titleMedium?.copyWith(color: AppColors.textSecondaryLight),
           ).animate(onPlay: (c) => c.repeat()).fade(duration: 1.seconds),
         ],
       ),
@@ -129,13 +131,13 @@ class IaInsightsScreen extends ConsumerWidget {
     String statusText;
     
     if (data.predictionRetard < 0.3) {
-      barColor = Colors.green;
+      barColor = AppColors.success;
       statusText = "Le chantier est en avance ou parfaitement dans les temps.";
     } else if (data.predictionRetard < 0.7) {
-      barColor = Colors.orange;
+      barColor = AppColors.warning;
       statusText = "Léger retard possible. Une vigilance est requise.";
     } else {
-      barColor = Colors.red;
+      barColor = AppColors.error;
       statusText = "Risque élevé de dépassement des délais prévus !";
     }
 
@@ -145,7 +147,7 @@ class IaInsightsScreen extends ConsumerWidget {
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10),
+          BoxShadow(color: AppColors.textPrimaryLight.withValues(alpha: 0.05), blurRadius: 10),
         ],
       ),
       child: Column(
@@ -176,11 +178,11 @@ class IaInsightsScreen extends ConsumerWidget {
           AppSpacing.vXs,
           Row(
             children: [
-              const Icon(Icons.info_outline, size: 14, color: Colors.grey),
+              const Icon(Icons.info_outline, size: 14, color: AppColors.textSecondaryLight),
               AppSpacing.hXs,
               Text(
                 'Niveau de confiance de l\'IA : ${(data.confiancePrediction * 100).toInt()}%',
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight),
               ),
             ],
           )

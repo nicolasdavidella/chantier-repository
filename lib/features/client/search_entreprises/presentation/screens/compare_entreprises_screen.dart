@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/search_entreprises_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class CompareEntreprisesScreen extends ConsumerWidget {
   const CompareEntreprisesScreen({super.key});
@@ -76,7 +78,7 @@ class CompareEntreprisesScreen extends ConsumerWidget {
                     ...selectedEntreprises.map((e) => DataCell(
                           Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.amber, size: 16),
+                              const Icon(Icons.star, color: AppColors.warning, size: 16),
                               const SizedBox(width: 4),
                               Text('${e.noteMoyenne} (${e.nombreAvis})'),
                             ],
@@ -95,8 +97,8 @@ class CompareEntreprisesScreen extends ConsumerWidget {
                     const DataCell(Text('Certifié')),
                     ...selectedEntreprises.map((e) => DataCell(
                           e.isVerified
-                              ? const Icon(Icons.check_circle, color: Colors.green)
-                              : const Icon(Icons.cancel, color: Colors.red),
+                              ? const Icon(Icons.check_circle, color: AppColors.success)
+                              : const Icon(Icons.cancel, color: AppColors.error),
                         )),
                   ],
                 ),

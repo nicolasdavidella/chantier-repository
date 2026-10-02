@@ -38,18 +38,19 @@ class AppTheme {
         iconTheme: IconThemeData(color: colorScheme.onBackground),
         titleTextStyle: textTheme.titleLarge?.copyWith(
           color: colorScheme.onBackground,
+          fontWeight: FontWeight.bold,
         ),
       ),
       
       // Card Theme
       cardTheme: CardThemeData(
         color: colorScheme.surface,
-        elevation: 2, // Soft shadow
-        shadowColor: Colors.black.withOpacity(0.05),
+        elevation: 4, 
+        shadowColor: colorScheme.primary.withValues(alpha: 0.1),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16), // Flat/moderate radius
+          borderRadius: BorderRadius.circular(16), 
           side: BorderSide(
-            color: colorScheme.outline,
+            color: colorScheme.outline.withValues(alpha: 0.2),
             width: 1,
           ),
         ),
@@ -67,10 +68,10 @@ class AppTheme {
             vertical: 16,
           ),
           textStyle: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12), // Standard moderate radius
+            borderRadius: BorderRadius.circular(24),
           ),
         ),
       ),
@@ -84,10 +85,10 @@ class AppTheme {
             vertical: AppSpacing.md,
           ),
           textStyle: textTheme.labelLarge?.copyWith(
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(24),
           ),
         ),
       ),
@@ -97,11 +98,11 @@ class AppTheme {
         filled: true,
         fillColor: colorScheme.surface,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
+          horizontal: 20,
           vertical: 16,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12), 
           borderSide: BorderSide(color: colorScheme.outline, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
@@ -117,7 +118,7 @@ class AppTheme {
           borderSide: BorderSide(color: colorScheme.error, width: 1),
         ),
         hintStyle: textTheme.bodyLarge?.copyWith(
-          color: colorScheme.onSurface.withOpacity(0.5),
+          color: colorScheme.onSurface.withValues(alpha: 0.4),
         ),
       ),
       
@@ -136,7 +137,7 @@ class AppTheme {
         elevation: 0,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(
-            top: Radius.circular(20),
+            top: Radius.circular(24),
           ),
         ),
       ),

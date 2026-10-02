@@ -4,6 +4,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/entreprise_dashboard_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ActiveProjectsSection extends ConsumerWidget {
   const ActiveProjectsSection({super.key});
@@ -67,7 +69,7 @@ class ActiveProjectsSection extends ConsumerWidget {
                           child: LinearProgressIndicator(
                             value: progress,
                             backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                            color: progress > 0.8 ? Colors.green : theme.colorScheme.primary,
+                            color: progress > 0.8 ? AppColors.success : theme.colorScheme.primary,
                             minHeight: 6,
                             borderRadius: BorderRadius.circular(3),
                           ),

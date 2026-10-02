@@ -7,6 +7,8 @@ import '../../../../../core/theme/app_spacing.dart';
 import '../../providers/search_entreprises_provider.dart';
 import '../widgets/entreprise_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class SearchEntreprisesScreen extends ConsumerStatefulWidget {
   const SearchEntreprisesScreen({super.key});
@@ -103,11 +105,11 @@ class _SearchEntreprisesScreenState extends ConsumerState<SearchEntreprisesScree
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                    const Icon(Icons.search_off, size: 64, color: AppColors.textSecondaryLight),
                     AppSpacing.vMd,
                     Text('Aucune entreprise trouvée.', style: theme.textTheme.titleMedium),
                     AppSpacing.vXs,
-                    Text('Essayez de modifier vos filtres.', style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey)),
+                    Text('Essayez de modifier vos filtres.', style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondaryLight)),
                   ],
                 ),
               )

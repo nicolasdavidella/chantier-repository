@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DepensesTab extends StatefulWidget {
   final String projectId;
@@ -62,7 +64,7 @@ class _DepensesTabState extends State<DepensesTab> {
                             startDegreeOffset: -90,
                             sections: [
                               PieChartSectionData(
-                                color: engagedPercentage > 90 ? Colors.red : theme.colorScheme.primary,
+                                color: engagedPercentage > 90 ? AppColors.error : theme.colorScheme.primary,
                                 value: totalEngaged,
                                 title: '',
                                 radius: 15,
@@ -90,11 +92,11 @@ class _DepensesTabState extends State<DepensesTab> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Budget Global', style: theme.textTheme.titleMedium?.copyWith(color: Colors.grey)),
+                        Text('Budget Global', style: theme.textTheme.titleMedium?.copyWith(color: AppColors.textSecondaryLight)),
                         Text('${budgetTotal.toStringAsFixed(0)} FCFA', style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
                         AppSpacing.vSm,
                         Text('Engagé : ${totalEngaged.toStringAsFixed(0)} FCFA', style: TextStyle(color: theme.colorScheme.primary, fontWeight: FontWeight.bold)),
-                        Text('Restant : ${remaining > 0 ? remaining.toStringAsFixed(0) : 0} FCFA', style: const TextStyle(color: Colors.grey)),
+                        Text('Restant : ${remaining > 0 ? remaining.toStringAsFixed(0) : 0} FCFA', style: const TextStyle(color: AppColors.textSecondaryLight)),
                       ],
                     ),
                   ),

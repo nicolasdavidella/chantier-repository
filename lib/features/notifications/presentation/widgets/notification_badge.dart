@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../providers/notification_providers.dart';
 import '../screens/notifications_screen.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class NotificationBadge extends ConsumerWidget {
   final Color? iconColor;
@@ -29,7 +31,7 @@ class NotificationBadge extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.all(4),
               decoration: const BoxDecoration(
-                color: Colors.red,
+                color: AppColors.error,
                 shape: BoxShape.circle,
               ),
               child: Text(

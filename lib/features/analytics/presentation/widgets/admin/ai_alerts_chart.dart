@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class AiAlertsChart extends ConsumerWidget {
   const AiAlertsChart({super.key});
@@ -20,7 +22,7 @@ class AiAlertsChart extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -41,14 +43,14 @@ class AiAlertsChart extends ConsumerWidget {
                       centerSpaceRadius: 30,
                       sections: [
                         PieChartSectionData(
-                          color: Colors.red,
+                          color: AppColors.error,
                           value: data['Critique'],
                           title: '${data['Critique']}%',
                           radius: 50,
                           titleStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                         PieChartSectionData(
-                          color: Colors.orange,
+                          color: AppColors.warning,
                           value: data['Majeure'],
                           title: '${data['Majeure']}%',
                           radius: 40,
@@ -73,9 +75,9 @@ class AiAlertsChart extends ConsumerWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildLegend(context, 'Critique', Colors.red),
+                      _buildLegend(context, 'Critique', AppColors.error),
                       AppSpacing.vSm,
-                      _buildLegend(context, 'Majeure', Colors.orange),
+                      _buildLegend(context, 'Majeure', AppColors.warning),
                       AppSpacing.vSm,
                       _buildLegend(context, 'Mineure', Colors.blueGrey),
                     ],

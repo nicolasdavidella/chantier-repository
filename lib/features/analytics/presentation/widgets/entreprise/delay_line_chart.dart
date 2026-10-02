@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../../providers/analytics_provider.dart';
 import '../../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class DelayLineChart extends ConsumerWidget {
   const DelayLineChart({super.key});
@@ -30,7 +32,7 @@ class DelayLineChart extends ConsumerWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -63,7 +65,7 @@ class DelayLineChart extends ConsumerWidget {
                       getTitlesWidget: (value, meta) {
                         return Padding(
                           padding: const EdgeInsets.only(top: 8.0),
-                          child: Text('P${value.toInt() + 1}', style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                          child: Text('P${value.toInt() + 1}', style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight)),
                         );
                       },
                     ),
@@ -74,7 +76,7 @@ class DelayLineChart extends ConsumerWidget {
                       reservedSize: 30,
                       getTitlesWidget: (value, meta) {
                         if (value == 0 || value == maxY) return const SizedBox.shrink();
-                        return Text('${value.toInt()}j', style: const TextStyle(fontSize: 10, color: Colors.grey));
+                        return Text('${value.toInt()}j', style: const TextStyle(fontSize: 10, color: AppColors.textSecondaryLight));
                       },
                     ),
                   ),
@@ -91,20 +93,20 @@ class DelayLineChart extends ConsumerWidget {
                   LineChartBarData(
                     spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value[0])).toList(),
                     isCurved: true,
-                    color: Colors.blueAccent,
+                    color: AppColors.primary,
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
                     belowBarData: BarAreaData(
                       show: true,
-                      color: Colors.blueAccent.withValues(alpha: 0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                     ),
                   ),
                   // Ligne Réel
                   LineChartBarData(
                     spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value[1])).toList(),
                     isCurved: true,
-                    color: Colors.orangeAccent,
+                    color: AppColors.warning,
                     barWidth: 3,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: true),
@@ -119,9 +121,9 @@ class DelayLineChart extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _buildLegend(context, 'Prévu', Colors.blueAccent),
+              _buildLegend(context, 'Prévu', AppColors.primary),
               AppSpacing.hLg,
-              _buildLegend(context, 'Réel', Colors.orangeAccent),
+              _buildLegend(context, 'Réel', AppColors.warning),
             ],
           )
         ],

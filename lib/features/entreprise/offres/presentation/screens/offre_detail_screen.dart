@@ -6,14 +6,17 @@ import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/data/models/project_model.dart';
 import 'package:chantier_track/features/entreprise/offres/providers/offres_provider.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class OffreDetailScreen extends ConsumerWidget {
-  final ProjectModel projet;
+  final ProjectDiffusion diffusion;
 
-  const OffreDetailScreen({super.key, required this.projet});
+  const OffreDetailScreen({super.key, required this.diffusion});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final projet = diffusion.project;
     final theme = Theme.of(context);
     final candidatureState = ref.watch(candidatureControllerProvider);
 
@@ -96,7 +99,7 @@ class OffreDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.md),
               ...projet.listeDocuments.map((docUrl) => 
                 ListTile(
-                  leading: const FaIcon(FontAwesomeIcons.filePdf, color: Colors.redAccent),
+                  leading: const FaIcon(FontAwesomeIcons.filePdf, color: AppColors.error),
                   title: Text('Document attaché', style: theme.textTheme.bodyMedium),
                   trailing: const Icon(Icons.download),
                   onTap: () {
@@ -137,7 +140,7 @@ class OffreDetailScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: candidatureState.isLoading ? null : () async {
                     try {
-                      await ref.read(candidatureControllerProvider.notifier).accepterProjet(projet.id);
+                      await ref.read(candidatureControllerProvider.notifier).accepterProjet(diffusion.diffusionId, projet);
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Candidature envoyée avec succès !')),
@@ -159,7 +162,7 @@ class OffreDetailScreen extends ConsumerWidget {
                   ),
                   child: candidatureState.isLoading 
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Accepter le projet', style: TextStyle(fontWeight: FontWeight.bold)),
+                    : const Text('Je peux réaliser ce projet', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -178,7 +181,7 @@ class OffreDetailScreen extends ConsumerWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+            Text(title, style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight)),
             Text(value, style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600)),
           ],
         ),

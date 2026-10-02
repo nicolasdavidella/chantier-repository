@@ -7,8 +7,10 @@ import 'user_management_screen.dart';
 import 'moderation_screen.dart';
 import 'activity_logs_screen.dart';
 import 'reclamations_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/data/auth_repository.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
 
 class AdminShellScreen extends ConsumerStatefulWidget {
   const AdminShellScreen({super.key});
@@ -27,7 +29,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
     const UserManagementScreen(),
     const ModerationScreen(),
     const ActivityLogsScreen(),
-    const ReclamationsScreen(),
+    const ProfileScreen(),
   ];
 
   final List<NavigationRailDestination> _railDestinations = const [
@@ -36,16 +38,62 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
     NavigationRailDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: Text('Utilisateurs')),
     NavigationRailDestination(icon: Icon(Icons.gavel_outlined), selectedIcon: Icon(Icons.gavel), label: Text('Modération')),
     NavigationRailDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: Text('Logs')),
-    NavigationRailDestination(icon: Icon(Icons.report_problem_outlined), selectedIcon: Icon(Icons.report_problem), label: Text('Réclamations')),
+    NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profil')),
   ];
 
-  final List<NavigationDestination> _bottomDestinations = const [
-    NavigationDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: 'Tableau de bord'),
-    NavigationDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: 'Certifications'),
-    NavigationDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: 'Utilisateurs'),
-    NavigationDestination(icon: Icon(Icons.gavel_outlined), selectedIcon: Icon(Icons.gavel), label: 'Modération'),
-    NavigationDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: 'Logs'),
-  ];
+  Widget _buildCustomBottomNav() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+        child: Container(
+          height: 64,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(40),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.textPrimaryLight.withOpacity(0.08),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _navItem(0, Icons.dashboard_rounded),
+              _navItem(1, Icons.domain_rounded),
+              _navItem(2, Icons.people_rounded),
+              _navItem(3, Icons.gavel_rounded),
+              _navItem(4, Icons.history_rounded),
+              _navItem(5, Icons.person_rounded),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _navItem(int index, IconData icon) {
+    final isSelected = _selectedIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedIndex = index),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(
+          icon,
+          color: isSelected ? Colors.white : AppColors.grey400,
+          size: 24,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +101,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC), // Light blue-grey background
+      extendBody: true,
       body: Row(
         children: [
           if (isWideScreen)
@@ -61,7 +110,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppColors.textPrimaryLight.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(2, 0),
                   )
@@ -77,17 +126,17 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                 },
                 minExtendedWidth: 220,
                 backgroundColor: Colors.transparent,
-                indicatorColor: const Color(0xFFE8601A).withValues(alpha: 0.15),
-                selectedIconTheme: const IconThemeData(color: Color(0xFFE8601A)),
-                selectedLabelTextStyle: const TextStyle(color: Color(0xFFE8601A), fontWeight: FontWeight.bold),
-                unselectedIconTheme: IconThemeData(color: Colors.grey.shade600),
-                unselectedLabelTextStyle: TextStyle(color: Colors.grey.shade600),
+                indicatorColor: AppColors.secondary.withOpacity(0.15),
+                selectedIconTheme: IconThemeData(color: AppColors.secondary),
+                selectedLabelTextStyle: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold),
+                unselectedIconTheme: IconThemeData(color: AppColors.textSecondaryLight),
+                unselectedLabelTextStyle: TextStyle(color: AppColors.textSecondaryLight),
                 leading: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24.0),
                   child: Column(
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.menu, color: Color(0xFF0F6E56)),
+                        icon: const Icon(Icons.menu, color: AppColors.primary),
                         onPressed: () {
                           setState(() {
                             _isExpanded = !_isExpanded;
@@ -99,13 +148,13 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0F6E56).withValues(alpha: 0.1),
+                            color: AppColors.primary.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Text(
                             'ADMIN CHANTIER',
                             style: TextStyle(
-                              color: Color(0xFF0F6E56),
+                              color: AppColors.primary,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
                             ),
@@ -121,7 +170,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 24.0),
                       child: IconButton(
-                        icon: const Icon(Icons.logout, color: Colors.red),
+                        icon: const Icon(Icons.logout, color: AppColors.error),
                         tooltip: 'Déconnexion',
                         onPressed: () async {
                           await ref.read(authRepositoryProvider).signOut();
@@ -149,18 +198,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: isWideScreen
-          ? null
-          : NavigationBar(
-              selectedIndex: _selectedIndex > 4 ? 0 : _selectedIndex,
-              onDestinationSelected: (int index) {
-                setState(() {
-                  _selectedIndex = index;
-                });
-              },
-              indicatorColor: const Color(0xFFE8601A).withValues(alpha: 0.2),
-              destinations: _bottomDestinations,
-            ),
+      bottomNavigationBar: isWideScreen ? null : _buildCustomBottomNav(),
     );
   }
 }

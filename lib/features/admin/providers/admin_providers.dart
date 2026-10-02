@@ -68,9 +68,17 @@ final pendingCertificationsProvider = StreamProvider<List<CertificationRequestMo
   return FirebaseFirestore.instance
       .collection('demandes_certification')
       .where('statut', isEqualTo: 'en_attente')
-      .orderBy('dateSoumission', descending: false) // plus anciennes en premier
       .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => CertificationRequestModel.fromJson(doc.data(), doc.id)).toList());
+      .map((snapshot) {
+        final list = snapshot.docs.map((doc) => CertificationRequestModel.fromJson(doc.data(), doc.id)).toList();
+        list.sort((a, b) {
+          if (a.dateSoumission == null && b.dateSoumission == null) return 0;
+          if (a.dateSoumission == null) return 1;
+          if (b.dateSoumission == null) return -1;
+          return a.dateSoumission!.compareTo(b.dateSoumission!);
+        }); // plus anciennes en premier
+        return list;
+      });
 });
 
 class UsersManagementNotifier extends StateNotifier<List<UserModel>> {

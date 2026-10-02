@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../data/models/user_model.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'package:chantier_track/core/theme/app_colors.dart';
+
 
 class ProfileHeader extends ConsumerStatefulWidget {
   final UserModel user;
@@ -37,7 +39,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
         if (mounted) {
           setState(() => _isUploading = false);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Photo de profil mise à jour', style: TextStyle(color: Colors.white)), backgroundColor: Colors.green),
+            const SnackBar(content: Text('Photo de profil mise à jour', style: TextStyle(color: Colors.white)), backgroundColor: AppColors.success),
           );
         }
       }
@@ -45,7 +47,7 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
       if (mounted) {
         setState(() => _isUploading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erreur lors de la sélection de l\'image', style: TextStyle(color: Colors.white)), backgroundColor: Colors.red),
+          const SnackBar(content: Text('Erreur lors de la sélection de l\'image', style: TextStyle(color: Colors.white)), backgroundColor: AppColors.error),
         );
       }
     }
@@ -63,11 +65,11 @@ class _ProfileHeaderState extends ConsumerState<ProfileHeader> {
 
   Color _getRoleColor(String role) {
     switch (role) {
-      case 'client': return Colors.blue;
-      case 'entreprise': return Colors.orange;
-      case 'chef_chantier': return Colors.green;
-      case 'admin': return Colors.red;
-      default: return Colors.grey;
+      case 'client': return AppColors.primary;
+      case 'entreprise': return AppColors.warning;
+      case 'chef_chantier': return AppColors.success;
+      case 'admin': return AppColors.error;
+      default: return AppColors.textSecondaryLight;
     }
   }
 
