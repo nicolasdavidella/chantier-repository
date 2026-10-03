@@ -294,12 +294,13 @@ class _EntrepriseVerificationScreenState
         });
       }
 
-      setState(() => _uploadStatus = 'Validation finale...');
+      setState(() => _uploadStatus = 'Soumission de la demande...');
 
-      // Call Cloud Function to submit
-      final functions = FirebaseFunctions.instance;
-      final callable = functions.httpsCallable('soumettreCertification');
-      await callable.call();
+      // Mise à jour directe du statut en base de données sans passer par la Cloud Function
+      await docRef.update({
+        'statut': 'en_attente',
+        'dateSoumission': FieldValue.serverTimestamp(),
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

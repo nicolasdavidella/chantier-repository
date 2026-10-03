@@ -50,7 +50,7 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
             child: ListView.separated(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               itemCount: filteredUsers.length,
-              separatorBuilder: (_, __) => const Divider(),
+              separatorBuilder: (context, index) => const Divider(),
               itemBuilder: (context, index) {
                 final user = filteredUsers[index];
                 

@@ -4,11 +4,11 @@ import 'package:go_router/go_router.dart';
 import 'admin_dashboard_screen.dart';
 import 'certifications_screen.dart';
 import 'user_management_screen.dart';
-import 'moderation_screen.dart';
+
 import 'activity_logs_screen.dart';
 import 'reclamations_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
-import '../../../../core/theme/app_spacing.dart';
+
 import '../../../auth/data/auth_repository.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 
@@ -52,7 +52,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
             borderRadius: BorderRadius.circular(40),
             boxShadow: [
               BoxShadow(
-                color: AppColors.textPrimaryLight.withOpacity(0.08),
+                color: AppColors.textPrimaryLight.withValues(alpha: 0.08),
                 blurRadius: 20,
                 offset: const Offset(0, 10),
               )
@@ -110,7 +110,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.textPrimaryLight.withOpacity(0.05),
+                    color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
                     blurRadius: 10,
                     offset: const Offset(2, 0),
                   )
@@ -126,7 +126,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                 },
                 minExtendedWidth: 220,
                 backgroundColor: Colors.transparent,
-                indicatorColor: AppColors.secondary.withOpacity(0.15),
+                indicatorColor: AppColors.secondary.withValues(alpha: 0.15),
                 selectedIconTheme: IconThemeData(color: AppColors.secondary),
                 selectedLabelTextStyle: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold),
                 unselectedIconTheme: IconThemeData(color: AppColors.textSecondaryLight),
@@ -148,7 +148,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
+                            color: AppColors.primary.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Text(

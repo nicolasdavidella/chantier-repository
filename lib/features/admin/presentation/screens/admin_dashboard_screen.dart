@@ -5,8 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_spacing.dart';
 import 'package:chantier_track/features/admin/providers/admin_providers.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:go_router/go_router.dart';
-import '../../../auth/data/auth_repository.dart';
+
 import '../../../auth/providers/auth_provider.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 
@@ -43,7 +42,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                     onTap: () {},
                     child: CircleAvatar(
                       radius: 18,
-                      backgroundColor: AppColors.primary.withOpacity(0.1),
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                       backgroundImage: user?.photoUrl != null && user!.photoUrl!.isNotEmpty
                           ? NetworkImage(user.photoUrl!)
                           : null,

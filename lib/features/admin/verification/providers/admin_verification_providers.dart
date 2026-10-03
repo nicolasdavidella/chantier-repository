@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../data/models/verification_request_model.dart';
-import '../../../../data/models/audit_log_model.dart';
+
 import '../data/audit_log_repository.dart';
 
 final adminVerificationListProvider = StreamProvider.family<List<VerificationRequestModel>, String>((ref, statusFilter) {
@@ -27,10 +27,15 @@ final dashboardStatsProvider = StreamProvider<Map<String, int>>((ref) {
 
     for (var doc in snapshot.docs) {
       final status = doc.data()['status'] as String?;
-      if (status == 'SUBMITTED') pending++;
-      else if (status == 'UNDER_REVIEW') underReview++;
-      else if (status == 'APPROVED') approved++;
-      else if (status == 'REJECTED') rejected++;
+      if (status == 'SUBMITTED') {
+        pending++;
+      } else if (status == 'UNDER_REVIEW') {
+        underReview++;
+      } else if (status == 'APPROVED') {
+        approved++;
+      } else if (status == 'REJECTED') {
+        rejected++;
+      }
     }
 
     return {
@@ -109,6 +114,7 @@ class AdminVerificationController extends StateNotifier<AsyncValue<void>> {
       await _firestore.collection('verification_requests').doc(requestId).update({
         'status': status,
         'reviewedAt': FieldValue.serverTimestamp(),
+        // ignore: use_null_aware_elements
         if (globalFeedback != null) 'globalFeedback': globalFeedback,
       });
 

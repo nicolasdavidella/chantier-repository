@@ -19,7 +19,13 @@ class AnthropicService {
     try {
       final systemPrompt = "Tu es l'Assistant de Conception ChantierTrack, une application de gestion de chantiers de construction au Cameroun et en Afrique.\nTu dois répondre de manière concise, professionnelle, et aidante.";
       
-      final messages = history.map((m) {
+      // L'API Anthropic exige que la conversation commence par un rôle "user".
+      // On ignore donc le premier message s'il s'agit du message de bienvenue de l'assistant.
+      final validHistory = history.isNotEmpty && !history.first.isUser 
+          ? history.skip(1) 
+          : history;
+
+      final messages = validHistory.map((m) {
         return {
           "role": m.isUser ? "user" : "assistant",
           "content": m.text

@@ -2,14 +2,12 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
 
 import '../../../data/models/project_model.dart';
 import '../../../data/models/rapport_avancement_model.dart';
 import '../../../data/models/depense_model.dart';
 import '../../../data/models/devis_model.dart';
 import '../../../data/models/entreprise_model.dart';
-import 'package:chantier_track/core/theme/app_colors.dart';
 
 
 class PdfExportService {
@@ -37,7 +35,7 @@ class PdfExportService {
           pw.Text('Historique de progression', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: _primaryColor)),
           pw.Divider(),
           pw.SizedBox(height: 10),
-          ...rapports.map((r) => _buildRapportItem(r)).toList(),
+          ...rapports.map((r) => _buildRapportItem(r)),
         ],
       ),
     );
@@ -198,7 +196,7 @@ class PdfExportService {
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
             pw.Text('ChantierTrack', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: _primaryColor)),
-            pw.Text(DateFormat('dd MMMM yyyy', 'fr_FR').format(DateTime.now()), style: const pw.TextStyle(color: PdfColor.fromInt(0xFF6B6B63))),
+            pw.Text(DateFormat('dd MMMM yyyy', 'fr_FR').format(DateTime.now()), style: pw.TextStyle(color: PdfColor.fromInt(0xFF6B6B63))),
           ],
         ),
         pw.SizedBox(height: 10),
@@ -217,7 +215,7 @@ class PdfExportService {
       margin: const pw.EdgeInsets.only(top: 20),
       child: pw.Text(
         'Page ${context.pageNumber} sur ${context.pagesCount}',
-        style: const pw.TextStyle(color: PdfColor.fromInt(0xFF6B6B63), fontSize: 10),
+        style: pw.TextStyle(color: PdfColor.fromInt(0xFF6B6B63), fontSize: 10),
       ),
     );
   }
@@ -272,7 +270,7 @@ class PdfExportService {
           pw.Text(rapport.description, style: const pw.TextStyle(color: PdfColors.grey800)),
           if (rapport.photos.isNotEmpty) ...[
             pw.SizedBox(height: 10),
-            pw.Text('[${rapport.photos.length} photo(s) attachée(s)]', style: const pw.TextStyle(color: PdfColor.fromInt(0xFF6B6B63), fontSize: 10, fontStyle: pw.FontStyle.italic)),
+            pw.Text('[${rapport.photos.length} photo(s) attachée(s)]', style: pw.TextStyle(color: PdfColor.fromInt(0xFF6B6B63), fontSize: 10, fontStyle: pw.FontStyle.italic)),
             // Note: En prod, il faut télécharger les images et les convertir en MemoryImage pour les afficher dans le PDF.
           ]
         ],
