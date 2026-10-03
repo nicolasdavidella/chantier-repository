@@ -11,7 +11,7 @@ class ActivityLogsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logs = ref.watch(activityLogsProvider);
+    final logsAsync = ref.watch(activityLogsProvider);
     final dateFormatter = DateFormat('dd MMM yyyy HH:mm', 'fr_FR');
 
     return Scaffold(
@@ -19,15 +19,24 @@ class ActivityLogsScreen extends ConsumerWidget {
         title: const Text('Journal d\'Activité'),
         centerTitle: false,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        itemCount: logs.length,
-        itemBuilder: (context, index) {
-          final log = logs[index];
-          return ListTile(
-            leading: const Icon(Icons.history, color: AppColors.textSecondaryLight),
-            title: Text(log.action, style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Text('Par ${log.user} - ${dateFormatter.format(log.timestamp)}'),
+      body: logsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Erreur: $err')),
+        data: (logs) {
+          if (logs.isEmpty) {
+            return const Center(child: Text("Aucune activité enregistrée."));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            itemCount: logs.length,
+            itemBuilder: (context, index) {
+              final log = logs[index];
+              return ListTile(
+                leading: const Icon(Icons.history, color: AppColors.textSecondaryLight),
+                title: Text(log.action, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text('Par ${log.user} - ${dateFormatter.format(log.timestamp)}'),
+              );
+            },
           );
         },
       ),

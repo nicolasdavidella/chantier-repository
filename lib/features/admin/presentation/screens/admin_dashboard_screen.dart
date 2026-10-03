@@ -16,8 +16,8 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(adminStatsProvider);
-    final activityLogs = ref.watch(activityLogsProvider);
+    final statsAsync = ref.watch(adminStatsProvider);
+    final activityLogsAsync = ref.watch(activityLogsProvider);
     final theme = Theme.of(context);
     final currencyFormatter = NumberFormat.compactCurrency(locale: 'fr_FR', symbol: 'FCFA');
 
@@ -40,9 +40,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                   final user = userState.value;
                   return InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    onTap: () {
-                      // Handled by bottom navigation profile tab
-                    },
+                    onTap: () {},
                     child: CircleAvatar(
                       radius: 18,
                       backgroundColor: AppColors.primary.withOpacity(0.1),
@@ -91,7 +89,11 @@ class AdminDashboardScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Bienvenue, Administrateur 👋', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.centerLeft,
+                          child: Text('Bienvenue, Administrateur 👋', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                        ),
                         AppSpacing.vSm,
                         Text('Voici un résumé de l\'activité sur la plateforme Chantier Track aujourd\'hui.', style: TextStyle(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8), fontSize: 16)),
                       ],
@@ -112,42 +114,46 @@ class AdminDashboardScreen extends ConsumerWidget {
             AppSpacing.vLg,
 
             // Stats Grid
-            GridView.count(
-              crossAxisCount: isWideScreen ? 3 : 1,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: AppSpacing.lg,
-              crossAxisSpacing: AppSpacing.lg,
-              childAspectRatio: isWideScreen ? 1.4 : 1.5,
-              children: [
-                _buildStatCard(
-                  context,
-                  title: 'Utilisateurs',
-                  value: stats['totalUsers'].toString(),
-                  icon: Icons.group_rounded,
-                  color: theme.colorScheme.primary,
-                  chartData: stats['usersData'] as List<double>,
-                  delay: 100,
-                ),
-                _buildStatCard(
-                  context,
-                  title: 'Chantiers Actifs',
-                  value: stats['activeProjects'].toString(),
-                  icon: Icons.construction_rounded,
-                  color: theme.colorScheme.secondary,
-                  chartData: [10, 15, 20, 18, 25, 30, 34],
-                  delay: 200,
-                ),
-                _buildStatCard(
-                  context,
-                  title: 'Volume Financier',
-                  value: currencyFormatter.format(stats['financialVolume']),
-                  icon: Icons.account_balance_wallet_rounded,
-                  color: theme.colorScheme.tertiary,
-                  chartData: stats['financialData'] as List<double>,
-                  delay: 300,
-                ),
-              ],
+            statsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Erreur de chargement des stats', style: TextStyle(color: theme.colorScheme.error))),
+              data: (stats) => GridView.count(
+                crossAxisCount: isWideScreen ? 3 : 1,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                mainAxisSpacing: AppSpacing.lg,
+                crossAxisSpacing: AppSpacing.lg,
+                childAspectRatio: isWideScreen ? 1.4 : 1.5,
+                children: [
+                  _buildStatCard(
+                    context,
+                    title: 'Utilisateurs',
+                    value: stats['totalUsers'].toString(),
+                    icon: Icons.group_rounded,
+                    color: theme.colorScheme.primary,
+                    chartData: stats['usersData'] as List<double>,
+                    delay: 100,
+                  ),
+                  _buildStatCard(
+                    context,
+                    title: 'Chantiers Actifs',
+                    value: stats['activeProjects'].toString(),
+                    icon: Icons.construction_rounded,
+                    color: theme.colorScheme.secondary,
+                    chartData: [10, 15, 20, 18, 25, 30, 34],
+                    delay: 200,
+                  ),
+                  _buildStatCard(
+                    context,
+                    title: 'Volume Financier',
+                    value: currencyFormatter.format(stats['financialVolume']),
+                    icon: Icons.account_balance_wallet_rounded,
+                    color: theme.colorScheme.tertiary,
+                    chartData: stats['financialData'] as List<double>,
+                    delay: 300,
+                  ),
+                ],
+              ),
             ),
 
             AppSpacing.vXxl,
@@ -164,56 +170,65 @@ class AdminDashboardScreen extends ConsumerWidget {
             AppSpacing.vMd,
 
             // Recent Activity from Provider
-            Container(
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
-                boxShadow: [
-                  BoxShadow(color: theme.colorScheme.shadow.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 5)),
-                ],
-              ),
-              child: ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: activityLogs.length,
-                separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.textSecondaryLight),
-                itemBuilder: (context, index) {
-                  final log = activityLogs[index];
-                  final isRecent = DateTime.now().difference(log.timestamp).inHours < 1;
-                  
-                  return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-                    leading: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(
-                        _getIconForAction(log.action),
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    title: Text(log.action, style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
-                    subtitle: Padding(
-                      padding: const EdgeInsets.only(top: 4.0),
-                      child: Text(
-                        'Par ${log.user} • ${_formatTimeAgo(log.timestamp)}',
-                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
-                      ),
-                    ),
-                    trailing: isRecent
-                        ? Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            activityLogsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Erreur: $err', style: TextStyle(color: theme.colorScheme.error))),
+              data: (activityLogs) => Container(
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusXl),
+                  boxShadow: [
+                    BoxShadow(color: theme.colorScheme.shadow.withValues(alpha: 0.05), blurRadius: 15, offset: const Offset(0, 5)),
+                  ],
+                ),
+                child: activityLogs.isEmpty
+                  ? const Padding(
+                      padding: EdgeInsets.all(AppSpacing.xl),
+                      child: Center(child: Text("Aucune activité récente.", style: TextStyle(color: Colors.grey))),
+                    )
+                  : ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: activityLogs.length,
+                      separatorBuilder: (context, index) => Divider(height: 1, color: AppColors.textSecondaryLight),
+                      itemBuilder: (context, index) {
+                        final log = activityLogs[index];
+                        final isRecent = DateTime.now().difference(log.timestamp).inHours < 1;
+                        
+                        return ListTile(
+                          contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                          leading: Container(
+                            padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.primaryContainer,
-                              borderRadius: BorderRadius.circular(8),
+                              color: theme.colorScheme.surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            child: Text('Nouveau', style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 11, fontWeight: FontWeight.bold)),
-                          )
-                        : null,
-                  ).animate().fadeIn(delay: Duration(milliseconds: 400 + (index * 100))).slideX(begin: 0.1);
-                },
+                            child: Icon(
+                              _getIconForAction(log.action),
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          title: Text(log.action, style: TextStyle(fontWeight: FontWeight.w600, color: theme.colorScheme.onSurface)),
+                          subtitle: Padding(
+                            padding: const EdgeInsets.only(top: 4.0),
+                            child: Text(
+                              'Par ${log.user} • ${_formatTimeAgo(log.timestamp)}',
+                              style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
+                            ),
+                          ),
+                          trailing: isRecent
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text('Nouveau', style: TextStyle(color: theme.colorScheme.onPrimaryContainer, fontSize: 11, fontWeight: FontWeight.bold)),
+                                )
+                              : null,
+                        ).animate().fadeIn(delay: Duration(milliseconds: 400 + (index * 100))).slideX(begin: 0.1);
+                      },
+                    ),
               ),
             ),
             const SizedBox(height: 40),
@@ -265,7 +280,11 @@ class AdminDashboardScreen extends ConsumerWidget {
             ],
           ),
           const Spacer(),
-          Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(value, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
+          ),
           AppSpacing.vXs,
           Text(title, style: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.w500)),
           AppSpacing.vMd,

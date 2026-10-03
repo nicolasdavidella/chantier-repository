@@ -27,7 +27,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
     const AdminDashboardScreen(),
     const CertificationsScreen(),
     const UserManagementScreen(),
-    const ModerationScreen(),
+    const ReclamationsScreen(),
     const ActivityLogsScreen(),
     const ProfileScreen(),
   ];
@@ -36,7 +36,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
     NavigationRailDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: Text('Tableau de bord')),
     NavigationRailDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: Text('Certifications')),
     NavigationRailDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: Text('Utilisateurs')),
-    NavigationRailDestination(icon: Icon(Icons.gavel_outlined), selectedIcon: Icon(Icons.gavel), label: Text('Modération')),
+    NavigationRailDestination(icon: Icon(Icons.report_problem_outlined), selectedIcon: Icon(Icons.report_problem), label: Text('Réclamations')),
     NavigationRailDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: Text('Logs')),
     NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profil')),
   ];
@@ -64,7 +64,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
               _navItem(0, Icons.dashboard_rounded),
               _navItem(1, Icons.domain_rounded),
               _navItem(2, Icons.people_rounded),
-              _navItem(3, Icons.gavel_rounded),
+              _navItem(3, Icons.report_problem_rounded),
               _navItem(4, Icons.history_rounded),
               _navItem(5, Icons.person_rounded),
             ],

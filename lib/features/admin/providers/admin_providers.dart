@@ -46,12 +46,32 @@ class FlaggedReviewModel {
 
 // --- Providers ---
 
-final adminStatsProvider = Provider((ref) {
+final adminStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+  final db = FirebaseFirestore.instance;
+  
+  // Total users
+  final usersCountQuery = await db.collection('users').count().get();
+  final totalUsers = usersCountQuery.count ?? 0;
+  
+  // Active projects
+  final projectsCountQuery = await db.collection('projects').where('statut', isEqualTo: 'en_cours').count().get();
+  final activeProjects = projectsCountQuery.count ?? 0;
+  
+  // Financial volume
+  final projectsSnap = await db.collection('projects').where('statut', isNotEqualTo: 'brouillon').get();
+  double financialVolume = 0.0;
+  for (var doc in projectsSnap.docs) {
+    final data = doc.data();
+    if (data['budget'] != null) {
+      financialVolume += (data['budget'] as num).toDouble();
+    }
+  }
+
   return {
-    'totalUsers': 1245,
-    'activeProjects': 34,
-    'financialVolume': 1500000000.0, // FCFA
-    'financialData': [100.0, 120.0, 110.0, 150.0, 200.0, 180.0, 220.0], // For sparkline
+    'totalUsers': totalUsers,
+    'activeProjects': activeProjects,
+    'financialVolume': financialVolume,
+    'financialData': [100.0, 120.0, 110.0, 150.0, 200.0, 180.0, 220.0],
     'usersData': [30.0, 40.0, 35.0, 50.0, 60.0, 80.0, 95.0],
   };
 });
@@ -147,10 +167,19 @@ final moderationProvider = StateNotifierProvider<ModerationNotifier, List<Flagge
   return ModerationNotifier();
 });
 
-final activityLogsProvider = Provider<List<ActivityLogModel>>((ref) {
-  return [
-    ActivityLogModel(id: 'l1', action: 'Validation de l\'entreprise "Toiture 237"', user: 'Admin Sup', timestamp: DateTime.now().subtract(const Duration(minutes: 10))),
-    ActivityLogModel(id: 'l2', action: 'Bannissement de l\'utilisateur "Paul Chantier"', user: 'Admin Sup', timestamp: DateTime.now().subtract(const Duration(hours: 2))),
-    ActivityLogModel(id: 'l3', action: 'Suppression de l\'avis de "Marc D."', user: 'Admin Mod', timestamp: DateTime.now().subtract(const Duration(days: 1))),
-  ];
+final activityLogsProvider = StreamProvider<List<ActivityLogModel>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('audit_logs')
+      .orderBy('timestamp', descending: true)
+      .limit(10)
+      .snapshots()
+      .map((snap) => snap.docs.map((doc) {
+            final data = doc.data();
+            return ActivityLogModel(
+              id: doc.id,
+              action: data['action'] ?? 'Action inconnue',
+              user: data['userName'] ?? 'Système',
+              timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+            );
+          }).toList());
 });

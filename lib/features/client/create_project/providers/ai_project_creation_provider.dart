@@ -42,7 +42,7 @@ class AiProjectCreationController extends StateNotifier<AiProjectCreationState> 
   void _initChat() {
     state = state.copyWith(messages: [
       ChatMessage(
-        text: "Bonjour ! Je suis l'architecte IA de ChantierTrack. Parlez-moi de votre projet de construction (style, nombre de pièces...) et n'oubliez pas de m'indiquer votre budget !",
+        text: "Bonjour ! Je suis l'Assistant de Conception ChantierTrack. Parlez-moi de votre projet de construction (style, nombre de pièces...) et n'oubliez pas de m'indiquer votre budget !",
         isUser: false,
         timestamp: DateTime.now(),
       )
@@ -97,7 +97,7 @@ class AiProjectCreationController extends StateNotifier<AiProjectCreationState> 
 
       final projectId = FirebaseFirestore.instance.collection('projects').doc().id;
       final budget = (state.proposedPlansJson!['budget'] as num).toDouble();
-      final description = state.proposedPlansJson!['descriptionComplete'] ?? 'Projet généré par IA';
+      final description = state.proposedPlansJson!['descriptionComplete'] ?? 'Projet généré par l\\'Assistant';
 
       final newProject = ProjectModel(
         id: projectId,
@@ -143,13 +143,13 @@ class AiProjectCreationController extends StateNotifier<AiProjectCreationState> 
           );
         }
         await batch.commit();
-        debugPrint('✅ Projet IA diffusé à ${entreprisesSnap.docs.length} entreprise(s)');
+        debugPrint('✅ Projet diffusé à ${entreprisesSnap.docs.length} entreprise(s)');
       } catch (e) {
-        debugPrint('⚠️ Erreur diffusion IA: $e');
+        debugPrint('⚠️ Erreur diffusion: $e');
       }
       
     } catch (e) {
-      print("Erreur création projet IA: $e");
+      print("Erreur création projet: $e");
       rethrow;
     }
   }

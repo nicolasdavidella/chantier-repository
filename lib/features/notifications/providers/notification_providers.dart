@@ -12,7 +12,7 @@ class NotificationsNotifier extends StateNotifier<List<NotificationModel>> {
       NotificationModel(
         id: 'n1',
         userId: 'u_current',
-        titre: 'Alerte IA Critique',
+        titre: 'Alerte Système Critique',
         corps: 'Anomalie détectée dans les dépenses du chantier "Villa M".',
         type: 'alerte_ia',
         dateEnvoi: now.subtract(const Duration(minutes: 10)),

@@ -21,6 +21,7 @@ import '../../features/client/search_entreprises/presentation/screens/compare_en
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/showcase/presentation/showcase_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/client/dashboard/presentation/client_reclamation_screen.dart';
 import '../../features/analytics/presentation/screens/admin_analytics_screen.dart';
 import '../../features/analytics/presentation/screens/entreprise_analytics_screen.dart';
 import '../../data/models/entreprise_model.dart';
@@ -235,6 +236,16 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'compare_entreprises',
             name: 'compare_entreprises',
             pageBuilder: (context, state) => _buildPageWithTransition(const CompareEntreprisesScreen(), state),
+          ),
+          GoRoute(
+            path: 'ia_chat',
+            name: 'client_ia_chat',
+            pageBuilder: (context, state) => _buildPageWithTransition(const IaProjectChatScreen(), state),
+          ),
+          GoRoute(
+            path: 'reclamation',
+            name: 'client_reclamation',
+            pageBuilder: (context, state) => _buildPageWithTransition(const ClientReclamationScreen(), state),
           ),
         ],
       ),

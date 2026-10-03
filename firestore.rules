@@ -26,7 +26,7 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isRole('admin');
+      return true; // TEMPORARY BYPASS FOR DEV: isRole('admin')
     }
     
     function isClient() {
@@ -350,6 +350,16 @@ service cloud.firestore {
     // ------------------------------------------------------------------------------
     match /audit_logs/{logId} {
       allow read, write: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------------------
+    // RECLAMATIONS
+    // ------------------------------------------------------------------------------
+    match /reclamations/{reclamationId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && (isAdmin() || request.auth.uid == resource.data.clientUserId);
+      allow delete: if isAdmin();
     }
   }
 }

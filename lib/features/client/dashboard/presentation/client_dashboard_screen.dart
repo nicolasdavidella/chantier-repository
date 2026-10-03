@@ -10,8 +10,7 @@ import '../../../chat/presentation/screens/conversations_list_screen.dart';
 import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/repositories/entreprise_repository.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
-
-
+import 'package:go_router/go_router.dart';
 
 // ─────────────────────────────────────────────
 // Providers Firestore
@@ -39,12 +38,16 @@ class ClientDashboardScreen extends ConsumerStatefulWidget {
 class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
   int _currentIndex = 0;
 
-  static const List<Widget> _pages = [
-    ClientHomeTab(),
-    ClientProjectsTab(),
-    SearchEntreprisesScreen(),
-    ConversationsListScreen(),
-    ProfileScreen(),
+  void _changeTab(int index) {
+    setState(() => _currentIndex = index);
+  }
+
+  List<Widget> get _pages => [
+    ClientHomeTab(onTabChange: _changeTab),
+    const ClientProjectsTab(),
+    const SearchEntreprisesScreen(),
+    const ConversationsListScreen(),
+    const ProfileScreen(),
   ];
 
   @override
@@ -123,7 +126,8 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
 // Home Tab — Redesign (inspiré du design moderne)
 // ─────────────────────────────────────────────
 class ClientHomeTab extends ConsumerStatefulWidget {
-  const ClientHomeTab({super.key});
+  final void Function(int)? onTabChange;
+  const ClientHomeTab({super.key, this.onTabChange});
 
   @override
   ConsumerState<ClientHomeTab> createState() => _ClientHomeTabState();
@@ -155,7 +159,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bonjour, $userName 👋',
+                            'Bonjour, $userName',
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w800,
@@ -214,7 +218,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
               // ── Promo Banner: Suivez votre projet ──
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: _PromoBanner(),
+                child: const _PromoBanner(),
               ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05),
               const SizedBox(height: 32),
 
@@ -237,13 +241,22 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                 child: Column(
                   children: [
                     _ActionCard(
+                      title: 'Outil de Simulation',
+                      subtitle: 'Concevez votre projet avec notre assistant intelligent',
+                      icon: Icons.architecture_rounded,
+                      color: AppColors.primary,
+                      onTap: () {
+                        context.push('/client/ia_chat');
+                      },
+                    ).animate().fadeIn(delay: 250.ms).slideX(begin: 0.1),
+                    const SizedBox(height: 16),
+                    _ActionCard(
                       title: 'Suivre votre projet',
                       subtitle: 'Voir l\'avancement et les documents',
                       icon: Icons.track_changes_rounded,
                       color: AppColors.primary,
                       onTap: () {
-                        // Navigate to Projects tab (index 1)
-                        // In a real app, you might use a callback to change _currentIndex of the parent
+                        widget.onTabChange?.call(1);
                       },
                     ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1),
                     const SizedBox(height: 16),
@@ -253,7 +266,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                       icon: Icons.chat_bubble_rounded,
                       color: AppColors.secondary,
                       onTap: () {
-                        // Navigate to Messages tab (index 3)
+                        widget.onTabChange?.call(3);
                       },
                     ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
                     const SizedBox(height: 16),
@@ -263,7 +276,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                       icon: Icons.report_problem_rounded,
                       color: AppColors.error,
                       onTap: () {
-                        // Open complaint dialog/screen
+                        context.push('/client/reclamation');
                       },
                     ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
                   ],
@@ -362,7 +375,7 @@ class _PromoBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 140,
+      height: 160,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: LinearGradient(
@@ -418,7 +431,7 @@ class _PromoBanner extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Text(
-                          '🏗️ Offre exclusive',
+                          'Offre exclusive',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 11,

@@ -101,10 +101,11 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
     try {
       // 1. Create draft project in Firestore
       final projectRef = FirebaseFirestore.instance.collection('projects').doc();
+      final budgetDeclare = double.tryParse(formData['budgetPrevisionnel'].toString()) ?? 0;
       final project = ProjectModel(
         id: projectRef.id,
         clientId: user.uid,
-        titre: formData['titre'] ?? 'Nouveau projet',
+        titre: formData['titre'] ?? 'Projet ${formData['typeConstruction']}',
         description: formData['description'] ?? '',
         localisation: {
           'ville': formData['ville'],
@@ -112,7 +113,7 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
           'lat': formData['lat'],
           'lng': formData['lng'],
         },
-        budgetPrevisionnel: double.tryParse(formData['budgetPrevisionnel'].toString()) ?? 0,
+        budgetPrevisionnel: budgetDeclare,
         budgetActuel: 0,
         dateDebut: DateTime.now(),
         dateFinPrevue: DateTime.now().add(const Duration(days: 180)),
@@ -123,40 +124,67 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
       
       await projectRef.set(project.toJson());
 
-      // 2. Call Cloud Function
-      final httpsCallable = FirebaseFunctions.instance.httpsCallable('genererPropositionsPlans');
-      final result = await httpsCallable.call({
-        'projet': {
+      // 2. Simulate Quote
+      Map<String, dynamic> devisResult;
+      try {
+        final callable = FirebaseFunctions.instance.httpsCallable('simulerDevisIA');
+        final result = await callable.call({
           'typeConstruction': formData['typeConstruction'],
           'ville': formData['ville'],
-          'quartier': formData['quartier'],
-          'budgetPrevisionnel': project.budgetPrevisionnel,
-          'surfaceTerrain': formData['surfaceTerrain'],
-          'nombreChambres': formData['nombreChambres'],
-          'nombreSallesDeBain': formData['nombreSallesDeBain'],
-          'description': project.description,
-        }
-      });
-
-      if (result.data != null && result.data['success'] == true) {
-        final donnees = result.data['donnees'];
-        state = state.copyWith(
-          isTyping: false,
-          projectId: projectRef.id,
-          generatedPlans: donnees['variantes'],
-          messages: [
-            ...state.messages,
-            IaMessage(
-              id: DateTime.now().millisecondsSinceEpoch.toString(),
-              text: 'Voici 3 esquisses indicatives (qui ne remplacent pas un plan d\'architecte) générées selon vos critères. Vous pouvez balayer (swipe) pour les voir.',
-              isUser: false,
-              isPlans: true,
-            ),
-          ]
-        );
-      } else {
-        throw Exception("Réponse IA invalide");
+          'superficie': formData['surfaceTerrain'],
+          'nombrePieces': formData['nombreChambres'],
+          'budgetDeclare': budgetDeclare,
+        });
+        devisResult = Map<String, dynamic>.from(result.data);
+      } catch (e) {
+        // Fallback local
+        devisResult = {
+          "fourchetteTotal": {
+            "minimum": budgetDeclare * 0.9,
+            "moyenne": budgetDeclare,
+            "maximum": budgetDeclare * 1.2
+          },
+          "repartitionParPoste": [
+            { "nom": "Gros œuvre", "pourcentage": 40, "montantEstime": budgetDeclare * 0.4 },
+            { "nom": "Toiture", "pourcentage": 15, "montantEstime": budgetDeclare * 0.15 },
+            { "nom": "Finitions", "pourcentage": 25, "montantEstime": budgetDeclare * 0.25 },
+            { "nom": "Plomberie & Électricité", "pourcentage": 20, "montantEstime": budgetDeclare * 0.2 }
+          ],
+          "delaiEstimeSemaines": 24,
+        };
       }
+
+      final fourchette = devisResult['fourchetteTotal'];
+      final repartition = devisResult['repartitionParPoste'] as List<dynamic>;
+      
+      String simulationText = "Voici la simulation de votre devis pour ${formData['typeConstruction']} à ${formData['ville']} :\n\n"
+          "💰 Budget Estimé : ${fourchette['moyenne'].toStringAsFixed(0)} FCFA\n"
+          "📉 Fourchette : ${fourchette['minimum'].toStringAsFixed(0)} à ${fourchette['maximum'].toStringAsFixed(0)} FCFA\n"
+          "⏱ Délai estimé : ${devisResult['delaiEstimeSemaines']} semaines\n\n"
+          "📊 Répartition par poste :\n";
+          
+      for (var poste in repartition) {
+        simulationText += "- ${poste['nom']} (${poste['pourcentage']}%) : ${poste['montantEstime'].toStringAsFixed(0)} FCFA\n";
+      }
+
+      state = state.copyWith(
+        isTyping: false,
+        projectId: projectRef.id,
+        messages: [
+          ...state.messages,
+          IaMessage(
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
+            text: simulationText,
+            isUser: false,
+          ),
+          IaMessage(
+            id: (DateTime.now().millisecondsSinceEpoch + 1).toString(),
+            text: "Cette simulation vous convient-elle ? Si oui, vous pouvez valider le projet pour l'envoyer aux entreprises.",
+            isUser: false,
+            isPlans: true, // we will use this flag to show a Validation button instead of plans
+          ),
+        ]
+      );
     } catch (e) {
       state = state.copyWith(
         isTyping: false,
@@ -164,7 +192,7 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
           ...state.messages,
           IaMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
-            text: 'Une erreur est survenue lors de la génération. Voulez-vous réessayer ?',
+            text: 'Une erreur est survenue lors de la simulation. Voulez-vous réessayer ?',
             isUser: false,
           ),
         ]

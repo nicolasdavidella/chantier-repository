@@ -6,31 +6,28 @@ import '../../../../../data/models/reclamation_model.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 
 
-// Mock Provider for Reclamations
-final reclamationsProvider = Provider<List<ReclamationModel>>((ref) {
-  return [
-    ReclamationModel(
-      id: 'r1',
-      projectId: 'p1',
-      titre: 'Retard inexpliqué',
-      description: 'L\'entreprise n\'est pas venue sur le chantier depuis 3 jours sans donner de nouvelles.',
-      statut: 'ouverte',
-      dateCreation: DateTime.now().subtract(const Duration(days: 2)),
-      clientUserId: 'client1',
-      entrepriseId: 'ent1',
-    ),
-    ReclamationModel(
-      id: 'r2',
-      projectId: 'p2',
-      titre: 'Malfaçon carrelage',
-      description: 'Le carrelage du salon est mal posé, plusieurs carreaux sont fissurés.',
-      statut: 'en_traitement',
-      dateCreation: DateTime.now().subtract(const Duration(days: 5)),
-      clientUserId: 'client2',
-      entrepriseId: 'ent2',
-      reponseAdmin: 'Contact pris avec l\'entreprise pour un constat amiable.',
-    ),
-  ];
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+// Firestore Provider for Reclamations
+final reclamationsProvider = StreamProvider<List<ReclamationModel>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('reclamations')
+      .orderBy('dateCreation', descending: true)
+      .snapshots()
+      .map((snap) => snap.docs.map((doc) {
+            final data = doc.data();
+            return ReclamationModel(
+              id: doc.id,
+              projectId: data['projectId'] ?? '',
+              titre: data['titre'] ?? 'Sans titre',
+              description: data['description'] ?? '',
+              statut: data['statut'] ?? 'ouverte',
+              dateCreation: (data['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              clientUserId: data['clientUserId'] ?? '',
+              entrepriseId: data['entrepriseId'] ?? '',
+              reponseAdmin: data['reponseAdmin'],
+            );
+          }).toList());
 });
 
 class ReclamationsScreen extends ConsumerWidget {
@@ -38,89 +35,96 @@ class ReclamationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reclamations = ref.watch(reclamationsProvider);
+    final reclamationsAsync = ref.watch(reclamationsProvider);
     final theme = Theme.of(context);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Gestion des Réclamations'),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        itemCount: reclamations.length,
-        itemBuilder: (context, index) {
-          final reclamation = reclamations[index];
-          
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: AppSpacing.md),
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      body: reclamationsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Erreur: $err')),
+        data: (reclamations) {
+          if (reclamations.isEmpty) {
+            return const Center(child: Text("Aucune réclamation."));
+          }
+          return ListView.builder(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            itemCount: reclamations.length,
+            itemBuilder: (context, index) {
+              final reclamation = reclamations[index];
+              
+              return Card(
+                elevation: 2,
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          reclamation.titre,
-                          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      _buildStatusChip(reclamation.statut),
-                    ],
-                  ),
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    'Date : ${DateFormat('dd MMM yyyy').format(reclamation.dateCreation)}',
-                    style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(reclamation.description),
-                  const SizedBox(height: AppSpacing.md),
-                  if (reclamation.reponseAdmin != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.sm),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.admin_panel_settings, size: 16),
-                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: Text(
-                              'Admin: ${reclamation.reponseAdmin}',
-                              style: theme.textTheme.bodySmall,
+                              reclamation.titre,
+                              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                             ),
+                          ),
+                          _buildStatusChip(reclamation.statut),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Date : ${DateFormat('dd MMM yyyy').format(reclamation.dateCreation)}',
+                        style: theme.textTheme.bodySmall?.copyWith(color: AppColors.textSecondaryLight),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(reclamation.description),
+                      const SizedBox(height: AppSpacing.md),
+                      if (reclamation.reponseAdmin != null) ...[
+                        Container(
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.admin_panel_settings, size: 16),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: Text(
+                                  'Admin: ${reclamation.reponseAdmin}',
+                                  style: theme.textTheme.bodySmall,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                      ],
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () {},
+                            child: const Text('Détails'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              _showResponseDialog(context, reclamation);
+                            },
+                            child: const Text('Traiter'),
                           ),
                         ],
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                  ],
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          // TODO: Afficher les détails du projet et du client
-                        },
-                        child: const Text('Détails'),
-                      ),
-                      ElevatedButton(
-                        onPressed: () {
-                          _showResponseDialog(context, reclamation);
-                        },
-                        child: const Text('Traiter'),
-                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           );
         },
       ),

@@ -41,7 +41,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Assistant IA ChantierTrack'),
+        title: const Text('Assistant de Conception'),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
       ),
@@ -66,7 +66,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                   return const SizedBox.shrink(); // Hide form once submitted
                 }
                 
-                if (msg.isPlans && state.generatedPlans != null) {
+                if (msg.isPlans) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: Column(
@@ -74,22 +74,21 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                       children: [
                         _ChatBubble(message: msg),
                         const SizedBox(height: 16),
-                        SizedBox(
-                          height: 400,
-                          child: PageView.builder(
-                            itemCount: state.generatedPlans!.length,
-                            itemBuilder: (context, i) {
-                              return IaPlanCard(
-                                plan: state.generatedPlans![i],
-                                onValider: () {
-                                  ref.read(iaProjectProvider.notifier).validerPlan(state.generatedPlans![i]);
-                                  // Navigate to next step or show confirmation
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Plan validé. Recherche d\'entreprises en cours...'))
-                                  );
-                                },
+                        Center(
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              ref.read(iaProjectProvider.notifier).validerPlan({}); // Empty plan object
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Projet validé. Recherche d\'entreprises en cours...'))
                               );
                             },
+                            icon: const Icon(Icons.check_circle),
+                            label: const Text('Valider ce projet'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            ),
                           ),
                         ),
                       ],
@@ -208,7 +207,7 @@ class _TypingIndicator extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: const [
-            Text('L\'IA écrit...'),
+            Text('Génération en cours...'),
             SizedBox(width: 8),
             SizedBox(
               width: 12,

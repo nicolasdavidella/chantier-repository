@@ -114,6 +114,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 80.0),
         child: FloatingActionButton.extended(
+          heroTag: null,
           onPressed: () {
             context.push('/client/create_project');
           },

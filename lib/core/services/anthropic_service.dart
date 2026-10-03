@@ -17,7 +17,7 @@ class AnthropicService {
   /// Handles conversational chat
   Future<String> chat(String message, List<ChatMessage> history) async {
     try {
-      final systemPrompt = "Tu es l'Assistant IA de ChantierTrack, une application de gestion de chantiers de construction au Cameroun et en Afrique.\nTu dois répondre de manière concise, professionnelle, et aidante.";
+      final systemPrompt = "Tu es l'Assistant de Conception ChantierTrack, une application de gestion de chantiers de construction au Cameroun et en Afrique.\nTu dois répondre de manière concise, professionnelle, et aidante.";
       
       final messages = history.map((m) {
         return {
@@ -52,11 +52,11 @@ class AnthropicService {
         return data['content'][0]['text'] ?? "Désolé, je n'ai pas pu générer une réponse.";
       } else {
         print("Erreur Anthropic API: \${response.statusCode} - \${response.body}");
-        return "Une erreur de connexion à l'IA s'est produite (Erreur \${response.statusCode}).";
+        return "Une erreur de connexion s'est produite (Erreur \${response.statusCode}).";
       }
     } catch (e) {
       print("Erreur Anthropic chat: \$e");
-      return "Une erreur de connexion à l'IA s'est produite. Veuillez vérifier votre connexion.";
+      return "Une erreur de connexion s'est produite. Veuillez vérifier votre réseau.";
     }
   }
 
@@ -194,11 +194,11 @@ Ne renvoie que le texte du rapport.
         final data = jsonDecode(response.body);
         return data['content'][0]['text'] ?? "Rapport non généré.";
       } else {
-        return "Le service IA est indisponible (\${response.statusCode}).";
+        return "Le service est indisponible (\${response.statusCode}).";
       }
     } catch (e) {
       print("Erreur Anthropic report: \$e");
-      return "Le service IA est indisponible.";
+      return "Le service est indisponible.";
     }
   }
 
@@ -253,7 +253,7 @@ Exemple: ["ent1", "ent3"]
   Future<String> chatForProjectCreation(String message, List<ChatMessage> history) async {
     try {
       final systemPrompt = """
-Tu es un Architecte IA pour ChantierTrack. Ton but est d'aider le client à concevoir son projet de construction.
+Tu es un Assistant de Conception pour ChantierTrack. Ton but est d'aider le client à concevoir son projet de construction.
 Pose des questions pour affiner le besoin si nécessaire (type de maison, nombre de pièces, style).
 Tu DOIS obligatoirement demander au client son budget prévisionnel (en FCFA).
 
@@ -306,11 +306,11 @@ Tant que tu n'as pas toutes les infos, réponds normalement (texte naturel). Dè
         final data = jsonDecode(response.body);
         return data['content'][0]['text'] ?? "Désolé, je n'ai pas pu générer une réponse.";
       } else {
-        return "Une erreur de connexion à l'IA s'est produite (Erreur ${response.statusCode}).";
+        return "Une erreur de connexion s'est produite (Erreur ${response.statusCode}).";
       }
     } catch (e) {
       print("Erreur Anthropic project creation chat: $e");
-      return "Une erreur de connexion à l'IA s'est produite.";
+      return "Une erreur de connexion s'est produite.";
     }
   }
 }

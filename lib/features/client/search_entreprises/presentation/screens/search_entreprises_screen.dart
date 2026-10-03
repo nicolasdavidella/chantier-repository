@@ -127,6 +127,7 @@ class _SearchEntreprisesScreenState extends ConsumerState<SearchEntreprisesScree
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: comparisonList.isNotEmpty
           ? FloatingActionButton.extended(
+              heroTag: null,
               onPressed: () => context.push('/client/compare_entreprises'),
               backgroundColor: theme.colorScheme.primary,
               foregroundColor: theme.colorScheme.onPrimary,

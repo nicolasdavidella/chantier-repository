@@ -279,17 +279,37 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
           .doc(widget.demande.entrepriseId);
 
       if (status == 'certifiee') {
+        // Aussi certifier l'utilisateur (client) lié à cette entreprise
+        final entSnap = await entrepriseRef.get();
+        if (entSnap.exists && entSnap.data()?['userId'] != null) {
+          final userId = entSnap.data()!['userId'];
+          final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
+          batch.set(userRef, {
+            'isVerified': true,
+            'certifie': true,
+            'role': 'entreprise', // s'assurer qu'il a le bon rôle
+          }, SetOptions(merge: true));
+        }
+
         batch.set(demandeRef, {
           'statut': 'certifiee',
           'dateDecision': FieldValue.serverTimestamp(),
-          // 'adminId': currentUserId // ideally
         }, SetOptions(merge: true));
+        
         batch.set(entrepriseRef, {
           'certifie': true,
           'isVerified': true,
           'statutVerification': 'approuve',
           'verificationStatus': 'APPROVED',
         }, SetOptions(merge: true));
+
+        // Ajouter dans le journal d'activité
+        final logRef = FirebaseFirestore.instance.collection('audit_logs').doc();
+        batch.set(logRef, {
+          'action': 'Validation de l\'entreprise "${widget.demande.raisonSociale}"',
+          'userName': 'Administrateur',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       } else if (status == 'rejetee') {
         if (_motifController.text.trim().isEmpty) {
           throw Exception("Motif de rejet obligatoire.");
@@ -303,6 +323,14 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
           'statutVerification': 'rejete',
           'verificationStatus': 'REJECTED',
         }, SetOptions(merge: true));
+
+        // Ajouter dans le journal d'activité
+        final logRef = FirebaseFirestore.instance.collection('audit_logs').doc();
+        batch.set(logRef, {
+          'action': 'Rejet de la certification "${widget.demande.raisonSociale}"',
+          'userName': 'Administrateur',
+          'timestamp': FieldValue.serverTimestamp(),
+        });
       }
 
       await batch.commit();
@@ -342,107 +370,109 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
       child: Container(
         width: 600,
         padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.business_center),
-                AppSpacing.hSm,
-                Expanded(
-                  child: Text(
-                    'Examen: ${widget.demande.raisonSociale}',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.business_center),
+                  AppSpacing.hSm,
+                  Expanded(
+                    child: Text(
+                      'Examen: ${widget.demande.raisonSociale}',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            const Divider(),
-            AppSpacing.vSm,
-            Text('RCCM: ${widget.demande.rccm} | NIU: ${widget.demande.niu}'),
-            Text('Contact: ${widget.demande.contact}'),
-            AppSpacing.vLg,
-            const Text(
-              'Documents fournis (cliquer pour ouvrir):',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            AppSpacing.vSm,
-
-            if (widget.demande.documents.isEmpty)
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              AppSpacing.vSm,
+              Text('RCCM: ${widget.demande.rccm} | NIU: ${widget.demande.niu}'),
+              Text('Contact: ${widget.demande.contact}'),
+              AppSpacing.vLg,
               const Text(
-                'Aucun document fourni.',
-                style: TextStyle(color: AppColors.error),
+                'Documents fournis (cliquer pour ouvrir):',
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-
-            ...List.generate(widget.demande.documents.length, (index) {
-              final doc = widget.demande.documents[index];
-              return CheckboxListTile(
-                value: _docsVerified[index],
-                onChanged: (val) {
-                  setState(() {
-                    _docsVerified[index] = val ?? false;
-                  });
-                },
-                title: Text(doc.nom),
-                subtitle: Text('Type: ${doc.type}'),
-                secondary: IconButton(
-                  icon: const Icon(Icons.open_in_new),
-                  onPressed: () async {
-                    final uri = Uri.parse(doc.url);
-                    if (await canLaunchUrl(uri)) {
-                      await launchUrl(uri);
-                    }
+              AppSpacing.vSm,
+  
+              if (widget.demande.documents.isEmpty)
+                const Text(
+                  'Aucun document fourni.',
+                  style: TextStyle(color: AppColors.error),
+                ),
+  
+              ...List.generate(widget.demande.documents.length, (index) {
+                final doc = widget.demande.documents[index];
+                return CheckboxListTile(
+                  value: _docsVerified[index],
+                  onChanged: (val) {
+                    setState(() {
+                      _docsVerified[index] = val ?? false;
+                    });
                   },
+                  title: Text(doc.nom),
+                  subtitle: Text('Type: ${doc.type}'),
+                  secondary: IconButton(
+                    icon: const Icon(Icons.open_in_new),
+                    onPressed: () async {
+                      final uri = Uri.parse(doc.url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      }
+                    },
+                  ),
+                  controlAffinity: ListTileControlAffinity.leading,
+                );
+              }),
+  
+              AppSpacing.vLg,
+              TextField(
+                controller: _motifController,
+                decoration: const InputDecoration(
+                  labelText: 'Motif de rejet (obligatoire si rejeté)',
+                  border: OutlineInputBorder(),
                 ),
-                controlAffinity: ListTileControlAffinity.leading,
-              );
-            }),
-
-            AppSpacing.vLg,
-            TextField(
-              controller: _motifController,
-              decoration: const InputDecoration(
-                labelText: 'Motif de rejet (obligatoire si rejeté)',
-                border: OutlineInputBorder(),
+                maxLines: 2,
               ),
-              maxLines: 2,
-            ),
-            AppSpacing.vLg,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: _isSaving
-                      ? null
-                      : () => _handleDecision('rejetee'),
-                  icon: const Icon(Icons.cancel),
-                  label: const Text('Rejeter'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
+              AppSpacing.vLg,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: _isSaving
+                        ? null
+                        : () => _handleDecision('rejetee'),
+                    icon: const Icon(Icons.cancel),
+                    label: const Text('Rejeter'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                    ),
                   ),
-                ),
-                AppSpacing.hMd,
-                FilledButton.icon(
-                  onPressed: (_isSaving || !_allVerified)
-                      ? null
-                      : () => _handleDecision('certifiee'),
-                  icon: const Icon(Icons.check_circle),
-                  label: const Text('Valider la certification'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: _allVerified ? AppColors.success : AppColors.textSecondaryLight,
+                  AppSpacing.hMd,
+                  FilledButton.icon(
+                    onPressed: (_isSaving || !_allVerified)
+                        ? null
+                        : () => _handleDecision('certifiee'),
+                    icon: const Icon(Icons.check_circle),
+                    label: const Text('Valider la certification'),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: _allVerified ? AppColors.success : AppColors.textSecondaryLight,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

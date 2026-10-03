@@ -19,7 +19,7 @@ class IAChatNotifier extends StateNotifier<List<ChatMessage>> {
 
   IAChatNotifier(this._anthropicService) : super([
     ChatMessage(
-      text: "Bonjour ! Je suis l'Assistant IA de ChantierTrack propulsé par Claude (Anthropic). Posez-moi vos questions !",
+      text: "Bonjour ! Je suis l'Assistant de Conception ChantierTrack. Posez-moi vos questions !",
       isUser: false,
       timestamp: DateTime.now(),
     )
@@ -33,7 +33,7 @@ class IAChatNotifier extends StateNotifier<List<ChatMessage>> {
       final aiResponse = await _anthropicService.chat(text, state);
       state = [...state, ChatMessage(text: aiResponse, isUser: false, timestamp: DateTime.now())];
     } catch (e) {
-      state = [...state, ChatMessage(text: "Erreur de connexion à l'IA.", isUser: false, timestamp: DateTime.now())];
+      state = [...state, ChatMessage(text: "Erreur de connexion.", isUser: false, timestamp: DateTime.now())];
     }
   }
 }
@@ -77,7 +77,7 @@ final iaInsightsProvider = FutureProvider.family<IAInsightData, String>((ref, pr
     return IAInsightData(
       predictionRetard: 0.0,
       confiancePrediction: 0.0,
-      anomalies: [{'titre': 'Erreur IA', 'description': 'Impossible de générer l\'analyse', 'severite': 'moyenne'}],
+      anomalies: [{'titre': 'Erreur d\'analyse', 'description': 'Impossible de générer l\'analyse', 'severite': 'moyenne'}],
       recommandations: ["Veuillez réessayer plus tard"],
     );
   }
