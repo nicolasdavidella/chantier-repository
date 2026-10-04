@@ -21,9 +21,9 @@ class IaInsightsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            const Icon(Icons.psychology, color: Colors.purple),
+            const Icon(Icons.insights_rounded, color: Color(0xFF10B981)),
             AppSpacing.hSm,
-            const Text('Insights IA'),
+            const Text('Analyses & Suivi'),
           ],
         ),
       ),
@@ -40,12 +40,12 @@ class IaInsightsScreen extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.psychology, size: 64, color: Colors.purple)
+          const Icon(Icons.insights_rounded, size: 64, color: Color(0xFF10B981))
               .animate(onPlay: (c) => c.repeat(reverse: true))
               .scale(begin: const Offset(0.9, 0.9), end: const Offset(1.1, 1.1), duration: 1.seconds),
           AppSpacing.vMd,
           Text(
-            'L\'IA analyse votre chantier...',
+            'Analyse du chantier en cours...',
             style: theme.textTheme.titleMedium?.copyWith(color: AppColors.textSecondaryLight),
           ).animate(onPlay: (c) => c.repeat()).fade(duration: 1.seconds),
         ],

@@ -98,21 +98,21 @@ class _DevisIASimulatorState extends State<DevisIASimulator> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.psychology, color: AppColors.primary, size: 28),
+              const Icon(Icons.calculate_rounded, color: AppColors.primary, size: 28),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Simulateur de Devis IA',
+                      'Simulateur de Devis & Coûts',
                       style: theme.textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),
                     ),
                     Text(
-                      'Généré par Claude 3 Haiku',
+                      'Calcul automatique détaillé ChantierTrack',
                       style: theme.textTheme.bodySmall?.copyWith(color: AppColors.primary),
                     ),
                   ],
@@ -141,7 +141,7 @@ class _DevisIASimulatorState extends State<DevisIASimulator> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.auto_awesome, size: 64, color: AppColors.textSecondaryLight),
+            const Icon(Icons.calculate_rounded, size: 64, color: AppColors.textSecondaryLight),
             const SizedBox(height: AppSpacing.lg),
             Text(
               'Obtenez une estimation détaillée',
@@ -150,7 +150,7 @@ class _DevisIASimulatorState extends State<DevisIASimulator> {
             ),
             const SizedBox(height: AppSpacing.md),
             const Text(
-              'Notre intelligence artificielle va analyser les caractéristiques de votre projet pour vous donner une fourchette de prix réaliste au Sénégal, poste par poste.',
+              'Notre système d\'estimation analyse les caractéristiques de votre projet pour vous donner une fourchette de prix réaliste, poste par poste.',
               textAlign: TextAlign.center,
               style: TextStyle(height: 1.5),
             ),
@@ -161,8 +161,8 @@ class _DevisIASimulatorState extends State<DevisIASimulator> {
                 onPressed: _isLoading ? null : _simuler,
                 icon: _isLoading 
                     ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Icon(Icons.auto_awesome),
-                label: Text(_isLoading ? 'Analyse en cours...' : 'Lancer la simulation'),
+                    : const Icon(Icons.calculate_rounded),
+                label: Text(_isLoading ? 'Calcul en cours...' : 'Lancer la simulation'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: AppColors.primary,

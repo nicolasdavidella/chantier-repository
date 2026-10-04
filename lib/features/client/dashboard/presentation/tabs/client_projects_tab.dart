@@ -153,7 +153,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
                               ),
                               const SizedBox(height: 6),
                               const Text(
-                                'Lancez NICO IA pour concevoir un nouveau plan ou créez un projet test.',
+                                'Lancez la conception 3D pour concevoir un nouveau plan ou créez un projet test.',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 12.5,

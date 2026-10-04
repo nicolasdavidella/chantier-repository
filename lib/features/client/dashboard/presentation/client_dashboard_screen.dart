@@ -113,7 +113,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
               ),
             ],
           ),
-          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 26),
+          child: const Icon(Icons.architecture_rounded, color: Colors.white, size: 26),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -265,35 +265,43 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Greeting Header ──
+            // ── Greeting Header (Flexible with no overflow) ──
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      isFrench ? 'Bonjour $userName !' : 'Hi $userName!',
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF0F172A),
-                        letterSpacing: -0.5,
-                      ),
-                    ).animate().fadeIn(duration: 400.ms),
-                    const SizedBox(height: 2),
-                    Text(
-                      isFrench
-                          ? 'Bienvenue sur votre espace ChantierTrack'
-                          : 'Welcome to your construction workspace',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF64748B),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ).animate().fadeIn(delay: 100.ms),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        isFrench ? 'Bonjour $userName !' : 'Hi $userName!',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                      ).animate().fadeIn(duration: 400.ms),
+                      const SizedBox(height: 2),
+                      Text(
+                        isFrench
+                            ? 'Bienvenue sur votre espace ChantierTrack'
+                            : 'Welcome to your construction workspace',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 12.5,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ).animate().fadeIn(delay: 100.ms),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 8),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
@@ -364,14 +372,14 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
               childAspectRatio: 1.05,
               children: [
                 _NextGenModuleCard(
-                  title: isFrench ? 'NICO IA' : 'NICO AI',
-                  subtitle: isFrench ? 'Plans 3D & Devis IA' : '3D Plans & Estimates',
+                  title: isFrench ? 'Studio 3D' : '3D Studio',
+                  subtitle: isFrench ? 'Plans 3D & Devis' : '3D Plans & Estimates',
                   icon: Icons.architecture_rounded,
-                  badgeText: 'IA 3D',
+                  badgeText: 'Conception',
                   isHighlighted: true,
                   onTap: () => _openModule(
                     () => context.push('/client/ia_chat'),
-                    name: 'NICO IA',
+                    name: isFrench ? 'Studio 3D' : '3D Studio',
                   ),
                 ),
                 _NextGenModuleCard(
@@ -529,7 +537,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
 
                 // Grand titre
                 Text(
-                  isFrench ? 'Concevez vos Projets\navec NICO IA' : 'Designing Unique\nStructures',
+                  isFrench ? 'Concevez vos Projets\nde Rêves' : 'Designing Unique\nStructures',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
@@ -560,7 +568,7 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                       const SizedBox(height: 6),
                       _buildServiceItem(
                         Icons.view_in_ar_rounded,
-                        isFrench ? 'Modélisation 3D Meshy & AR' : '3D Design & Visualization',
+                        isFrench ? 'Modélisation 3D Architecturale' : '3D Design & Visualization',
                       ),
                       const SizedBox(height: 6),
                       _buildServiceItem(
@@ -580,11 +588,11 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
                   child: ElevatedButton.icon(
                     onPressed: () => _openModule(
                       () => context.push('/client/ia_chat'),
-                      name: 'NICO IA',
+                      name: isFrench ? 'Studio 3D' : '3D Studio',
                     ),
-                    icon: const Icon(Icons.auto_awesome, color: Color(0xFF143D2B), size: 18),
+                    icon: const Icon(Icons.architecture_rounded, color: Color(0xFF143D2B), size: 18),
                     label: Text(
-                      isFrench ? 'Démarrer avec NICO IA' : 'Start with NICO AI',
+                      isFrench ? 'Démarrer la conception' : 'Start Designing',
                       style: const TextStyle(
                         color: Color(0xFF143D2B),
                         fontWeight: FontWeight.w900,

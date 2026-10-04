@@ -76,8 +76,8 @@ class SettingsSection extends ConsumerWidget {
         ),
         ListTile(
           contentPadding: EdgeInsets.zero,
-          leading: const Icon(Icons.auto_awesome),
-          title: const Text('Alertes IA'),
+          leading: const Icon(Icons.warning_amber_rounded),
+          title: const Text('Alertes de suivi'),
           trailing: Switch(
             value: notifications['alertes_ia'] ?? true,
             onChanged: (val) => ref.read(notificationPrefsProvider.notifier).togglePreference('alertes_ia', val),

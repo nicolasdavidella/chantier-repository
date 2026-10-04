@@ -68,7 +68,7 @@ class _EntreprisesInteresseesTabState
                           color: AppColors.primary.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.auto_awesome, color: AppColors.primary),
+                        child: const Icon(Icons.calculate_rounded, color: AppColors.primary),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
@@ -76,7 +76,7 @@ class _EntreprisesInteresseesTabState
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Simuler un devis avec l\'IA',
+                              'Simuler une estimation de devis',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,

@@ -132,12 +132,12 @@ class QuickServicesModal extends StatelessWidget {
             children: [
               _QuickServiceItem(
                 icon: Icons.architecture_rounded,
-                label: isFrench ? 'NICO IA' : 'NICO AI',
+                label: isFrench ? 'Studio 3D' : '3D Studio',
                 color: const Color(0xFF1B4D3E),
                 onTap: () => _openService(
                   context,
                   () => context.push('/client/ia_chat'),
-                  label: isFrench ? 'NICO IA' : 'NICO AI',
+                  label: isFrench ? 'Studio 3D' : '3D Studio',
                 ),
               ),
               _QuickServiceItem(

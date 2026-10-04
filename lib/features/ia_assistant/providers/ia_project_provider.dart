@@ -110,7 +110,7 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
         IaMessage(
           id: 'q1',
           text:
-              'Bonjour ! Je suis NICO IA, votre architecte et assistant virtuel ChantierTrack. Pour concevoir votre plan 3D sur-mesure et simuler votre devis, quel type de construction souhaitez-vous réaliser ?',
+              'Bonjour ! Bienvenue sur le Studio Architecte ChantierTrack. Pour concevoir votre plan 3D sur-mesure et simuler votre devis, quel type de construction souhaitez-vous réaliser ?',
           isUser: false,
           questionKey: 'typeConstruction',
           options: const [
@@ -450,7 +450,7 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
               IaMessage(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 text:
-                    "Voici votre maquette 3D interactive conçue par NICO IA ! Vous pouvez pivoter et zoomer sur le plan. Souhaitez-vous valider le projet pour l'envoyer aux entreprises ?",
+                    "Voici votre maquette 3D interactive conçue pour votre projet ! Vous pouvez pivoter et zoomer sur le plan. Souhaitez-vous valider le projet pour l'envoyer aux entreprises ?",
                 isUser: false,
                 isPlans: true,
               ),

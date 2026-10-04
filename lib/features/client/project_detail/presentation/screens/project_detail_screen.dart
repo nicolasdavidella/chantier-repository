@@ -187,9 +187,9 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                           color: const Color(0xFF10B981).withValues(alpha: 0.3),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.auto_awesome, color: Color(0xFF86EFAC), size: 20),
+                        child: const Icon(Icons.insights_rounded, color: Color(0xFF86EFAC), size: 20),
                       ),
-                      tooltip: 'Insights NICO IA',
+                      tooltip: 'Analyses du projet',
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -278,7 +278,7 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
                           : const [
                               Tab(text: 'Avancement', icon: Icon(Icons.timeline_rounded, size: 20)),
                               Tab(text: 'Dépenses', icon: Icon(Icons.account_balance_wallet_rounded, size: 20)),
-                              Tab(text: 'Alertes NICO IA', icon: Icon(Icons.warning_amber_rounded, size: 20)),
+                              Tab(text: 'Alertes & Suivi', icon: Icon(Icons.warning_amber_rounded, size: 20)),
                               Tab(text: 'Documents', icon: Icon(Icons.folder_rounded, size: 20)),
                             ],
                       ),

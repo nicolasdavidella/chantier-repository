@@ -212,11 +212,11 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.auto_awesome, color: Color(0xFF2E7D32), size: 16),
+                  const Icon(Icons.architecture_rounded, color: Color(0xFF2E7D32), size: 16),
                   const SizedBox(width: 8),
                   const Flexible(
                     child: Text(
-                      'NICO IA',
+                      'Studio 3D',
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Color(0xFF1B4D3E),
@@ -299,7 +299,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
           const SizedBox(height: 22),
 
           Text(
-            isFrench ? 'Bonjour ! Je suis NICO IA' : 'Hello! I am NICO AI',
+            isFrench ? 'Studio de Conception 3D' : '3D Design Studio',
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 22,
@@ -554,7 +554,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 const Text(
-                                  'NICO IA',
+                                  'Studio 3D',
                                   style: TextStyle(
                                     color: Color(0xFF1B4D3E),
                                     fontWeight: FontWeight.w800,
@@ -706,7 +706,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          '$_selectedType 3D - NICO IA',
+                          '$_selectedType 3D - ChantierTrack',
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: Color(0xFF1B4D3E),
@@ -748,7 +748,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
               borderRadius: BorderRadius.circular(14),
               child: ModelViewer(
                 src: glbUrl,
-                alt: 'Modèle 3D NICO IA',
+                alt: 'Modèle 3D ChantierTrack',
                 ar: true,
                 autoRotate: true,
                 cameraControls: true,
@@ -861,8 +861,8 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                           ),
                           decoration: InputDecoration(
                             hintText: isFrench
-                                ? 'Écrivez à NICO IA (ex: 35 000 000 FCFA)...'
-                                : 'Message NICO AI (e.g. 35,000,000 FCFA)...',
+                                ? 'Écrivez votre réponse (ex: 35 000 000 FCFA)...'
+                                : 'Type your answer (e.g. 35,000,000 FCFA)...',
                             hintStyle: const TextStyle(
                               color: Color(0xFF94A3B8),
                               fontSize: 13.5,
@@ -963,7 +963,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  isFrench ? 'NICO IA modélise en 3D et calcule votre devis...' : 'NICO AI is generating 3D model & estimate...',
+                  isFrench ? 'Modélisation 3D et calcul du devis en cours...' : 'Generating 3D model & estimate...',
                   style: const TextStyle(color: Color(0xFF1B4D3E), fontSize: 13, fontWeight: FontWeight.w600),
                 ),
               ],
