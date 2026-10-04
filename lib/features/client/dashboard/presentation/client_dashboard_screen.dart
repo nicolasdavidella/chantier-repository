@@ -6,7 +6,6 @@ import '../../search_entreprises/presentation/screens/search_entreprises_screen.
 import '../../../profile/presentation/screens/profile_screen.dart';
 import 'tabs/client_projects_tab.dart';
 import '../../../chat/presentation/screens/conversations_list_screen.dart';
-import 'package:chantier_track/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/widgets/app_circular_loader.dart';

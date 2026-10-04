@@ -252,7 +252,7 @@ class _AiProjectCreationScreenState extends ConsumerState<AiProjectCreationScree
               ),
             ).animate().slideY(),
           );
-        }).toList(),
+        }),
       ],
     );
   }

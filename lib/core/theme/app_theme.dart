@@ -28,16 +28,16 @@ class AppTheme {
       useMaterial3: true,
       colorScheme: colorScheme,
       textTheme: textTheme,
-      scaffoldBackgroundColor: colorScheme.background,
+      scaffoldBackgroundColor: colorScheme.surface,
       
       // App Bar Theme
       appBarTheme: AppBarTheme(
-        backgroundColor: colorScheme.background,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         centerTitle: false,
-        iconTheme: IconThemeData(color: colorScheme.onBackground),
+        iconTheme: IconThemeData(color: colorScheme.onSurface),
         titleTextStyle: textTheme.titleLarge?.copyWith(
-          color: colorScheme.onBackground,
+          color: colorScheme.onSurface,
           fontWeight: FontWeight.bold,
         ),
       ),

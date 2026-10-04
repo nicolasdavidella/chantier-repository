@@ -112,7 +112,7 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
       body: ListView.separated(
         padding: const EdgeInsets.all(AppSpacing.lg),
         itemCount: _reports.length,
-        separatorBuilder: (_, __) => AppSpacing.vMd,
+        separatorBuilder: (_, _) => AppSpacing.vMd,
         itemBuilder: (context, index) {
           final report = _reports[index];
           return Card(

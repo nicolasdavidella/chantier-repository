@@ -83,7 +83,7 @@ class _StepGeneralState extends ConsumerState<StepGeneral> {
             ),
             AppSpacing.vLg,
             DropdownButtonFormField<String>(
-              value: _selectedType,
+              initialValue: _selectedType,
               decoration: const InputDecoration(
                 labelText: 'Type de travaux',
                 prefixIcon: Icon(Icons.category),

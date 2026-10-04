@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/connectivity/sync_queue_provider.dart';
-import '../../providers/chef_chantier_providers.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 
 

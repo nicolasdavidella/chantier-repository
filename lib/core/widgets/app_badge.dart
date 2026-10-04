@@ -72,7 +72,7 @@ class AppBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (hasIcon && icon != null) ...[
+          if (hasIcon) ...[
             Icon(icon, size: 14, color: foregroundColor),
             AppSpacing.hXs,
           ],

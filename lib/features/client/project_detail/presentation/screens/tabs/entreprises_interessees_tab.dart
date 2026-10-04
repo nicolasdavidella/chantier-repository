@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:chantier_track/data/models/project_model.dart';
 import '../../../../../../core/theme/app_spacing.dart';
 import '../../../../../../core/theme/app_colors.dart';
@@ -173,8 +172,9 @@ class _EntreprisesInteresseesTabState
           .doc(entrepriseId)
           .get(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData)
+        if (!snapshot.hasData) {
           return const Card(child: ListTile(title: Text('Chargement...')));
+        }
         if (!snapshot.data!.exists) return const SizedBox.shrink();
 
         final data = snapshot.data!.data() as Map<String, dynamic>;
@@ -288,8 +288,9 @@ class _EntreprisesInteresseesTabState
           .doc(entrepriseId)
           .get(),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists)
+        if (!snapshot.hasData || !snapshot.data!.exists) {
           return const SizedBox.shrink();
+        }
         final data = snapshot.data!.data() as Map<String, dynamic>;
         return ListTile(
           leading: const Icon(Icons.hourglass_empty, color: AppColors.textSecondaryLight),

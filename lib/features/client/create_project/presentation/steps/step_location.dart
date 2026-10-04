@@ -130,7 +130,7 @@ class _StepLocationState extends ConsumerState<StepLocation> {
             ),
             AppSpacing.vXxl,
             DropdownButtonFormField<String>(
-              value: _selectedVille,
+              initialValue: _selectedVille,
               decoration: const InputDecoration(
                 labelText: 'Ville',
                 prefixIcon: Icon(Icons.location_city),

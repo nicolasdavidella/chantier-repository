@@ -4,7 +4,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../data/models/devis_model.dart';
-import '../../../../../data/models/project_model.dart';
 import '../../../dashboard/providers/entreprise_dashboard_providers.dart';
 
 class DevisScreen extends ConsumerStatefulWidget {

@@ -127,7 +127,7 @@ class _ChantierDetailScreenState extends ConsumerState<ChantierDetailScreen> {
                         style: const TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold, fontSize: 14));
                   },
                   loading: () => const SizedBox(),
-                  error: (_, __) => const SizedBox(),
+                  error: (_, _) => const SizedBox(),
                 ),
               ],
             ),

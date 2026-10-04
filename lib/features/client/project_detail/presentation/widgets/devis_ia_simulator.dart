@@ -221,12 +221,12 @@ class _DevisIASimulatorState extends State<DevisIASimulator> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildMiniStat('Min', '${(fourchette['minimum'] as num).toStringAsFixed(0)}'),
+                  _buildMiniStat('Min', (fourchette['minimum'] as num).toStringAsFixed(0)),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Text('-', style: TextStyle(color: Colors.white54)),
                   ),
-                  _buildMiniStat('Max', '${(fourchette['maximum'] as num).toStringAsFixed(0)}'),
+                  _buildMiniStat('Max', (fourchette['maximum'] as num).toStringAsFixed(0)),
                 ],
               ),
               const SizedBox(height: AppSpacing.md),

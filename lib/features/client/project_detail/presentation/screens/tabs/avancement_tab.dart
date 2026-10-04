@@ -127,7 +127,7 @@ class AvancementTab extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               itemCount: galleryImages.length,
-              separatorBuilder: (_, __) => AppSpacing.hSm,
+              separatorBuilder: (_, _) => AppSpacing.hSm,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {

@@ -36,7 +36,7 @@ class _EntrepriseDetailsScreenState extends ConsumerState<EntrepriseDetailsScree
   // Step 2: Spécialités
   final _step2FormKey = GlobalKey<FormState>();
   final _experienceController = TextEditingController();
-  List<String> _selectedSpecialites = [];
+  final List<String> _selectedSpecialites = [];
   final List<String> _availableSpecialites = [
     'Gros œuvre', 'Plomberie', 'Électricité', 'Menuiserie',
     'Peinture', 'Revêtement', 'Charpente', 'Terrassement'
@@ -48,7 +48,7 @@ class _EntrepriseDetailsScreenState extends ConsumerState<EntrepriseDetailsScree
 
   Future<void> _pickFile(bool isNif) async {
     final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'jpg', 'png']);
-    if (result != null && result.isNotEmpty && result.first.path != null) {
+    if (result.isNotEmpty && result.first.path != null) {
       setState(() {
         if (isNif) {
           _nifFile = File(result.first.path!);

@@ -25,7 +25,7 @@ class MeshyService {
       },
       body: jsonEncode({
         'mode': 'preview',
-        'prompt': prompt + ', vibrant colors, realistic materials, wood, metal, glass, fully textured, highly detailed, photorealistic',
+        'prompt': '$prompt, vibrant colors, realistic materials, wood, metal, glass, fully textured, highly detailed, photorealistic',
         'art_style': 'realistic',
       }),
     );

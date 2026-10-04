@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../../core/theme/app_colors.dart';
 import '../../../../auth/providers/auth_provider.dart';
 import '../../../projects/providers/client_projects_provider.dart';
 import '../../../../../data/models/project_model.dart';

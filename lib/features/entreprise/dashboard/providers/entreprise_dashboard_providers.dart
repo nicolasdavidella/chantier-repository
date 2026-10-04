@@ -7,7 +7,6 @@ import '../../../../data/models/rapport_avancement_model.dart';
 import '../../../../data/models/membre_equipe_model.dart';
 import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/repositories/entreprise_dashboard_repository.dart';
-import '../../../../data/repositories/entreprise_repository.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../chat/providers/chat_providers.dart';
 

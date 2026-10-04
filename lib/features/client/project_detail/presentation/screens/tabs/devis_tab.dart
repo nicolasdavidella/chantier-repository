@@ -168,7 +168,7 @@ class DevisTab extends ConsumerWidget {
             ),
           ),
         );
-          }).toList(),
+          }),
         ],
         
         StreamBuilder<QuerySnapshot>(

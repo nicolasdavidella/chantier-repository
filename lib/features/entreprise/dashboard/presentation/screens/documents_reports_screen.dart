@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../data/models/project_model.dart';
 import '../../../../../data/models/rapport_avancement_model.dart';
 import '../../providers/entreprise_dashboard_providers.dart';
 
@@ -292,13 +291,13 @@ class _RapportCard extends StatelessWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: rapport.photos.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      separatorBuilder: (_, _) => const SizedBox(width: 8),
                       itemBuilder: (_, i) => ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Image.network(
                           rapport.photos[i],
                           width: 100, height: 70, fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
+                          errorBuilder: (_, _, _) => Container(
                             width: 100, height: 70,
                             color: AppColors.grey200,
                             child: const Icon(Icons.broken_image_rounded, color: AppColors.grey400),

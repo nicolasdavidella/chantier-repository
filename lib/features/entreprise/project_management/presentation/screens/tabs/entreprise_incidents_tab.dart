@@ -79,7 +79,7 @@ class _EntrepriseIncidentsTabState extends ConsumerState<EntrepriseIncidentsTab>
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: _incidents.length,
-              separatorBuilder: (_, __) => AppSpacing.vMd,
+              separatorBuilder: (_, _) => AppSpacing.vMd,
               itemBuilder: (context, index) {
                 final incident = _incidents[index];
                 final isResolved = incident['resolved'] as bool;

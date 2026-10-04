@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../../data/models/devis_model.dart';
 import '../../../../../core/theme/app_spacing.dart';
@@ -87,7 +86,7 @@ class _DevisListScreenState extends ConsumerState<DevisListScreen> {
           : ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: devisList.length,
-              separatorBuilder: (_, __) => AppSpacing.vMd,
+              separatorBuilder: (_, _) => AppSpacing.vMd,
               itemBuilder: (context, index) {
                 final devis = devisList[index];
                 

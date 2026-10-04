@@ -37,7 +37,7 @@ class ProjectRequestsSection extends ConsumerWidget {
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: requests.length,
-            separatorBuilder: (_, __) => AppSpacing.hMd,
+            separatorBuilder: (_, _) => AppSpacing.hMd,
             itemBuilder: (context, index) {
               final project = requests[index];
 

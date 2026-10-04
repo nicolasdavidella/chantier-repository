@@ -38,7 +38,7 @@ class _EntrepriseCertificationFormScreenState extends ConsumerState<EntrepriseCe
 
   Future<void> _pickFile(String key) async {
     final result = await FilePicker.pickFiles(type: FileType.custom, allowedExtensions: ['pdf', 'jpg', 'png', 'jpeg']);
-    if (result != null && result.isNotEmpty && result.first.path != null) {
+    if (result.isNotEmpty && result.first.path != null) {
       setState(() {
         _documents[key] = File(result.first.path!);
       });

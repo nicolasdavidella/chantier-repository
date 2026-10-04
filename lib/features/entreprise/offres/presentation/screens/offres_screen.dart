@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../core/theme/app_spacing.dart';
-import 'package:chantier_track/data/models/project_model.dart';
 import 'package:chantier_track/features/entreprise/offres/providers/offres_provider.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 

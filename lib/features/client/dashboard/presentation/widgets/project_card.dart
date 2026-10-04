@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../../data/models/project_model.dart';
-import '../../providers/dashboard_providers.dart';
 import 'package:intl/intl.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -18,12 +17,9 @@ import '../../features/ia_assistant/presentation/screens/ia_project_chat_screen.
 import '../../features/client/project_detail/presentation/screens/project_detail_screen.dart';
 import '../../features/client/search_entreprises/presentation/screens/entreprise_profile_screen.dart';
 import '../../features/client/search_entreprises/presentation/screens/compare_entreprises_screen.dart';
-import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/showcase/presentation/showcase_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/client/dashboard/presentation/client_reclamation_screen.dart';
-import '../../features/analytics/presentation/screens/admin_analytics_screen.dart';
-import '../../features/analytics/presentation/screens/entreprise_analytics_screen.dart';
 import '../../data/models/entreprise_model.dart';
 import '../../data/models/project_model.dart';
 import '../../features/entreprise/dashboard/presentation/screens/entreprise_dashboard_screen.dart';

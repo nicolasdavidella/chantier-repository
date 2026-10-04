@@ -90,7 +90,7 @@ class StepSummary extends ConsumerWidget {
                     child: ListView.separated(
                       scrollDirection: Axis.horizontal,
                       itemCount: data.documents.length,
-                      separatorBuilder: (_, __) => AppSpacing.hSm,
+                      separatorBuilder: (_, _) => AppSpacing.hSm,
                       itemBuilder: (context, index) {
                         return Container(
                           width: 80,

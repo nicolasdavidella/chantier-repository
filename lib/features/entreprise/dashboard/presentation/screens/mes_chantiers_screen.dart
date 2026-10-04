@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../../core/theme/app_colors.dart';
 import '../../../../../data/models/project_model.dart';
@@ -225,7 +224,7 @@ class _ProjectCard extends StatelessWidget {
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
               child: imageUrl.isNotEmpty
                   ? Image.network(imageUrl, height: 150, width: double.infinity, fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => _placeholder())
+                      errorBuilder: (_, _, _) => _placeholder())
                   : _placeholder(),
             ),
             Padding(

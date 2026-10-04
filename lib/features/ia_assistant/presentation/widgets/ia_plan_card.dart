@@ -7,10 +7,10 @@ class IaPlanCard extends StatefulWidget {
   final VoidCallback onValider;
 
   const IaPlanCard({
-    Key? key,
+    super.key,
     required this.plan,
     required this.onValider,
-  }) : super(key: key);
+  });
 
   @override
   State<IaPlanCard> createState() => _IaPlanCardState();

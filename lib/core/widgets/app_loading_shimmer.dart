@@ -49,8 +49,8 @@ class AppListShimmer extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
-      separatorBuilder: (_, __) => AppSpacing.vMd,
-      itemBuilder: (_, __) {
+      separatorBuilder: (_, _) => AppSpacing.vMd,
+      itemBuilder: (_, _) {
         return Container(
           padding: const EdgeInsets.all(AppSpacing.lg),
           decoration: BoxDecoration(

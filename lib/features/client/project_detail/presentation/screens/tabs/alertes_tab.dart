@@ -99,7 +99,7 @@ class _AlertesTabState extends State<AlertesTab> {
               return ListView.separated(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 itemCount: alertsDocs.length,
-                separatorBuilder: (_, __) => AppSpacing.vMd,
+                separatorBuilder: (_, _) => AppSpacing.vMd,
                 itemBuilder: (context, index) {
                   final alertDoc = alertsDocs[index];
                   final alert = alertDoc.data() as Map<String, dynamic>;

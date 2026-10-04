@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -204,8 +203,9 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                           .doc(widget.conversationId)
                           .get(),
                       builder: (context, snapshot) {
-                        if (!snapshot.hasData || !snapshot.data!.exists)
+                        if (!snapshot.hasData || !snapshot.data!.exists) {
                           return const SizedBox.shrink();
+                        }
                         final projectId = snapshot.data!.data() != null
                             ? (snapshot.data!.data() as Map)['projectId']
                             : null;
@@ -217,8 +217,9 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                               .doc(projectId)
                               .get(),
                           builder: (context, pSnapshot) {
-                            if (!pSnapshot.hasData || !pSnapshot.data!.exists)
+                            if (!pSnapshot.hasData || !pSnapshot.data!.exists) {
                               return const SizedBox.shrink();
+                            }
                             final pData =
                                 pSnapshot.data!.data() as Map<String, dynamic>;
                             return Text(

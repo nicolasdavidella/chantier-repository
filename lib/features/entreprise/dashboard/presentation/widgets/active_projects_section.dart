@@ -34,7 +34,7 @@ class ActiveProjectsSection extends ConsumerWidget {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: projects.length,
-          separatorBuilder: (_, __) => AppSpacing.vMd,
+          separatorBuilder: (_, _) => AppSpacing.vMd,
           itemBuilder: (context, index) {
             final project = projects[index];
             final progress = (project.budgetActuel / project.budgetPrevisionnel).clamp(0.0, 1.0);
