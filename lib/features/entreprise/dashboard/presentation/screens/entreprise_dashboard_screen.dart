@@ -579,12 +579,6 @@ class _StatCard extends StatelessWidget {
       ),
     );
   }
-}tyle(fontSize: 11, color: AppColors.grey500)),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _MiniChantierCard extends StatelessWidget {
