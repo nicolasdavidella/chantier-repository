@@ -11,6 +11,9 @@ import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/repositories/entreprise_repository.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/settings_provider.dart';
+import 'widgets/app_settings_modal.dart';
+import 'widgets/quick_services_modal.dart';
 
 // ─────────────────────────────────────────────
 // Providers Firestore
@@ -54,69 +57,97 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _pages[_currentIndex],
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Image d'arrière-plan recouvrant toute la surface de l'écran
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/dashboard_bg.jpg',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // Voile léger pour faire ressortir l'image tout en garantissant le contraste
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withValues(alpha: 0.25),
+            ),
+          ),
+          // Contenu principal
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: _pages[_currentIndex],
+          ),
+        ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.push('/client/ia_chat'),
+        backgroundColor: AppColors.primary,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.add, color: Colors.white, size: 32),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _buildBottomNav(),
     );
   }
 
   Widget _buildBottomNav() {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
-        child: Container(
-          height: 64,
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(40),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _navItem(0, Icons.home_rounded),
-              _navItem(1, Icons.view_agenda_rounded),
-              _navItem(2, Icons.search_rounded),
-              _navItem(3, Icons.chat_bubble_rounded),
-              _navItem(4, Icons.person_rounded),
-            ],
-          ),
-        ).animate().slideY(begin: 1, duration: 500.ms, curve: Curves.easeOutCubic),
+    final language = ref.watch(languageProvider);
+    final isFrench = language == 'fr';
+
+    return BottomAppBar(
+      color: Colors.white,
+      shape: const CircularNotchedRectangle(),
+      notchMargin: 8.0,
+      elevation: 20,
+      shadowColor: Colors.black.withValues(alpha: 0.1),
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                _navItem(0, Icons.home_rounded, isFrench ? "Accueil" : "Home"),
+                _navItem(1, Icons.assignment_rounded, isFrench ? "Projets" : "My Task"),
+              ],
+            ),
+            Row(
+              children: [
+                _navItem(3, Icons.chat_bubble_outline_rounded, isFrench ? "Chat" : "Chat"),
+                _navItem(4, Icons.person_outline_rounded, isFrench ? "Profil" : "Profile"),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _navItem(int index, IconData icon) {
+  Widget _navItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _currentIndex = index),
-        behavior: HitTestBehavior.opaque,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 48,
-              maxHeight: 48,
-            ),
-            child: AspectRatio(
-              aspectRatio: 1.0,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 250),
-                decoration: BoxDecoration(
-                  color: isSelected ? Theme.of(context).colorScheme.primary : Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  icon,
-                  color: isSelected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurfaceVariant,
-                  size: 22,
-                ),
-              ),
+    return MaterialButton(
+      minWidth: 70,
+      onPressed: () => setState(() => _currentIndex = index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? AppColors.primary : Colors.grey.shade400,
+            size: 24,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? AppColors.primary : Colors.grey.shade400,
+              fontSize: 10,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -137,153 +168,293 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProfileProvider).value;
-    final userName = user?.nom ?? 'Client';
+    final userName = user?.nom ?? 'Jenifer';
+    final language = ref.watch(languageProvider);
+    final isFrench = language == 'fr';
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 100),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ── Header ──
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Bonjour, $userName',
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.textPrimaryLight,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Bienvenue sur Chantier Track, votre rêve une réalisation',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Stack(
+      backgroundColor: Colors.transparent, // Let the background image show through
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.grid_view_rounded, color: AppColors.primary),
+          tooltip: isFrench ? 'Services & Raccourcis' : 'Services & Shortcuts',
+          onPressed: () {
+            showQuickServicesModal(
+              context: context,
+              isFrench: isFrench,
+              onSelectTab: (index) => widget.onTabChange?.call(index),
+            );
+          },
+        ),
+        title: Text(
+          isFrench ? 'Accueil' : 'Home',
+          style: const TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.settings_rounded, color: AppColors.primary),
+              tooltip: isFrench ? 'Paramètres' : 'Settings',
+              onPressed: () {
+                showAppSettingsModal(context);
+              },
+            ),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10).copyWith(bottom: 100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Greeting ──
+            Text(
+              isFrench ? 'Bonjour $userName !' : 'Hi $userName!',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+                letterSpacing: -0.5,
+              ),
+            ).animate().fadeIn(duration: 400.ms),
+            const SizedBox(height: 4),
+            Text(
+              isFrench ? 'Bienvenue sur votre espace' : 'Welcome to your workspace',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF2D3748),
+                fontWeight: FontWeight.w600,
+              ),
+            ).animate().fadeIn(delay: 100.ms),
+            const SizedBox(height: 24),
+
+            // ── Search Bar ──
+            Container(
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: isFrench ? 'Rechercher un artisan, un service...' : 'Search for a pro, service...',
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
+                  prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+                ),
+              ),
+            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.05),
+            const SizedBox(height: 24),
+
+            // ── Project Theme Banner (BTP Theme) ──
+            Container(
+              height: 140,
+              decoration: BoxDecoration(
+                color: AppColors.primary, // Dark Blue
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Positioned(
+                    left: 24,
+                    top: 24,
+                    bottom: 24,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.textPrimaryLight.withValues(alpha: 0.08),
-                                blurRadius: 10,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: const CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.notifications_none_rounded, color: AppColors.textPrimaryLight, size: 22),
+                        Text(
+                          isFrench ? 'Votre Nouveau Projet' : 'Your New Project',
+                          style: TextStyle(
+                            color: Colors.white.withValues(alpha: 0.8),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                        Positioned(
-                          top: 2, right: 2,
-                          child: Container(
-                            width: 10, height: 10,
-                            decoration: const BoxDecoration(
-                              color: AppColors.secondary,
-                              shape: BoxShape.circle,
-                            ),
+                        const SizedBox(height: 8),
+                        Text(
+                          isFrench ? 'Construire\navec sérénité' : 'Build\nwith serenity',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            height: 1.2,
                           ),
                         ),
                       ],
                     ),
-                  ],
-                ).animate().fadeIn(duration: 400.ms).slideY(begin: -0.05),
+                  ),
+                ],
               ),
-              const SizedBox(height: 32),
+            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.05),
+            const SizedBox(height: 32),
 
-              // ── Promo Banner: Suivez votre projet ──
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: const _PromoBanner(),
-              ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.05),
-              const SizedBox(height: 32),
-
-              // ── Actions Rapides ──
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: const Text(
-                  'Actions rapides',
-                  style: TextStyle(
+            // ── Ongoing Projects Title ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isFrench ? 'Actions Rapides' : 'Quick Actions',
+                  style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.bold,
                     color: AppColors.textPrimaryLight,
                   ),
-                ).animate().fadeIn(delay: 200.ms),
-              ),
-              const SizedBox(height: 16),
-              
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    _ActionCard(
-                      title: 'Outil de Simulation',
-                      subtitle: 'Concevez votre projet avec notre assistant intelligent',
-                      icon: Icons.architecture_rounded,
-                      color: AppColors.primary,
-                      onTap: () {
-                        context.push('/client/ia_chat');
-                      },
-                    ).animate().fadeIn(delay: 250.ms).slideX(begin: 0.1),
-                    const SizedBox(height: 16),
-                    _ActionCard(
-                      title: 'Suivre votre projet',
-                      subtitle: 'Voir l\'avancement et les documents',
-                      icon: Icons.track_changes_rounded,
-                      color: AppColors.primary,
-                      onTap: () {
-                        widget.onTabChange?.call(1);
-                      },
-                    ).animate().fadeIn(delay: 300.ms).slideX(begin: 0.1),
-                    const SizedBox(height: 16),
-                    _ActionCard(
-                      title: 'Chat direct',
-                      subtitle: 'Discuter avec votre entreprise de construction',
-                      icon: Icons.chat_bubble_rounded,
-                      color: AppColors.secondary,
-                      onTap: () {
-                        widget.onTabChange?.call(3);
-                      },
-                    ).animate().fadeIn(delay: 400.ms).slideX(begin: 0.1),
-                    const SizedBox(height: 16),
-                    _ActionCard(
-                      title: 'Soumettre réclamation',
-                      subtitle: 'Un problème ? Signalez-le nous',
-                      icon: Icons.report_problem_rounded,
-                      color: AppColors.error,
-                      onTap: () {
-                        context.push('/client/reclamation');
-                      },
-                    ).animate().fadeIn(delay: 500.ms).slideX(begin: 0.1),
-                  ],
                 ),
+              ],
+            ).animate().fadeIn(delay: 400.ms),
+            const SizedBox(height: 16),
+
+            // ── Projects Grid ──
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.95,
+              children: [
+                _FeatureCard(
+                  title: isFrench ? 'Assistant IA' : 'AI Assistant',
+                  category: isFrench ? 'Générer plan 3D' : 'Generate 3D plan',
+                  icon: Icons.architecture_rounded,
+                  isDark: true,
+                  onTap: () {
+                    context.push('/client/ia_chat');
+                  },
+                ),
+                _FeatureCard(
+                  title: isFrench ? 'Mes Projets' : 'My Projects',
+                  category: isFrench ? 'Suivi de chantier' : 'Project tracking',
+                  icon: Icons.track_changes_rounded,
+                  isDark: false,
+                  onTap: () {
+                    widget.onTabChange?.call(1);
+                  },
+                ),
+                _FeatureCard(
+                  title: isFrench ? 'Recherche' : 'Search',
+                  category: isFrench ? 'Trouver un pro' : 'Find a contractor',
+                  icon: Icons.search_rounded,
+                  isDark: false,
+                  onTap: () {
+                    widget.onTabChange?.call(2);
+                  },
+                ),
+                _FeatureCard(
+                  title: isFrench ? 'Réclamations' : 'Claims',
+                  category: isFrench ? 'Support client' : 'Customer support',
+                  icon: Icons.report_problem_rounded,
+                  isDark: false,
+                  onTap: () {
+                    context.push('/client/reclamation');
+                  },
+                ),
+              ],
+            ).animate().fadeIn(delay: 500.ms),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
+  final String title;
+  final String category;
+  final IconData icon;
+  final bool isDark;
+  final VoidCallback onTap;
+
+  const _FeatureCard({
+    required this.title,
+    required this.category,
+    required this.icon,
+    required this.isDark,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = isDark ? AppColors.primary : Colors.white;
+    final textColor = isDark ? Colors.white : AppColors.primary;
+    final subtitleColor = isDark ? Colors.white70 : Colors.grey.shade500;
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: Icon(Icons.arrow_outward_rounded, color: subtitleColor, size: 20),
+            ),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white.withValues(alpha: 0.15) : AppColors.primary.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
+              child: Icon(icon, color: textColor, size: 28),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              category,
+              style: TextStyle(
+                color: subtitleColor,
+                fontSize: 11,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/ia_project_provider.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 
 class IaProjectForm extends ConsumerStatefulWidget {
   const IaProjectForm({Key? key}) : super(key: key);
@@ -24,6 +26,19 @@ class _IaProjectFormState extends ConsumerState<IaProjectForm> {
   double budgetPrevisionnel = 15000000;
   String? delai;
   String? description;
+  
+  XFile? _selectedImage;
+  bool _useImage = false;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _selectedImage = image;
+      });
+    }
+  }
 
   final List<String> villesCameroun = ['Yaoundé', 'Douala', 'Bafoussam', 'Garoua', 'Maroua', 'Bamenda', 'Kribi', 'Limbé', 'Buéa', 'Ngaoundéré'];
   final List<String> typesConstruction = ['maison individuelle', 'villa', 'duplex/immeuble', 'studio', 'rénovation', 'extension', 'clôture'];
@@ -120,11 +135,54 @@ class _IaProjectFormState extends ConsumerState<IaProjectForm> {
               ),
               const SizedBox(height: 12),
               
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Description libre', border: OutlineInputBorder()),
-                maxLines: 3,
-                onSaved: (v) => description = v,
+              const Text('Source d\'inspiration 3D', style: TextStyle(fontWeight: FontWeight.w600)),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: RadioListTile<bool>(
+                      title: const Text('Description textuelle'),
+                      value: false,
+                      groupValue: _useImage,
+                      onChanged: (val) => setState(() => _useImage = val!),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<bool>(
+                      title: const Text('Image / Croquis'),
+                      value: true,
+                      groupValue: _useImage,
+                      onChanged: (val) => setState(() => _useImage = val!),
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
               ),
+              if (!_useImage)
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Description de la maison', border: OutlineInputBorder()),
+                  maxLines: 3,
+                  maxLength: 800,
+                  validator: (v) => !_useImage && (v == null || v.isEmpty) ? 'Requis' : null,
+                  onSaved: (v) => description = v,
+                )
+              else
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _pickImage,
+                      icon: const Icon(Icons.upload_file),
+                      label: const Text('Téléverser une image'),
+                    ),
+                    if (_selectedImage != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Text('Fichier sélectionné : ${_selectedImage!.name}', style: const TextStyle(color: Colors.green)),
+                      ),
+                  ],
+                ),
               const SizedBox(height: 16),
               
               ElevatedButton.icon(
@@ -141,9 +199,14 @@ class _IaProjectFormState extends ConsumerState<IaProjectForm> {
               SizedBox(
                 width: double.infinity,
                 child: AppButton(
-                  text: 'Générer des plans avec l\'IA',
+                  text: 'Estimation et génération du plan',
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      if (_useImage && _selectedImage == null) {
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Veuillez téléverser une image.')));
+                        return;
+                      }
+                      
                       _formKey.currentState!.save();
                       
                       final formData = {
@@ -156,7 +219,8 @@ class _IaProjectFormState extends ConsumerState<IaProjectForm> {
                         'surfaceTerrain': superficieTerrain,
                         'budgetPrevisionnel': budgetPrevisionnel,
                         'delai': delai,
-                        'description': description,
+                        'description': _useImage ? null : description,
+                        'imagePath': _useImage ? _selectedImage?.path : null,
                         'lat': 3.8480, // Mock Yaounde lat
                         'lng': 11.5021, // Mock Yaounde lng
                       };

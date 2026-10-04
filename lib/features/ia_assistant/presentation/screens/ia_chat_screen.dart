@@ -72,8 +72,8 @@ class _IaChatScreenState extends ConsumerState<IaChatScreen> {
             const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Assistant IA', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimaryLight)),
-                Text('Propulse par Gemini', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
+                Text('NICO IA', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimaryLight)),
+                Text('Architecte & Expert ChantierTrack', style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500)),
               ],
             ),
           ],
