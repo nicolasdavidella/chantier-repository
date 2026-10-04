@@ -51,7 +51,7 @@ class _EntrepriseDashboardScreenState
     final newOffresCount = offresAsync.value?.length ?? 0;
 
     return Container(
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      margin: const EdgeInsets.only(left: 12, right: 12, bottom: 12),
       decoration: BoxDecoration(
         color: const Color(0xFF143D2B),
         borderRadius: BorderRadius.circular(30),
@@ -66,15 +66,14 @@ class _EntrepriseDashboardScreenState
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _navItem(0, Icons.home_rounded, 'Accueil'),
-              _navItem(1, Icons.assignment_rounded, 'Offres', badge: newOffresCount),
-              _navItem(2, Icons.construction_rounded, 'Chantiers'),
-              _navItem(3, Icons.chat_bubble_rounded, 'Messages'),
-              _navItem(4, Icons.person_rounded, 'Profil'),
+              Expanded(child: _navItem(0, Icons.home_rounded, 'Accueil')),
+              Expanded(child: _navItem(1, Icons.assignment_rounded, 'Offres', badge: newOffresCount)),
+              Expanded(child: _navItem(2, Icons.construction_rounded, 'Chantiers')),
+              Expanded(child: _navItem(3, Icons.chat_bubble_rounded, 'Messages')),
+              Expanded(child: _navItem(4, Icons.person_rounded, 'Profil')),
             ],
           ),
         ),
@@ -88,12 +87,13 @@ class _EntrepriseDashboardScreenState
       onTap: () => setState(() => _currentIndex = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
         decoration: BoxDecoration(
           color: selected ? const Color(0xFF10B981).withValues(alpha: 0.25) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(16),
         ),
         child: Stack(
+          alignment: Alignment.center,
           clipBehavior: Clip.none,
           children: [
             Column(
@@ -102,14 +102,16 @@ class _EntrepriseDashboardScreenState
                 Icon(
                   icon,
                   color: selected ? const Color(0xFF86EFAC) : Colors.white60,
-                  size: 22,
+                  size: 20,
                 ),
-                const SizedBox(height: 3),
+                const SizedBox(height: 2),
                 Text(
                   label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     color: selected ? const Color(0xFF86EFAC) : Colors.white60,
-                    fontSize: 10,
+                    fontSize: 9.5,
                     fontWeight: selected ? FontWeight.w900 : FontWeight.w500,
                   ),
                 ),
@@ -118,15 +120,15 @@ class _EntrepriseDashboardScreenState
             if (badge > 0)
               Positioned(
                 top: -4,
-                right: -6,
+                right: 4,
                 child: Container(
-                  width: 18,
-                  height: 18,
+                  width: 16,
+                  height: 16,
                   decoration: const BoxDecoration(color: Color(0xFFEAB308), shape: BoxShape.circle),
                   child: Center(
                     child: Text(
                       '$badge',
-                      style: const TextStyle(color: Color(0xFF143D2B), fontSize: 10, fontWeight: FontWeight.w900),
+                      style: const TextStyle(color: Color(0xFF143D2B), fontSize: 9, fontWeight: FontWeight.w900),
                     ),
                   ),
                 ).animate(onPlay: (c) => c.repeat(reverse: true))
@@ -581,7 +583,7 @@ class _StatCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(18),
@@ -593,10 +595,20 @@ class _StatCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: color, size: 22),
+            Icon(icon, color: color, size: 20),
             const SizedBox(height: 6),
-            Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: color)),
-            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600)),
+            Text(
+              value,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: color),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 10.5, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
