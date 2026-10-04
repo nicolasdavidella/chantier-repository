@@ -48,7 +48,7 @@ class _ChantierDetailScreenState extends ConsumerState<ChantierDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final tachesAsync = ref.watch(tachesProjectProvider(widget.project.id));
+    final tachesAsync = ref.watch(tachesProjectStreamProvider(widget.project.id));
     final p = widget.project;
     final ville = p.localisation['ville'] ?? '';
     final quartier = p.localisation['quartier'] ?? '';

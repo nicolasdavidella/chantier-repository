@@ -171,7 +171,7 @@ class _EntrepriseProfilScreenState extends ConsumerState<EntrepriseProfilScreen>
 
   @override
   Widget build(BuildContext context) {
-    final entrepriseAsync = ref.watch(currentEntrepriseProvider);
+    final entrepriseAsync = ref.watch(currentEntrepriseStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,

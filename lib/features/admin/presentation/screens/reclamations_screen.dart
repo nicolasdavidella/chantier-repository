@@ -9,7 +9,7 @@ import 'package:chantier_track/core/theme/app_colors.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Firestore Provider for Reclamations
-final reclamationsProvider = StreamProvider<List<ReclamationModel>>((ref) {
+final reclamationsStreamProvider = StreamProvider.autoDispose<List<ReclamationModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('reclamations')
       .orderBy('dateCreation', descending: true)
@@ -30,12 +30,17 @@ final reclamationsProvider = StreamProvider<List<ReclamationModel>>((ref) {
           }).toList());
 });
 
+final pendingReclamationsBadgeProvider = Provider.autoDispose<int>((ref) {
+  final reclamations = ref.watch(reclamationsStreamProvider).value ?? [];
+  return reclamations.where((r) => r.statut == 'ouverte').length;
+});
+
 class ReclamationsScreen extends ConsumerWidget {
   const ReclamationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reclamationsAsync = ref.watch(reclamationsProvider);
+    final reclamationsAsync = ref.watch(reclamationsStreamProvider);
     final theme = Theme.of(context);
 
     return Scaffold(

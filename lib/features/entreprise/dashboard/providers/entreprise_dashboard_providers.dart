@@ -12,7 +12,7 @@ import '../../../auth/providers/auth_provider.dart';
 import '../../../chat/providers/chat_providers.dart';
 
 // ─── Profil Entreprise courant (stream) ───────────
-final currentEntrepriseProvider = StreamProvider<EntrepriseModel?>((ref) {
+final currentEntrepriseStreamProvider = StreamProvider.autoDispose<EntrepriseModel?>((ref) {
   final user = ref.watch(authStateProvider).value;
   if (user == null) return const Stream.empty();
   return FirebaseFirestore.instance
@@ -29,8 +29,8 @@ final currentEntrepriseProvider = StreamProvider<EntrepriseModel?>((ref) {
 });
 
 // ─── Mes Chantiers (tous statuts) ──────────────────
-final mesChantierProvider = StreamProvider<List<ProjectModel>>((ref) {
-  final entreprise = ref.watch(currentEntrepriseProvider).value;
+final mesChantierStreamProvider = StreamProvider.autoDispose<List<ProjectModel>>((ref) {
+  final entreprise = ref.watch(currentEntrepriseStreamProvider).value;
   if (entreprise == null) return const Stream.empty();
   return ref
       .watch(entrepriseDashboardRepositoryProvider)
@@ -38,21 +38,21 @@ final mesChantierProvider = StreamProvider<List<ProjectModel>>((ref) {
 });
 
 // ─── Appels d'offres ouverts ────────────────────────
-final appelsOffresProvider = StreamProvider<List<ProjectModel>>((ref) {
+final appelsOffresStreamProvider = StreamProvider.autoDispose<List<ProjectModel>>((ref) {
   return ref.watch(entrepriseDashboardRepositoryProvider).watchOpenProjects();
 });
 
 // ─── Tâches d'un projet ─────────────────────────────
-final tachesProjectProvider =
-    StreamProvider.family<List<TacheModel>, String>((ref, projectId) {
+final tachesProjectStreamProvider =
+    StreamProvider.autoDispose.family<List<TacheModel>, String>((ref, projectId) {
   return ref
       .watch(entrepriseDashboardRepositoryProvider)
       .watchProjectTaches(projectId);
 });
 
 // ─── Devis de l'entreprise ──────────────────────────
-final mesDevisProvider = StreamProvider<List<DevisModel>>((ref) {
-  final entreprise = ref.watch(currentEntrepriseProvider).value;
+final mesDevisStreamProvider = StreamProvider.autoDispose<List<DevisModel>>((ref) {
+  final entreprise = ref.watch(currentEntrepriseStreamProvider).value;
   if (entreprise == null) return const Stream.empty();
   return ref
       .watch(entrepriseDashboardRepositoryProvider)
@@ -60,16 +60,16 @@ final mesDevisProvider = StreamProvider<List<DevisModel>>((ref) {
 });
 
 // ─── Rapports d'un projet ───────────────────────────
-final rapportsProjectProvider =
-    StreamProvider.family<List<RapportAvancementModel>, String>((ref, projectId) {
+final rapportsProjectStreamProvider =
+    StreamProvider.autoDispose.family<List<RapportAvancementModel>, String>((ref, projectId) {
   return ref
       .watch(entrepriseDashboardRepositoryProvider)
       .watchRapportsForProject(projectId);
 });
 
 // ─── Membres de l'équipe ────────────────────────────
-final membresEquipeProvider = StreamProvider<List<MembreEquipeModel>>((ref) {
-  final entreprise = ref.watch(currentEntrepriseProvider).value;
+final membresEquipeStreamProvider = StreamProvider.autoDispose<List<MembreEquipeModel>>((ref) {
+  final entreprise = ref.watch(currentEntrepriseStreamProvider).value;
   if (entreprise == null) return const Stream.empty();
   return ref
       .watch(entrepriseDashboardRepositoryProvider)

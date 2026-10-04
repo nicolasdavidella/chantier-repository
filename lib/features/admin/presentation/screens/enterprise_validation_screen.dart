@@ -13,7 +13,7 @@ class EnterpriseValidationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pendingEnterprisesAsync = ref.watch(pendingEnterprisesProvider);
+    final pendingEnterprisesAsync = ref.watch(pendingEnterprisesStreamProvider);
     final theme = Theme.of(context);
 
     return Scaffold(

@@ -32,16 +32,22 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
     const ProfileScreen(),
   ];
 
-  final List<NavigationRailDestination> _railDestinations = const [
-    NavigationRailDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: Text('Tableau de bord')),
-    NavigationRailDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: Text('Certifications')),
-    NavigationRailDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: Text('Utilisateurs')),
-    NavigationRailDestination(icon: Icon(Icons.report_problem_outlined), selectedIcon: Icon(Icons.report_problem), label: Text('Réclamations')),
-    NavigationRailDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: Text('Logs')),
-    NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profil')),
-  ];
+  List<NavigationRailDestination> _getRailDestinations(int pendingCount) {
+    return [
+      const NavigationRailDestination(icon: Icon(Icons.dashboard_outlined), selectedIcon: Icon(Icons.dashboard), label: Text('Tableau de bord')),
+      const NavigationRailDestination(icon: Icon(Icons.business_outlined), selectedIcon: Icon(Icons.business), label: Text('Certifications')),
+      const NavigationRailDestination(icon: Icon(Icons.people_outlined), selectedIcon: Icon(Icons.people), label: Text('Utilisateurs')),
+      NavigationRailDestination(
+        icon: Badge(isLabelVisible: pendingCount > 0, label: Text(pendingCount.toString()), child: const Icon(Icons.report_problem_outlined)),
+        selectedIcon: Badge(isLabelVisible: pendingCount > 0, label: Text(pendingCount.toString()), child: const Icon(Icons.report_problem)),
+        label: const Text('Réclamations')
+      ),
+      const NavigationRailDestination(icon: Icon(Icons.history_outlined), selectedIcon: Icon(Icons.history), label: Text('Logs')),
+      const NavigationRailDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: Text('Profil')),
+    ];
+  }
 
-  Widget _buildCustomBottomNav() {
+  Widget _buildCustomBottomNav(int pendingCount) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -64,8 +70,8 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
               _navItem(0, Icons.dashboard_rounded),
               _navItem(1, Icons.domain_rounded),
               _navItem(2, Icons.people_rounded),
-              _navItem(3, Icons.report_problem_rounded),
-              _navItem(4, Icons.history_rounded),
+              _navItem(3, Icons.report_problem_rounded, pendingCount),
+              _navItem(4, Icons.history_rounded, 0),
               _navItem(5, Icons.person_rounded),
             ],
           ),
@@ -74,8 +80,21 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
     );
   }
 
-  Widget _navItem(int index, IconData icon) {
+  Widget _navItem(int index, IconData icon, [int badgeCount = 0]) {
     final isSelected = _selectedIndex == index;
+    Widget iconWidget = Icon(
+      icon,
+      color: isSelected ? Colors.white : AppColors.grey400,
+      size: 24,
+    );
+    
+    if (badgeCount > 0) {
+      iconWidget = Badge(
+        label: Text(badgeCount.toString()),
+        child: iconWidget,
+      );
+    }
+    
     return GestureDetector(
       onTap: () => setState(() => _selectedIndex = index),
       behavior: HitTestBehavior.opaque,
@@ -86,11 +105,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
           color: isSelected ? AppColors.primary : Colors.transparent,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          icon,
-          color: isSelected ? Colors.white : AppColors.grey400,
-          size: 24,
-        ),
+        child: Center(child: iconWidget),
       ),
     );
   }
@@ -98,6 +113,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
   @override
   Widget build(BuildContext context) {
     final isWideScreen = MediaQuery.of(context).size.width > 800;
+    final pendingCount = ref.watch(pendingReclamationsBadgeProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC), // Light blue-grey background
@@ -182,7 +198,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
                     ),
                   ),
                 ),
-                destinations: _railDestinations,
+                destinations: _getRailDestinations(pendingCount),
               ),
             ),
 
@@ -198,7 +214,7 @@ class _AdminShellScreenState extends ConsumerState<AdminShellScreen> {
           ),
         ],
       ),
-      bottomNavigationBar: isWideScreen ? null : _buildCustomBottomNav(),
+      bottomNavigationBar: isWideScreen ? null : _buildCustomBottomNav(pendingCount),
     );
   }
 }

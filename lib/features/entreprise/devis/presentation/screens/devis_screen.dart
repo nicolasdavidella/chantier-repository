@@ -85,7 +85,7 @@ class _DevisListTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final devisAsync = ref.watch(mesDevisProvider);
+    final devisAsync = ref.watch(mesDevisStreamProvider);
     final dateFormat = DateFormat('dd MMM yyyy');
 
     return devisAsync.when(
@@ -231,7 +231,7 @@ class _CreateDevisTabState extends ConsumerState<_CreateDevisTab> {
       return;
     }
 
-    final entreprise = ref.read(currentEntrepriseProvider).value;
+    final entreprise = ref.read(currentEntrepriseStreamProvider).value;
     if (entreprise == null) return;
 
     final devis = DevisModel(
@@ -275,7 +275,7 @@ class _CreateDevisTabState extends ConsumerState<_CreateDevisTab> {
 
   @override
   Widget build(BuildContext context) {
-    final projetsAsync = ref.watch(mesChantierProvider);
+    final projetsAsync = ref.watch(mesChantierStreamProvider);
     final isLoading = ref.watch(devisControllerProvider).isLoading;
 
     return SingleChildScrollView(

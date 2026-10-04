@@ -54,10 +54,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isSignup = state.matchedLocation == '/signup';
       final isPhoneAuth = state.matchedLocation == '/phone_auth';
       final isForgotPassword = state.matchedLocation == '/forgot_password';
-      final isOnboarding = state.matchedLocation == '/onboarding';
       final isShowcase = state.matchedLocation == '/showcase';
 
-      final isAuthScreen = isLoggingIn || isAdminLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isForgotPassword || isOnboarding;
+      final isAuthScreen = isLoggingIn || isAdminLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isForgotPassword;
 
       if (authState.isLoading || authState.hasError) return null;
 
@@ -69,7 +68,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // Utilisateur connecté qui essaie d'aller sur login/signup : on le ramène au splash qui dispatche
-      if (isAuthenticated && (isLoggingIn || isAdminLoggingIn || isRoleSelection || isSignup || isPhoneAuth || isOnboarding)) {
+      if (isAuthenticated && (isLoggingIn || isAdminLoggingIn || isRoleSelection || isSignup || isPhoneAuth)) {
         return '/splash';
       }
 
@@ -81,11 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: 'splash',
         pageBuilder: (context, state) => _buildPageWithTransition(const SplashScreen(), state),
       ),
-      GoRoute(
-        path: '/onboarding',
-        name: 'onboarding',
-        pageBuilder: (context, state) => _buildPageWithTransition(const OnboardingScreen(), state),
-      ),
+
       GoRoute(
         path: '/showcase',
         name: 'showcase',

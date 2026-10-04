@@ -80,7 +80,7 @@ class _PendingCertificationsView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final pendingAsync = ref.watch(pendingCertificationsProvider);
+    final pendingAsync = ref.watch(pendingCertificationsStreamProvider);
     final theme = Theme.of(context);
 
     return pendingAsync.when(
@@ -444,8 +444,10 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
                 maxLines: 2,
               ),
               AppSpacing.vLg,
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+              Wrap(
+                alignment: WrapAlignment.end,
+                spacing: 16.0,
+                runSpacing: 16.0,
                 children: [
                   OutlinedButton.icon(
                     onPressed: _isSaving
@@ -458,7 +460,6 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
                       side: const BorderSide(color: AppColors.error),
                     ),
                   ),
-                  AppSpacing.hMd,
                   FilledButton.icon(
                     onPressed: (_isSaving || !_allVerified)
                         ? null

@@ -10,7 +10,7 @@ class EquipeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final membresAsync = ref.watch(membresEquipeProvider);
+    final membresAsync = ref.watch(membresEquipeStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -265,7 +265,7 @@ class _AddMembreSheetState extends ConsumerState<_AddMembreSheet> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    final entreprise = ref.read(currentEntrepriseProvider).value;
+    final entreprise = ref.read(currentEntrepriseStreamProvider).value;
     if (entreprise == null) return;
 
     final membre = MembreEquipeModel(

@@ -26,12 +26,12 @@ class _EntrepriseDashboardScreenState
   int _currentIndex = 0;
 
   // Pages corresponding to bottom nav items
-  final _pages = const [
-    _DashboardHomeTab(),
-    OffresScreen(),
-    MesChantierScreen(),
-    ConversationsListScreen(),
-    EntrepriseProfilScreen(),
+  List<Widget> get _pages => [
+    const _DashboardHomeTab(),
+    const OffresScreen(),
+    MesChantierScreen(key: UniqueKey()), // Force rebuild to bypass cached Red Screen
+    const ConversationsListScreen(),
+    const EntrepriseProfilScreen(),
   ];
 
   @override
@@ -47,7 +47,7 @@ class _EntrepriseDashboardScreenState
   }
 
   Widget _buildBottomNav() {
-    final offresAsync = ref.watch(appelsOffresProvider);
+    final offresAsync = ref.watch(appelsOffresStreamProvider);
     final newOffresCount = offresAsync.value?.length ?? 0;
 
     return Container(
@@ -69,7 +69,7 @@ class _EntrepriseDashboardScreenState
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(0, Icons.home_rounded, 'Accueil'),
-              _navItem(1, Icons.campaign_rounded, 'Offres', badge: newOffresCount),
+              _navItem(1, Icons.assignment_rounded, 'Offres', badge: newOffresCount),
               _navItem(2, Icons.construction_rounded, 'Chantiers'),
               _navItem(3, Icons.chat_bubble_rounded, 'Messages'),
               _navItem(4, Icons.person_rounded, 'Profil'),
@@ -137,9 +137,9 @@ class _DashboardHomeTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final entrepriseAsync = ref.watch(currentEntrepriseProvider);
-    final chantierAsync = ref.watch(mesChantierProvider);
-    final offresAsync = ref.watch(appelsOffresProvider);
+    final entrepriseAsync = ref.watch(currentEntrepriseStreamProvider);
+    final chantierAsync = ref.watch(mesChantierStreamProvider);
+    final offresAsync = ref.watch(appelsOffresStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -162,7 +162,7 @@ class _DashboardHomeTab extends ConsumerWidget {
               ],
 
               // Stats row
-              _buildStatsRow(chantierAsync.value ?? [], offresAsync.value ?? []),
+              _buildStatsRow(context, chantierAsync.value ?? [], offresAsync.value ?? []),
               const SizedBox(height: 24),
 
               // Quick actions
@@ -176,49 +176,6 @@ class _DashboardHomeTab extends ConsumerWidget {
               _buildOffresBanner(context, offresAsync.value?.length ?? 0),
               const SizedBox(height: 24),
 
-              // Recent chantiers
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text('Chantiers récents',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimaryLight)),
-                  TextButton(
-                    onPressed: () {},
-                    child: const Text('Voir tout',
-                        style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold)),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              chantierAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Text('Erreur: $e'),
-                data: (projets) {
-                  if (projets.isEmpty) {
-                    return Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderLight),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.info_outline_rounded, color: AppColors.primary),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text('Aucun chantier pour l\'instant. Candidatez aux appels d\'offres !',
-                                style: TextStyle(color: AppColors.textSecondaryLight)),
-                          ),
-                        ],
-                      ),
-                    );
-                  }
-                  return Column(
-                    children: projets.take(3).map((p) => _MiniChantierCard(project: p)).toList(),
-                  );
-                },
-              ),
             ],
           ),
         ),
@@ -334,16 +291,34 @@ class _DashboardHomeTab extends ConsumerWidget {
     ).animate().slideX(begin: -0.1).fadeIn();
   }
 
-  Widget _buildStatsRow(List projects, List offres) {
+  Widget _buildStatsRow(BuildContext context, List projects, List offres) {
     final enCours = projects.where((p) => p.statut == 'en_cours').length;
     final termines = projects.where((p) => p.statut == 'termine').length;
     return Row(
       children: [
-        Expanded(child: _StatCard(label: 'En cours', value: '$enCours', icon: Icons.construction_rounded, color: AppColors.secondary)),
+        Expanded(child: _StatCard(
+          label: 'En cours', 
+          value: '$enCours', 
+          icon: Icons.construction_rounded, 
+          color: AppColors.secondary,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MesChantierScreen(initialFilter: 'en_cours'))),
+        )),
         const SizedBox(width: 10),
-        Expanded(child: _StatCard(label: 'Terminés', value: '$termines', icon: Icons.check_circle_rounded, color: AppColors.success)),
+        Expanded(child: _StatCard(
+          label: 'Terminés', 
+          value: '$termines', 
+          icon: Icons.check_circle_rounded, 
+          color: AppColors.success,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MesChantierScreen(initialFilter: 'termine'))),
+        )),
         const SizedBox(width: 10),
-        Expanded(child: _StatCard(label: 'Nouvelles offres', value: '${offres.length}', icon: Icons.campaign_rounded, color: AppColors.warning)),
+        Expanded(child: _StatCard(
+          label: 'Nouvelles offres', 
+          value: '${offres.length}', 
+          icon: Icons.assignment_rounded, 
+          color: AppColors.warning,
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OffresScreen())),
+        )),
       ],
     ).animate().fadeIn(delay: 100.ms);
   }
@@ -433,7 +408,7 @@ class _DashboardHomeTab extends ConsumerWidget {
                 ],
               ),
             ),
-            const Icon(Icons.campaign_rounded, size: 60, color: Colors.white24),
+            const Icon(Icons.assignment_rounded, size: 60, color: Colors.white24),
           ],
         ),
       ).animate().fadeIn(delay: 200.ms),
@@ -446,26 +421,30 @@ class _StatCard extends StatelessWidget {
   final String value;
   final IconData icon;
   final Color color;
+  final VoidCallback? onTap;
 
-  const _StatCard({required this.label, required this.value, required this.icon, required this.color});
+  const _StatCard({required this.label, required this.value, required this.icon, required this.color, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.05), blurRadius: 8)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 6),
-          Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: color)),
-          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.grey500)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.05), blurRadius: 8)],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(height: 6),
+            Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: color)),
+            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.grey500)),
+          ],
+        ),
       ),
     );
   }

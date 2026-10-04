@@ -11,7 +11,7 @@ class ActivityLogsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final logsAsync = ref.watch(activityLogsProvider);
+    final logsAsync = ref.watch(activityLogsStreamProvider);
     final dateFormatter = DateFormat('dd MMM yyyy HH:mm', 'fr_FR');
 
     return Scaffold(

@@ -258,7 +258,14 @@ class _DevisIASimulatorState extends State<DevisIASimulator> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(poste['nom'].toString(), style: const TextStyle(fontWeight: FontWeight.w600)),
+                  Expanded(
+                    child: Text(
+                      poste['nom'].toString(),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Text('${poste['pourcentage']}%', style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                 ],
               ),

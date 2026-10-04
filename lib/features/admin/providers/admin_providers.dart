@@ -46,7 +46,7 @@ class FlaggedReviewModel {
 
 // --- Providers ---
 
-final adminStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final adminStatsFutureProvider = FutureProvider.autoDispose<Map<String, dynamic>>((ref) async {
   final db = FirebaseFirestore.instance;
   
   // Total users
@@ -76,7 +76,7 @@ final adminStatsProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   };
 });
 
-final pendingEnterprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
+final pendingEnterprisesStreamProvider = StreamProvider.autoDispose<List<EntrepriseModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('entreprises')
       .where('isVerified', isEqualTo: false)
@@ -84,7 +84,7 @@ final pendingEnterprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
       .map((snapshot) => snapshot.docs.map((doc) => EntrepriseModel.fromJson(doc.data())).toList());
 });
 
-final pendingCertificationsProvider = StreamProvider<List<CertificationRequestModel>>((ref) {
+final pendingCertificationsStreamProvider = StreamProvider.autoDispose<List<CertificationRequestModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('demandes_certification')
       .where('statut', isEqualTo: 'en_attente')
@@ -167,7 +167,7 @@ final moderationProvider = StateNotifierProvider<ModerationNotifier, List<Flagge
   return ModerationNotifier();
 });
 
-final activityLogsProvider = StreamProvider<List<ActivityLogModel>>((ref) {
+final activityLogsStreamProvider = StreamProvider.autoDispose<List<ActivityLogModel>>((ref) {
   return FirebaseFirestore.instance
       .collection('audit_logs')
       .orderBy('timestamp', descending: true)

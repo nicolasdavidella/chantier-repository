@@ -46,17 +46,17 @@ class _EntrepriseReportsTabState extends ConsumerState<EntrepriseReportsTab> {
                   final anthropicService = ref.read(anthropicServiceProvider);
                   final reportText = await anthropicService.generateReport();
                   textController.text = reportText;
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rapport généré par l\'IA !', style: TextStyle(color: AppColors.warning))));
-                  }
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Brouillon généré avec succès !', style: TextStyle(color: AppColors.warning))));
+                    }
                 } catch (e) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur: $e', style: const TextStyle(color: AppColors.error))));
                   }
                 }
               },
-              icon: const Icon(Icons.auto_awesome, color: AppColors.warning),
-              label: const Text('Générer avec l\'IA', style: TextStyle(color: AppColors.warning)),
+              icon: const Icon(Icons.edit_document, color: AppColors.warning),
+              label: const Text('Générer un brouillon', style: TextStyle(color: AppColors.warning)),
             ),
             Row(
               children: [

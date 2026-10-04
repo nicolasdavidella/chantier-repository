@@ -15,8 +15,8 @@ class AdminDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(adminStatsProvider);
-    final activityLogsAsync = ref.watch(activityLogsProvider);
+    final statsAsync = ref.watch(adminStatsFutureProvider);
+    final activityLogsAsync = ref.watch(activityLogsStreamProvider);
     final theme = Theme.of(context);
     final currencyFormatter = NumberFormat.compactCurrency(locale: 'fr_FR', symbol: 'FCFA');
 

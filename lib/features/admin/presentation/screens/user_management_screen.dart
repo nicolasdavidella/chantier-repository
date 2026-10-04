@@ -68,10 +68,11 @@ class _UserManagementScreenState extends ConsumerState<UserManagementScreen> {
                     backgroundColor: user.isActive ? theme.colorScheme.primaryContainer : AppColors.grey300,
                     child: Icon(Icons.person, color: user.isActive ? theme.colorScheme.primary : AppColors.textSecondaryLight),
                   ),
-                  title: Row(
+                  title: Wrap(
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
                     children: [
                       Text(user.nom, style: TextStyle(fontWeight: FontWeight.bold, decoration: user.isActive ? null : TextDecoration.lineThrough, color: user.isActive ? null : AppColors.textSecondaryLight)),
-                      AppSpacing.hSm,
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(

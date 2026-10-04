@@ -8,15 +8,22 @@ import '../../providers/entreprise_dashboard_providers.dart';
 import 'chantier_detail_screen.dart';
 
 class MesChantierScreen extends ConsumerStatefulWidget {
-  const MesChantierScreen({super.key});
+  final String initialFilter;
+  const MesChantierScreen({super.key, this.initialFilter = 'Tous'});
 
   @override
   ConsumerState<MesChantierScreen> createState() => _MesChantierScreenState();
 }
 
 class _MesChantierScreenState extends ConsumerState<MesChantierScreen> {
-  String _selectedFilter = 'Tous';
+  late String _selectedFilter;
   final _filters = ['Tous', 'en_cours', 'en_pause', 'termine', 'brouillon'];
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedFilter = widget.initialFilter;
+  }
 
   String _labelFor(String f) {
     switch (f) {
@@ -40,7 +47,7 @@ class _MesChantierScreenState extends ConsumerState<MesChantierScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final projetsAsync = ref.watch(mesChantierProvider);
+    final projetsAsync = ref.watch(mesChantierStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,

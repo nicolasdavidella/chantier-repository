@@ -57,18 +57,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               break;
           }
         } else {
-          context.go('/onboarding');
+          context.go('/login');
         }
       } else {
-        context.go('/onboarding');
+        context.go('/login');
       }
     } catch (e) {
       debugPrint('Erreur lors du routing Splash: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur de connexion à la base de données. Avez-vous créé Firestore ?')),
+          SnackBar(content: Text('Erreur de connexion à la base de données.')),
         );
-        context.go('/onboarding');
+        context.go('/login');
       }
     }
   }
@@ -79,7 +79,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background Architecture Image
+          // Background Architecture Image (keeping intact as requested)
           Image.network(
             'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1080&auto=format&fit=crop',
             fit: BoxFit.cover,
@@ -87,7 +87,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               color: AppColors.secondary,
             ),
           ),
-          // Gradient Overlay to ensure text readability
+          // Gradient Overlay
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -100,7 +100,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               ),
             ),
           ),
-          // Glassmorphic Content Container
+          // Glassmorphic Content Container with Spinning Logo
           Center(
             child: ClipRRect(
               borderRadius: BorderRadius.circular(32),
@@ -118,30 +118,43 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(20),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.15),
+                          color: Colors.white,
                           shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10,
+                              spreadRadius: 2,
+                            )
+                          ]
                         ),
-                        child: const Icon(
-                          Icons.apartment_rounded,
-                          size: 60,
-                          color: AppColors.primary, // Bright Orange
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          width: 120,
+                          height: 120,
+                          errorBuilder: (context, error, stackTrace) => const Icon(
+                            Icons.apartment_rounded,
+                            size: 80,
+                            color: AppColors.primary,
+                          ),
                         ),
-                      ).animate().scale(duration: 600.ms, curve: Curves.easeOutBack).fadeIn(),
+                      ).animate(onPlay: (controller) => controller.repeat())
+                       .rotate(duration: 2000.ms, curve: Curves.linear),
                       const SizedBox(height: 24),
                       const Text(
-                        'BUILDTRACK AI',
+                        'CHANTIER TRACK',
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 24,
                           fontWeight: FontWeight.w900,
                           color: AppColors.textPrimaryLight,
-                          letterSpacing: 2,
+                          letterSpacing: 1.5,
                         ),
                       ).animate().slideY(begin: 0.5, end: 0, duration: 600.ms, curve: Curves.easeOutCubic).fadeIn(),
                       const SizedBox(height: 8),
                       const Text(
-                        'Bienvenue sur ChantierTrack',
+                        'Chargement en cours...',
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.textSecondaryLight,
@@ -149,10 +162,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                         ),
                       ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
                       const SizedBox(height: 32),
-                      const CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                        strokeWidth: 3,
-                      ).animate(delay: 600.ms).fadeIn(duration: 400.ms),
                     ],
                   ),
                 ),

@@ -21,7 +21,7 @@ class _RapportsScreenState extends ConsumerState<RapportsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final projetsAsync = ref.watch(mesChantierProvider);
+    final projetsAsync = ref.watch(mesChantierStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
@@ -154,7 +154,7 @@ class _RapportsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final rapportsAsync = ref.watch(rapportsProjectProvider(projectId));
+    final rapportsAsync = ref.watch(rapportsProjectStreamProvider(projectId));
 
     return rapportsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
