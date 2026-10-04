@@ -51,21 +51,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1520), // Fond sombre épuré
+      backgroundColor: const Color(0xFFFAF8F5), // Fond beige doux uniforme avec le reste de l'app
       body: Stack(
         children: [
-          // Lueurs subtiles en arrière-plan
+          // Lueurs subtiles en arrière-plan vert menthe / sauge
           Positioned(
             top: -40,
             right: -40,
             child: Container(
-              width: 280,
-              height: 280,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF1B4D3E).withValues(alpha: 0.35),
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
                     Colors.transparent,
                   ],
                 ),
@@ -76,13 +76,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             bottom: -60,
             left: -40,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 320,
+              height: 320,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: RadialGradient(
                   colors: [
-                    const Color(0xFF10B981).withValues(alpha: 0.2),
+                    const Color(0xFFDCFCE7).withValues(alpha: 0.7),
                     Colors.transparent,
                   ],
                 ),
@@ -100,11 +100,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(32),
+                    border: Border.all(
+                      color: const Color(0xFFC8E6C9),
+                      width: 1.2,
+                    ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.25),
-                        blurRadius: 30,
-                        offset: const Offset(0, 12),
+                        color: const Color(0xFF1B4D3E).withValues(alpha: 0.08),
+                        blurRadius: 24,
+                        offset: const Offset(0, 8),
                       ),
                     ],
                   ),
