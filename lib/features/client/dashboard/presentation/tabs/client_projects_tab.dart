@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../../core/theme/app_spacing.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import '../../../../../core/theme/app_colors.dart';
 import '../../../../auth/providers/auth_provider.dart';
 import '../../../projects/providers/client_projects_provider.dart';
 import '../../../../../data/models/project_model.dart';
@@ -26,7 +27,7 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       case 'En cours':
         return 'en_cours';
       case 'En attente':
-        return 'en_recherche_entreprise'; // Ou "brouillon" ou autre status d'attente
+        return 'en_recherche_entreprise';
       case 'Terminés':
         return 'termine';
       default:
@@ -36,74 +37,161 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final projectsAsync = ref.watch(clientProjectsProvider);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(AppLocalizations.of(context)?.projectsTab ?? 'Mes Projets'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        title: Text(
+          AppLocalizations.of(context)?.projectsTab ?? 'Mes Projets',
+          style: const TextStyle(
+            color: Color(0xFF143D2B),
+            fontSize: 20,
+            fontWeight: FontWeight.w900,
+            letterSpacing: -0.3,
+          ),
+        ),
         centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const FaIcon(FontAwesomeIcons.filter, size: 20),
-            onPressed: () {},
-          )
-        ],
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.xl),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Tabs for project status
+              // Filtres en pilules avec nuances vertes
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
                 child: Row(
                   children: _filters.map((filter) {
+                    final isSelected = _selectedFilter == filter;
                     return Padding(
-                      padding: const EdgeInsets.only(right: AppSpacing.sm),
-                      child: _buildFilterChip(theme, filter, _selectedFilter == filter),
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedFilter = filter),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF143D2B) : Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: isSelected ? const Color(0xFF143D2B) : const Color(0xFFC8E6C9),
+                              width: 1.2,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isSelected
+                                    ? const Color(0xFF143D2B).withValues(alpha: 0.15)
+                                    : Colors.black.withValues(alpha: 0.02),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            filter,
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : const Color(0xFF64748B),
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
                     );
                   }).toList(),
                 ),
               ),
-              AppSpacing.vLg,
+
+              const SizedBox(height: 16),
+
               Expanded(
                 child: projectsAsync.when(
                   data: (projects) {
-                    // Filtrage des projets
                     final statusFilter = _mapFilterToStatus(_selectedFilter);
-                    final filteredProjects = _selectedFilter == 'Tous' 
-                        ? projects 
+                    final filteredProjects = _selectedFilter == 'Tous'
+                        ? projects
                         : projects.where((p) => p.statut == statusFilter).toList();
 
                     if (filteredProjects.isEmpty) {
                       return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('Aucun projet trouvé dans cette catégorie.'),
-                            const SizedBox(height: 16),
-                            ElevatedButton.icon(
-                              onPressed: () => _generateMockProjects(context, ref),
-                              icon: const Icon(Icons.add_circle_outline),
-                              label: const Text('Générer des projets de test'),
-                            ),
-                          ],
+                        child: Container(
+                          padding: const EdgeInsets.all(24),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(color: const Color(0xFFC8E6C9)),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE8F5E9),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.architecture_rounded,
+                                  color: Color(0xFF143D2B),
+                                  size: 40,
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Aucun projet dans cette catégorie',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Lancez NICO IA pour concevoir un nouveau plan ou créez un projet test.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                              const SizedBox(height: 18),
+                              ElevatedButton.icon(
+                                onPressed: () => _generateMockProjects(context, ref),
+                                icon: const Icon(Icons.add_circle_outline, color: Colors.white, size: 18),
+                                label: const Text(
+                                  'Générer des chantiers tests',
+                                  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF143D2B),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     }
 
                     return ListView.builder(
+                      physics: const BouncingScrollPhysics(),
+                      padding: const EdgeInsets.only(bottom: 90),
                       itemCount: filteredProjects.length,
                       itemBuilder: (context, index) {
                         final project = filteredProjects[index];
-                        return _buildProjectCard(theme, project);
+                        return _buildProjectCard(project, index);
                       },
                     );
                   },
-                  loading: () => const Center(child: CircularProgressIndicator()),
+                  loading: () => const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF10B981)),
+                  ),
                   error: (err, stack) => Center(child: Text('Erreur: $err')),
                 ),
               ),
@@ -115,70 +203,166 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
         padding: const EdgeInsets.only(bottom: 80.0),
         child: FloatingActionButton.extended(
           heroTag: null,
-          onPressed: () {
-            context.push('/client/create_project');
-          },
-          backgroundColor: theme.colorScheme.primary,
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: const Text('Nouveau projet', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          onPressed: () => context.push('/client/create_project'),
+          backgroundColor: const Color(0xFF143D2B),
+          elevation: 4,
+          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
+          label: const Text(
+            'Nouveau projet',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13.5),
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
-  Widget _buildProjectCard(ThemeData theme, ProjectModel project) {
+  Widget _buildProjectCard(ProjectModel project, int index) {
+    final ville = project.localisation['ville'] ?? 'Cameroun';
+    final quartier = project.localisation['quartier'] ?? '';
+    final loc = quartier.isNotEmpty ? '$ville, $quartier' : ville;
+
+    Color statusColor;
+    String statusLabel;
+
+    switch (project.statut) {
+      case 'en_cours':
+        statusColor = const Color(0xFF10B981);
+        statusLabel = 'En cours';
+        break;
+      case 'termine':
+        statusColor = const Color(0xFF3B82F6);
+        statusLabel = 'Terminé';
+        break;
+      case 'en_recherche_entreprise':
+      case 'brouillon_ia':
+        statusColor = const Color(0xFFF59E0B);
+        statusLabel = 'En recherche';
+        break;
+      default:
+        statusColor = const Color(0xFF64748B);
+        statusLabel = project.statut;
+        break;
+    }
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.only(bottom: 14),
       child: InkWell(
-        onTap: () {
-          // Navigation vers les détails du projet
-          context.push('/client/project_detail', extra: project);
-        },
-        borderRadius: BorderRadius.circular(16),
+        onTap: () => context.push('/client/project_detail', extra: project),
+        borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: theme.colorScheme.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: theme.colorScheme.outline.withValues(alpha: 0.3)),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFFC8E6C9),
+              width: 1.2,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Container(
-                width: 60,
-                height: 60,
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFF81C784).withValues(alpha: 0.4)),
                 ),
-                child: Center(
-                  child: FaIcon(FontAwesomeIcons.building, color: theme.colorScheme.primary),
+                child: const Center(
+                  child: Icon(
+                    Icons.apartment_rounded,
+                    color: Color(0xFF143D2B),
+                    size: 26,
+                  ),
                 ),
               ),
-              AppSpacing.hLg,
+              const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(project.titre, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-                    AppSpacing.vXs,
-                    Text('${project.localisation['ville'] ?? ''}, ${project.localisation['quartier'] ?? ''}', style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
-                    AppSpacing.vXs,
-                    Text('Statut: ${project.statut}', style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.primary)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            project.titre,
+                            style: const TextStyle(
+                              fontSize: 15.5,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF0F172A),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            statusLabel,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 13, color: Color(0xFF64748B)),
+                        const SizedBox(width: 3),
+                        Expanded(
+                          child: Text(
+                            loc,
+                            style: const TextStyle(
+                              color: Color(0xFF64748B),
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${(project.budgetPrevisionnel).toStringAsFixed(0)} FCFA',
+                      style: const TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF143D2B),
+                      ),
+                    ),
                   ],
                 ),
               ),
+              const SizedBox(width: 6),
               IconButton(
-                icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+                icon: const Icon(Icons.delete_outline_rounded, color: Color(0xFFEF4444), size: 20),
                 onPressed: () => _confirmDeleteProject(context, ref, project),
               ),
-              const FaIcon(FontAwesomeIcons.chevronRight, size: 16),
+              const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFF81C784), size: 14),
             ],
           ),
         ),
       ),
-    );
+    ).animate().fadeIn(delay: (index * 60).ms, duration: 350.ms).slideY(begin: 0.05);
   }
 
   Future<void> _confirmDeleteProject(BuildContext context, WidgetRef ref, ProjectModel project) async {
@@ -186,16 +370,21 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
-          title: const Text('Supprimer le projet'),
-          content: Text('Voulez-vous vraiment supprimer le projet "${project.titre}" ? Cette action est irréversible.'),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Text(
+            'Supprimer le projet',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+          ),
+          content: Text('Voulez-vous vraiment supprimer le projet "${project.titre}" ?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(false),
-              child: const Text('Annuler'),
+              child: const Text('Annuler', style: TextStyle(color: Color(0xFF64748B))),
             ),
             FilledButton(
               onPressed: () => Navigator.of(ctx).pop(true),
-              style: FilledButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.error),
+              style: FilledButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
               child: const Text('Supprimer'),
             ),
           ],
@@ -207,7 +396,12 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       try {
         await ref.read(projectRepositoryProvider).delete(project.id);
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Projet supprimé avec succès.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Color(0xFF143D2B),
+              content: Text('Projet supprimé avec succès.'),
+            ),
+          );
         }
       } catch (e) {
         if (context.mounted) {
@@ -217,57 +411,24 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
     }
   }
 
-  Widget _buildFilterChip(ThemeData theme, String label, bool isSelected) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) {
-        setState(() {
-          _selectedFilter = label;
-        });
-      },
-      backgroundColor: theme.colorScheme.surface,
-      selectedColor: theme.colorScheme.primary,
-      labelStyle: TextStyle(
-        color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurface,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-    );
-  }
-
   Future<void> _generateMockProjects(BuildContext context, WidgetRef ref) async {
     try {
       final user = ref.read(authStateProvider).value;
       if (user == null) return;
 
       final firestore = FirebaseFirestore.instance;
-      
+
       final mockProjects = [
         ProjectModel(
           id: firestore.collection('projects').doc().id,
           clientId: user.uid,
-          titre: 'Villa Horizon',
-          description: 'Construction d\'une villa R+1 avec piscine',
-          localisation: {'ville': 'Dakar', 'quartier': 'Almadies'},
-          budgetPrevisionnel: 150000000,
-          budgetActuel: 45000000,
+          titre: 'Villa Contemporaine Bastos',
+          description: 'Construction d\'une villa contemporaine 4 chambres avec piscine',
+          localisation: {'ville': 'Yaoundé', 'quartier': 'Bastos'},
+          budgetPrevisionnel: 75000000,
+          budgetActuel: 25000000,
           dateDebut: DateTime.now().subtract(const Duration(days: 30)),
           dateFinPrevue: DateTime.now().add(const Duration(days: 150)),
-          statut: 'en_cours',
-          listePlans: ['https://picsum.photos/seed/projet-villa/1000/700'],
-          listeDocuments: [],
-        ),
-        ProjectModel(
-          id: firestore.collection('projects').doc().id,
-          clientId: user.uid,
-          titre: 'Rénovation Appartement',
-          description: 'Rénovation complète d\'un T4',
-          localisation: {'ville': 'Dakar', 'quartier': 'Plateau'},
-          budgetPrevisionnel: 25000000,
-          budgetActuel: 5000000,
-          dateDebut: DateTime.now().subtract(const Duration(days: 10)),
-          dateFinPrevue: DateTime.now().add(const Duration(days: 45)),
           statut: 'en_cours',
           listePlans: [],
           listeDocuments: [],
@@ -275,13 +436,27 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
         ProjectModel(
           id: firestore.collection('projects').doc().id,
           clientId: user.uid,
-          titre: 'Immeuble Commercial',
-          description: 'Construction R+4 usage mixte',
-          localisation: {'ville': 'Dakar', 'quartier': 'Ngor'},
-          budgetPrevisionnel: 350000000,
+          titre: 'Duplex Moderne Bonapriso',
+          description: 'Duplex moderne R+1 avec garage et terrasse',
+          localisation: {'ville': 'Douala', 'quartier': 'Bonapriso'},
+          budgetPrevisionnel: 45000000,
+          budgetActuel: 10000000,
+          dateDebut: DateTime.now().subtract(const Duration(days: 10)),
+          dateFinPrevue: DateTime.now().add(const Duration(days: 90)),
+          statut: 'en_cours',
+          listePlans: [],
+          listeDocuments: [],
+        ),
+        ProjectModel(
+          id: firestore.collection('projects').doc().id,
+          clientId: user.uid,
+          titre: 'Résidence Kribi Bord de Mer',
+          description: 'Résidence de vacances avec jardin paysager',
+          localisation: {'ville': 'Kribi', 'quartier': 'Plage'},
+          budgetPrevisionnel: 95000000,
           budgetActuel: 0,
           dateDebut: DateTime.now().add(const Duration(days: 15)),
-          dateFinPrevue: DateTime.now().add(const Duration(days: 365)),
+          dateFinPrevue: DateTime.now().add(const Duration(days: 300)),
           statut: 'en_recherche_entreprise',
           listePlans: [],
           listeDocuments: [],
@@ -291,9 +466,14 @@ class _ClientProjectsTabState extends ConsumerState<ClientProjectsTab> {
       for (var p in mockProjects) {
         await firestore.collection('projects').doc(p.id).set(p.toJson());
       }
-      
+
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Projets de test générés avec succès !')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            backgroundColor: Color(0xFF143D2B),
+            content: Text('Projets de test générés avec succès !'),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

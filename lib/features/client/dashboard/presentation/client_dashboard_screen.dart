@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../search_entreprises/presentation/screens/search_entreprises_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import 'tabs/client_projects_tab.dart';
 import '../../../chat/presentation/screens/conversations_list_screen.dart';
-import '../../../../data/models/entreprise_model.dart';
-import '../../../../data/repositories/entreprise_repository.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/settings_provider.dart';
@@ -16,22 +13,6 @@ import '../../../../core/widgets/app_circular_loader.dart';
 import 'widgets/app_settings_modal.dart';
 import 'widgets/quick_services_modal.dart';
 
-// ─────────────────────────────────────────────
-// Providers Firestore
-// ─────────────────────────────────────────────
-final _nearbyEntreprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
-  final repo = ref.watch(entrepriseRepositoryProvider);
-  return repo.watchAll();
-});
-
-final _recommendedEntreprisesProvider = StreamProvider<List<EntrepriseModel>>((ref) {
-  final repo = ref.watch(entrepriseRepositoryProvider);
-  return repo.watchRecommended(limit: 5);
-});
-
-// ─────────────────────────────────────────────
-// Main Dashboard Screen
-// ─────────────────────────────────────────────
 class ClientDashboardScreen extends ConsumerStatefulWidget {
   const ClientDashboardScreen({super.key});
 
@@ -42,51 +23,98 @@ class ClientDashboardScreen extends ConsumerStatefulWidget {
 class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
   int _currentIndex = 0;
 
-  void _changeTab(int index) {
-    setState(() => _currentIndex = index);
-  }
+  late final List<Widget> _pages;
 
-  List<Widget> get _pages => [
-    ClientHomeTab(onTabChange: _changeTab),
-    const ClientProjectsTab(),
-    const SearchEntreprisesScreen(),
-    const ConversationsListScreen(),
-    const ProfileScreen(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      ClientHomeTab(onTabChange: (index) {
+        setState(() => _currentIndex = index);
+      }),
+      const ClientProjectsTab(),
+      const SearchEntreprisesScreen(),
+      const ConversationsListScreen(),
+      const ProfileScreen(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFFAF8F5), // Fond beige doux architectural
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Image d'arrière-plan recouvrant toute la surface de l'écran
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/dashboard_bg.jpg',
-              fit: BoxFit.cover,
-            ),
-          ),
-          // Voile léger pour faire ressortir l'image tout en garantissant le contraste
-          Positioned.fill(
+          // Lueurs d'ambiance vert forêt & menthe
+          Positioned(
+            top: -60,
+            right: -60,
             child: Container(
-              color: Colors.white.withValues(alpha: 0.25),
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
             ),
           ),
-          // Contenu principal
+          Positioned(
+            bottom: 60,
+            left: -60,
+            child: Container(
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFDCFCE7).withValues(alpha: 0.7),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Contenu de la page sélectionnée
           AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
+            duration: const Duration(milliseconds: 250),
             child: _pages[_currentIndex],
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push('/client/ia_chat'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: const Color(0xFF143D2B),
+        elevation: 6,
         shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: Colors.white, size: 32),
+        child: Container(
+          width: 56,
+          height: 56,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: const LinearGradient(
+              colors: [Color(0xFF143D2B), Color(0xFF10B981)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 26),
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _buildBottomNav(),
@@ -102,7 +130,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
       shape: const CircularNotchedRectangle(),
       notchMargin: 8.0,
       elevation: 20,
-      shadowColor: Colors.black.withValues(alpha: 0.1),
+      shadowColor: const Color(0xFF143D2B).withValues(alpha: 0.12),
       child: SizedBox(
         height: 64,
         child: Row(
@@ -111,7 +139,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
             Row(
               children: [
                 _navItem(0, Icons.home_rounded, isFrench ? "Accueil" : "Home"),
-                _navItem(1, Icons.assignment_rounded, isFrench ? "Projets" : "My Task"),
+                _navItem(1, Icons.assignment_rounded, isFrench ? "Projets" : "Projects"),
               ],
             ),
             Row(
@@ -136,16 +164,16 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
         children: [
           Icon(
             icon,
-            color: isSelected ? AppColors.primary : Colors.grey.shade400,
-            size: 24,
+            color: isSelected ? const Color(0xFF143D2B) : const Color(0xFF94A3B8),
+            size: 23,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? AppColors.primary : Colors.grey.shade400,
-              fontSize: 10,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected ? const Color(0xFF143D2B) : const Color(0xFF94A3B8),
+              fontSize: 10.5,
+              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
             ),
           ),
         ],
@@ -155,7 +183,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
 }
 
 // ─────────────────────────────────────────────
-// Home Tab — Redesign (inspiré du design moderne)
+// Home Tab — Redesign NextGen Construction
 // ─────────────────────────────────────────────
 class ClientHomeTab extends ConsumerStatefulWidget {
   final void Function(int)? onTabChange;
@@ -169,18 +197,18 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(currentUserProfileProvider).value;
-    final userName = user?.nom ?? 'Jenifer';
+    final userName = user?.nom ?? 'Client';
     final language = ref.watch(languageProvider);
     final isFrench = language == 'fr';
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Let the background image show through
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.grid_view_rounded, color: AppColors.primary),
+          icon: const Icon(Icons.grid_view_rounded, color: Color(0xFF143D2B)),
           tooltip: isFrench ? 'Services & Raccourcis' : 'Services & Shortcuts',
           onPressed: () {
             showQuickServicesModal(
@@ -190,199 +218,495 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
             );
           },
         ),
-        title: Text(
-          isFrench ? 'Accueil' : 'Home',
-          style: const TextStyle(color: AppColors.primary, fontSize: 18, fontWeight: FontWeight.bold),
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 28,
+                height: 28,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.architecture_rounded,
+                  color: Color(0xFF143D2B),
+                  size: 24,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Text(
+              'ChantierTrack',
+              style: TextStyle(
+                color: Color(0xFF143D2B),
+                fontSize: 18,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.3,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
-              icon: const Icon(Icons.settings_rounded, color: AppColors.primary),
+              icon: const Icon(Icons.settings_rounded, color: Color(0xFF143D2B)),
               tooltip: isFrench ? 'Paramètres' : 'Settings',
-              onPressed: () {
-                showAppSettingsModal(context);
-              },
+              onPressed: () => showAppSettingsModal(context),
             ),
           ),
         ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10).copyWith(bottom: 100),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8).copyWith(bottom: 110),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Greeting ──
-            Text(
-              isFrench ? 'Bonjour $userName !' : 'Hi $userName!',
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
-                letterSpacing: -0.5,
-              ),
-            ).animate().fadeIn(duration: 400.ms),
-            const SizedBox(height: 4),
-            Text(
-              isFrench ? 'Bienvenue sur votre espace' : 'Welcome to your workspace',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF2D3748),
-                fontWeight: FontWeight.w600,
-              ),
-            ).animate().fadeIn(delay: 100.ms),
-            const SizedBox(height: 24),
-
-            // ── Search Bar ──
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.03),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: isFrench ? 'Rechercher un artisan, un service...' : 'Search for a pro, service...',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 15),
-                  prefixIcon: Icon(Icons.search_rounded, color: Colors.grey.shade400),
-                  border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 15),
+            // ── Greeting Header ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isFrench ? 'Bonjour $userName !' : 'Hi $userName!',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                        color: Color(0xFF0F172A),
+                        letterSpacing: -0.5,
+                      ),
+                    ).animate().fadeIn(duration: 400.ms),
+                    const SizedBox(height: 2),
+                    Text(
+                      isFrench
+                          ? 'Bienvenue sur votre espace ChantierTrack'
+                          : 'Welcome to your construction workspace',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ).animate().fadeIn(delay: 100.ms),
+                  ],
                 ),
-              ),
-            ).animate().fadeIn(delay: 200.ms).slideY(begin: 0.05),
-            const SizedBox(height: 24),
-
-            // ── Project Theme Banner (BTP Theme) ──
-            Container(
-              height: 140,
-              decoration: BoxDecoration(
-                color: AppColors.primary, // Dark Blue
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 8),
-                  ),
-                ],
-              ),
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    left: 24,
-                    top: 24,
-                    bottom: 24,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          isFrench ? 'Votre Nouveau Projet' : 'Your New Project',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.8),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          isFrench ? 'Construire\navec sérénité' : 'Build\nwith serenity',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            height: 1.2,
-                          ),
-                        ),
-                      ],
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF81C784).withValues(alpha: 0.5),
                     ),
                   ),
-                ],
-              ),
-            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.05),
-            const SizedBox(height: 32),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.verified_rounded, color: Color(0xFF10B981), size: 14),
+                      SizedBox(width: 4),
+                      Text(
+                        '100% Qualité',
+                        style: TextStyle(
+                          color: Color(0xFF143D2B),
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
 
-            // ── Ongoing Projects Title ──
+            const SizedBox(height: 18),
+
+            // ── Hero Banner NextGen (Inspiré de l'image de référence) ──
+            _buildNextGenHeroCard(context, isFrench),
+
+            const SizedBox(height: 26),
+
+            // ── Section Actions Rapides / Modules ──
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  isFrench ? 'Actions Rapides' : 'Quick Actions',
+                  isFrench ? 'Modules & Outils' : 'Modules & Tools',
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimaryLight,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                Text(
+                  isFrench ? 'Accès rapide' : 'Quick access',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF10B981),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
-            ).animate().fadeIn(delay: 400.ms),
-            const SizedBox(height: 16),
+            ).animate().fadeIn(delay: 350.ms),
 
-            // ── Projects Grid ──
+            const SizedBox(height: 14),
+
+            // ── Grille des 4 Modules ──
             GridView.count(
               crossAxisCount: 2,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 0.95,
+              mainAxisSpacing: 14,
+              crossAxisSpacing: 14,
+              childAspectRatio: 1.05,
               children: [
-                _FeatureCard(
+                _NextGenModuleCard(
                   title: isFrench ? 'NICO IA' : 'NICO AI',
-                  category: isFrench ? 'Générer plan 3D' : 'Generate 3D plan',
+                  subtitle: isFrench ? 'Plans 3D & Devis IA' : '3D Plans & Estimates',
                   icon: Icons.architecture_rounded,
-                  isDark: true,
+                  badgeText: 'IA 3D',
+                  isHighlighted: true,
                   onTap: () => _openModule(
                     () => context.push('/client/ia_chat'),
-                    name: isFrench ? 'NICO IA' : 'NICO AI',
+                    name: 'NICO IA',
                   ),
                 ),
-                _FeatureCard(
+                _NextGenModuleCard(
                   title: isFrench ? 'Mes Projets' : 'My Projects',
-                  category: isFrench ? 'Suivi de chantier' : 'Project tracking',
-                  icon: Icons.track_changes_rounded,
-                  isDark: false,
+                  subtitle: isFrench ? 'Suivi & Planning' : 'Tracking & Planning',
+                  icon: Icons.assignment_rounded,
+                  badgeText: 'Chantiers',
+                  isHighlighted: false,
                   onTap: () => _openModule(
                     () => widget.onTabChange?.call(1),
                     name: isFrench ? 'Mes Projets' : 'My Projects',
                   ),
                 ),
-                _FeatureCard(
-                  title: isFrench ? 'Recherche' : 'Search',
-                  category: isFrench ? 'Trouver un pro' : 'Find a contractor',
+                _NextGenModuleCard(
+                  title: isFrench ? 'Trouver un Pro' : 'Find a Pro',
+                  subtitle: isFrench ? 'Entreprises certifiées' : 'Certified Contractors',
                   icon: Icons.search_rounded,
-                  isDark: false,
+                  badgeText: 'Artisans',
+                  isHighlighted: false,
                   onTap: () => _openModule(
                     () => widget.onTabChange?.call(2),
-                    name: isFrench ? 'Recherche' : 'Search',
+                    name: isFrench ? 'Trouver un Pro' : 'Find a Pro',
                   ),
                 ),
-                _FeatureCard(
+                _NextGenModuleCard(
                   title: isFrench ? 'Réclamations' : 'Claims',
-                  category: isFrench ? 'Support client' : 'Customer support',
-                  icon: Icons.report_problem_rounded,
-                  isDark: false,
+                  subtitle: isFrench ? 'Médiation & Support' : 'Support & Assistance',
+                  icon: Icons.shield_outlined,
+                  badgeText: 'Garantie',
+                  isHighlighted: false,
                   onTap: () => _openModule(
                     () => context.push('/client/reclamation'),
                     name: isFrench ? 'Réclamations' : 'Claims',
                   ),
                 ),
               ],
-            ).animate().fadeIn(delay: 500.ms),
+            ).animate().fadeIn(delay: 450.ms),
+
+            const SizedBox(height: 24),
+
+            // ── Footer Info Contact & Qualité (Pill Bar comme sur l'affiche) ──
+            _buildNextGenFooterPill(isFrench),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildNextGenHeroCard(BuildContext context, bool isFrench) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF143D2B), // Deep Forest Green
+            Color(0xFF1B5E3B), // Emerald Forest
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: const Color(0xFF34D399).withValues(alpha: 0.35),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF143D2B).withValues(alpha: 0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Décoration d'ondes en arrière-plan
+          Positioned(
+            right: -30,
+            top: -30,
+            child: Container(
+              width: 180,
+              height: 180,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFF10B981).withValues(alpha: 0.3),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Tag supérieur NextGen
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4.5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF86EFAC).withValues(alpha: 0.4),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Text(
+                        'Building Excellence, One Project At A Time',
+                        style: TextStyle(
+                          color: Color(0xFFDCFCE7),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                    // Sceau 100% Quality Gold & Green
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEAB308).withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFFDE047),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.star_rounded, color: Color(0xFFFDE047), size: 12),
+                          SizedBox(width: 3),
+                          Text(
+                            '100% QUALITÉ',
+                            style: TextStyle(
+                              color: Color(0xFFFEF08A),
+                              fontSize: 9,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+
+                // Grand titre
+                Text(
+                  isFrench ? 'Concevez vos Projets\navec NICO IA' : 'Designing Unique\nStructures',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    height: 1.2,
+                    letterSpacing: -0.4,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                // Liste de nos services (comme sur l'image)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildServiceItem(
+                        Icons.home_work_outlined,
+                        isFrench ? 'Plans 3D Sur-Mesure & Devis' : 'Custom Home Builds & 3D Plans',
+                      ),
+                      const SizedBox(height: 6),
+                      _buildServiceItem(
+                        Icons.view_in_ar_rounded,
+                        isFrench ? 'Modélisation 3D Meshy & AR' : '3D Design & Visualization',
+                      ),
+                      const SizedBox(height: 6),
+                      _buildServiceItem(
+                        Icons.engineering_outlined,
+                        isFrench ? 'Suivi de Chantier & Entreprises' : 'Project Management & Contractors',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Bouton d'action
+                SizedBox(
+                  width: double.infinity,
+                  height: 46,
+                  child: ElevatedButton.icon(
+                    onPressed: () => _openModule(
+                      () => context.push('/client/ia_chat'),
+                      name: 'NICO IA',
+                    ),
+                    icon: const Icon(Icons.auto_awesome, color: Color(0xFF143D2B), size: 18),
+                    label: Text(
+                      isFrench ? 'Démarrer avec NICO IA' : 'Start with NICO AI',
+                      style: const TextStyle(
+                        color: Color(0xFF143D2B),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 13.5,
+                      ),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF86EFAC),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 250.ms).slideY(begin: 0.06);
+  }
+
+  Widget _buildServiceItem(IconData icon, String text) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: const BoxDecoration(
+            color: Color(0xFF10B981),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 12, color: Colors.white),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNextGenFooterPill(bool isFrench) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFFC8E6C9),
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F5E9),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(Icons.phone_in_talk_rounded, color: Color(0xFF10B981), size: 16),
+              ),
+              const SizedBox(width: 8),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Assistance 24/7',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  Text(
+                    '+237 600 000 000',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDCFCE7),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Text(
+              'Certifié ChantierTrack',
+              style: TextStyle(
+                color: Color(0xFF15803D),
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    ).animate().fadeIn(delay: 550.ms);
   }
 
   void _openModule(VoidCallback action, {String? name}) {
@@ -399,607 +723,109 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
   }
 }
 
-class _FeatureCard extends StatelessWidget {
+class _NextGenModuleCard extends StatelessWidget {
   final String title;
-  final String category;
+  final String subtitle;
   final IconData icon;
-  final bool isDark;
+  final String badgeText;
+  final bool isHighlighted;
   final VoidCallback onTap;
 
-  const _FeatureCard({
+  const _NextGenModuleCard({
     required this.title,
-    required this.category,
+    required this.subtitle,
     required this.icon,
-    required this.isDark,
+    required this.badgeText,
+    required this.isHighlighted,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = isDark ? AppColors.primary : Colors.white;
-    final textColor = isDark ? Colors.white : AppColors.primary;
-    final subtitleColor = isDark ? Colors.white70 : Colors.grey.shade500;
-    
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: bgColor,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isHighlighted ? const Color(0xFF10B981) : const Color(0xFFC8E6C9),
+            width: isHighlighted ? 1.5 : 1.2,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+              color: isHighlighted
+                  ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                  : const Color(0xFF143D2B).withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Align(
-              alignment: Alignment.topRight,
-              child: Icon(Icons.arrow_outward_rounded, color: subtitleColor, size: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isHighlighted
+                        ? const Color(0xFFE8F5E9)
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: isHighlighted ? const Color(0xFF10B981) : const Color(0xFF143D2B),
+                    size: 20,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: isHighlighted
+                        ? const Color(0xFF10B981).withValues(alpha: 0.12)
+                        : const Color(0xFFF1F5F9),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    badgeText,
+                    style: TextStyle(
+                      color: isHighlighted ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ),
             const Spacer(),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: isDark ? Colors.white.withValues(alpha: 0.15) : AppColors.primary.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: textColor, size: 28),
-            ),
-            const SizedBox(height: 12),
             Text(
               title,
-              style: TextStyle(
-                color: textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
+              style: const TextStyle(
+                color: Color(0xFF0F172A),
+                fontWeight: FontWeight.w800,
+                fontSize: 14.5,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
-              category,
-              style: TextStyle(
-                color: subtitleColor,
+              subtitle,
+              style: const TextStyle(
+                color: Color(0xFF64748B),
                 fontSize: 11,
+                height: 1.25,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _ActionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 54,
-              height: 54,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: color, size: 28),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimaryLight,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.grey500,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: AppColors.grey400),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// Promo Banner
-// ─────────────────────────────────────────────
-class _PromoBanner extends StatelessWidget {
-  const _PromoBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 160,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: [AppColors.primary, AppColors.secondaryDark],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.35),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Decorative circles
-          Positioned(
-            right: -20, top: -20,
-            child: Container(
-              width: 110, height: 110,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.08),
-              ),
-            ),
-          ),
-          Positioned(
-            right: 40, bottom: -30,
-            child: Container(
-              width: 80, height: 80,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.06),
-              ),
-            ),
-          ),
-          // Content
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'Offre exclusive',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Trouvez le bon\nprofessionnel BTP',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w800,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-                        decoration: BoxDecoration(
-                          color: AppColors.secondary,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          'Explorer →',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                  width: 80, height: 80,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.engineering_rounded, color: Colors.white, size: 44),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// Category Chip
-// ─────────────────────────────────────────────
-class _CategoryChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  const _CategoryChip({required this.label, required this.icon, required this.selected});
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: 72,
-      decoration: BoxDecoration(
-        color: selected ? AppColors.primary : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: selected
-                ? AppColors.primary.withValues(alpha: 0.28)
-                : AppColors.textPrimaryLight.withValues(alpha: 0.05),
-            blurRadius: selected ? 12 : 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 24,
-            color: selected ? Colors.white : AppColors.primary,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: selected ? Colors.white : AppColors.textPrimaryLight,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-// Nearby horizontal card
-// ─────────────────────────────────────────────
-class _NearbyCard extends StatelessWidget {
-  final EntrepriseModel entreprise;
-  const _NearbyCard({required this.entreprise});
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = entreprise.realisations.isNotEmpty ? entreprise.realisations.first : '';
-    return Container(
-      width: 175,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimaryLight.withValues(alpha: 0.07),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            child: Stack(
-              children: [
-                imageUrl.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        height: 130,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => _imgPlaceholder(),
-                        errorWidget: (context, url, error) => _imgPlaceholder(),
-                      )
-                    : _imgPlaceholder(),
-                // Favourite
-                Positioned(
-                  top: 10, right: 10,
-                  child: Container(
-                    width: 30, height: 30,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(color: AppColors.textPrimaryLight.withValues(alpha: 0.1), blurRadius: 6),
-                      ],
-                    ),
-                    child: const Icon(Icons.favorite_border_rounded, size: 16, color: AppColors.secondary),
-                  ),
-                ),
-                // Zone badge
-                if (entreprise.zoneIntervention.isNotEmpty)
-                  Positioned(
-                    bottom: 8, left: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.location_on, color: Colors.white, size: 10),
-                          const SizedBox(width: 3),
-                          Text(
-                            entreprise.zoneIntervention.first,
-                            style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          // Info
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entreprise.raisonSociale,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: AppColors.textPrimaryLight,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  entreprise.zoneIntervention.join(', '),
-                  style: TextStyle(fontSize: 11, color: AppColors.grey500),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 14),
-                    const SizedBox(width: 3),
-                    Text(
-                      entreprise.noteMoyenne.toStringAsFixed(1),
-                      style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimaryLight,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '(${entreprise.nombreAvis})',
-                      style: TextStyle(fontSize: 11, color: AppColors.grey500),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _imgPlaceholder() => Container(
-    height: 130, width: double.infinity,
-    color: const Color(0xFFE6F3F0),
-    child: const Center(child: Icon(Icons.business_rounded, color: AppColors.primary, size: 40)),
-  );
-}
-
-// ─────────────────────────────────────────────
-// Recommended list card
-// ─────────────────────────────────────────────
-class _RecommendedCard extends StatelessWidget {
-  final EntrepriseModel entreprise;
-  const _RecommendedCard({required this.entreprise});
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrl = entreprise.realisations.isNotEmpty ? entreprise.realisations.first : '';
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Image
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: imageUrl.isNotEmpty
-                ? CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    width: 78, height: 78,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => _sqPlaceholder(),
-                    errorWidget: (context, url, error) => _sqPlaceholder(),
-                  )
-                : _sqPlaceholder(),
-          ),
-          const SizedBox(width: 14),
-          // Info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        entreprise.raisonSociale,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                          color: AppColors.textPrimaryLight,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 14),
-                    const SizedBox(width: 3),
-                    Text(
-                      entreprise.noteMoyenne.toStringAsFixed(1),
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    Icon(Icons.location_on_outlined, size: 13, color: AppColors.grey500),
-                    const SizedBox(width: 2),
-                    Expanded(
-                      child: Text(
-                        entreprise.zoneIntervention.join(', '),
-                        style: TextStyle(fontSize: 12, color: AppColors.grey500),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _InfoBadge(
-                      icon: Icons.chat_bubble_outline_rounded,
-                      label: '${entreprise.nombreAvis} avis',
-                    ),
-                    const SizedBox(width: 8),
-                    _InfoBadge(
-                      icon: Icons.work_history_outlined,
-                      label: '${entreprise.anneesExperience} ans',
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _sqPlaceholder() => Container(
-    width: 78, height: 78,
-    color: const Color(0xFFE6F3F0),
-    child: const Center(child: Icon(Icons.business_rounded, color: AppColors.primary, size: 36)),
-  );
-}
-
-// ─────────────────────────────────────────────
-// Small badge for recommended card
-// ─────────────────────────────────────────────
-class _InfoBadge extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  const _InfoBadge({required this.icon, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundLight,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 12, color: AppColors.primary),
-          const SizedBox(width: 4),
-          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimaryLight)),
-        ],
       ),
     );
   }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../../../data/models/user_model.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../auth/data/auth_repository.dart';
@@ -113,84 +112,127 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF8F5),
       appBar: AppBar(
-        title: const Text('Mon Profil'),
+        backgroundColor: const Color(0xFF143D2B),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Mon Profil',
+          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18, color: Colors.white),
+        ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            Center(
-              child: ProfileHeader(
-                user: user,
-                isUploading: _isUploadingPhoto,
-                onPhotoSelected: (file) async {
-                  setState(() => _isUploadingPhoto = true);
-                  try {
-                    final storage = ref.read(storageServiceProvider);
-                    final data = await file.readAsBytes();
-                    final url = await storage.uploadData('profile_pictures/${user.uid}/avatar.jpg', data, contentType: file.mimeType);
-                    
-                    final updatedUser = user.copyWith(photoUrl: url);
-                    await ref.read(userRepositoryProvider).updateUser(updatedUser);
-                    
-                    // Invalider le provider pour recharger le profil
-                    ref.invalidate(currentUserProfileProvider);
-                    
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo de profil mise à jour !')));
-                    }
-                  } catch (e) {
-                    if (mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : $e')));
-                    }
-                  } finally {
-                    if (mounted) setState(() => _isUploadingPhoto = false);
-                  }
-                },
+      body: Stack(
+        children: [
+          // Ambient glow
+          Positioned(
+            top: -40,
+            right: -60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
-            
-            AppSpacing.vXxl,
-            EditableInfoSection(user: user),
-            
-            if (user.role == 'entreprise') ...[
-              AppSpacing.vXxl,
-              _buildCertificationSection(context), // Added certification section
-              AppSpacing.vXxl,
-              _buildActivitySection(context),
-            ],
-            
-            AppSpacing.vXxl,
-            const SettingsSection(),
-            
-            AppSpacing.vXxl,
-            const SecuritySection(),
-            
-            AppSpacing.vXxl,
-            AppSpacing.vXxl,
-            
-            // Logout
-            AppButton(
-              onPressed: _handleLogout,
-              text: 'Se déconnecter',
-              icon: Icons.logout,
-              isSecondary: true,
+          ),
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Column(
+              children: [
+                Center(
+                  child: ProfileHeader(
+                    user: user,
+                    isUploading: _isUploadingPhoto,
+                    onPhotoSelected: (file) async {
+                      setState(() => _isUploadingPhoto = true);
+                      try {
+                        final storage = ref.read(storageServiceProvider);
+                        final data = await file.readAsBytes();
+                        final url = await storage.uploadData('profile_pictures/${user.uid}/avatar.jpg', data, contentType: file.mimeType);
+                        
+                        final updatedUser = user.copyWith(photoUrl: url);
+                        await ref.read(userRepositoryProvider).updateUser(updatedUser);
+                        
+                        // Invalider le provider pour recharger le profil
+                        ref.invalidate(currentUserProfileProvider);
+                        
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Photo de profil mise à jour !')));
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Erreur : $e')));
+                        }
+                      } finally {
+                        if (mounted) setState(() => _isUploadingPhoto = false);
+                      }
+                    },
+                  ),
+                ),
+                
+                AppSpacing.vXxl,
+                EditableInfoSection(user: user),
+                
+                if (user.role == 'entreprise') ...[
+                  AppSpacing.vXxl,
+                  _buildCertificationSection(context), // Added certification section
+                  AppSpacing.vXxl,
+                  _buildActivitySection(context),
+                ],
+                
+                AppSpacing.vXxl,
+                const SettingsSection(),
+                
+                AppSpacing.vXxl,
+                const SecuritySection(),
+                
+                AppSpacing.vXxl,
+                AppSpacing.vXxl,
+                
+                // Logout
+                SizedBox(
+                  width: double.infinity,
+                  height: 52,
+                  child: ElevatedButton.icon(
+                    onPressed: _handleLogout,
+                    icon: const Icon(Icons.logout_rounded, color: Color(0xFF143D2B)),
+                    label: const Text(
+                      'Se déconnecter',
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: Color(0xFF143D2B)),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(color: Color(0xFFC8E6C9), width: 1.5),
+                      ),
+                    ),
+                  ),
+                ),
+                
+                AppSpacing.vMd,
+                
+                // Delete Account
+                TextButton.icon(
+                  onPressed: _handleDeleteAccount,
+                  icon: const Icon(Icons.delete_forever_rounded, color: Color(0xFFDC2626), size: 20),
+                  label: const Text('Supprimer mon compte', style: TextStyle(color: Color(0xFFDC2626), fontWeight: FontWeight.w700)),
+                ),
+                
+                const SizedBox(height: 100),
+              ],
             ),
-            
-            AppSpacing.vMd,
-            
-            // Delete Account
-            TextButton.icon(
-              onPressed: _handleDeleteAccount,
-              icon: const Icon(Icons.delete_forever, color: AppColors.error),
-              label: const Text('Supprimer mon compte', style: TextStyle(color: AppColors.error)),
-            ),
-            
-            const SizedBox(height: 100),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

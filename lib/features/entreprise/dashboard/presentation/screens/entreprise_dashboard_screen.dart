@@ -37,7 +37,7 @@ class _EntrepriseDashboardScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: const Color(0xFFFAF8F5),
       body: IndexedStack(
         index: _currentIndex,
         children: _pages,
@@ -53,18 +53,20 @@ class _EntrepriseDashboardScreenState
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1E2822),
+        color: const Color(0xFF143D2B),
         borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: const Color(0xFFC8E6C9).withValues(alpha: 0.3), width: 1.2),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, -5)),
+            color: const Color(0xFF143D2B).withValues(alpha: 0.25),
+            blurRadius: 20,
+            offset: const Offset(0, 6),
+          ),
         ],
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -88,7 +90,7 @@ class _EntrepriseDashboardScreenState
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.secondary.withOpacity(0.15) : Colors.transparent,
+          color: selected ? const Color(0xFF10B981).withValues(alpha: 0.25) : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Stack(
@@ -99,27 +101,33 @@ class _EntrepriseDashboardScreenState
               children: [
                 Icon(
                   icon,
-                  color: selected ? AppColors.secondary : Colors.white54,
-                  size: 24,
+                  color: selected ? const Color(0xFF86EFAC) : Colors.white60,
+                  size: 22,
                 ),
-                const SizedBox(height: 2),
-                Text(label,
-                    style: TextStyle(
-                        color: selected ? AppColors.secondary : Colors.white54,
-                        fontSize: 10,
-                        fontWeight: selected ? FontWeight.bold : FontWeight.normal)),
+                const SizedBox(height: 3),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: selected ? const Color(0xFF86EFAC) : Colors.white60,
+                    fontSize: 10,
+                    fontWeight: selected ? FontWeight.w900 : FontWeight.w500,
+                  ),
+                ),
               ],
             ),
             if (badge > 0)
               Positioned(
-                top: -6,
-                right: -8,
+                top: -4,
+                right: -6,
                 child: Container(
-                  width: 18, height: 18,
-                  decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                  width: 18,
+                  height: 18,
+                  decoration: const BoxDecoration(color: Color(0xFFEAB308), shape: BoxShape.circle),
                   child: Center(
-                    child: Text('$badge',
-                        style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+                    child: Text(
+                      '$badge',
+                      style: const TextStyle(color: Color(0xFF143D2B), fontSize: 10, fontWeight: FontWeight.w900),
+                    ),
                   ),
                 ).animate(onPlay: (c) => c.repeat(reverse: true))
                  .scale(begin: const Offset(1, 1), end: const Offset(1.15, 1.15), duration: 600.ms),
@@ -142,43 +150,110 @@ class _DashboardHomeTab extends ConsumerWidget {
     final offresAsync = ref.watch(appelsOffresStreamProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              _buildHeader(context, ref, entrepriseAsync.value),
-              const SizedBox(height: 20),
-
-              // Certification Banner
-              if (entrepriseAsync.value == null)
-                const Text('Profil entreprise introuvable', style: TextStyle(color: Colors.red)),
-              if (entrepriseAsync.value == null || !entrepriseAsync.value!.isVerified) ...[
-                _buildCertificationBanner(context, entrepriseAsync.value?.id ?? ''),
-                const SizedBox(height: 20),
-              ],
-
-              // Stats row
-              _buildStatsRow(context, chantierAsync.value ?? [], offresAsync.value ?? []),
-              const SizedBox(height: 24),
-
-              // Quick actions
-              const Text('Actions rapides',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimaryLight)),
-              const SizedBox(height: 14),
-              _buildQuickActions(context),
-              const SizedBox(height: 24),
-
-              // New offres banner
-              _buildOffresBanner(context, offresAsync.value?.length ?? 0),
-              const SizedBox(height: 24),
-
-            ],
+      backgroundColor: const Color(0xFFFAF8F5),
+      body: Stack(
+        children: [
+          // Background ambient glows
+          Positioned(
+            top: -60,
+            left: -60,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
           ),
-        ),
+          Positioned(
+            bottom: 100,
+            right: -60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFDCFCE7).withValues(alpha: 0.6),
+                    const Color(0xFFDCFCE7).withValues(alpha: 0.0),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SafeArea(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // NextGen Header
+                  _buildHeader(context, ref, entrepriseAsync.value),
+                  const SizedBox(height: 16),
+
+                  // Tagline Pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: const [
+                        Icon(Icons.workspace_premium_rounded, size: 16, color: Color(0xFF10B981)),
+                        SizedBox(width: 6),
+                        Text(
+                          'Building Excellence, One Project At A Time',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF143D2B),
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ).animate().fadeIn().slideX(begin: -0.1),
+                  const SizedBox(height: 16),
+
+                  // Certification Banner
+                  if (entrepriseAsync.value == null)
+                    const Text('Profil entreprise introuvable', style: TextStyle(color: Colors.red)),
+                  if (entrepriseAsync.value == null || !entrepriseAsync.value!.isVerified) ...[
+                    _buildCertificationBanner(context, entrepriseAsync.value?.id ?? ''),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Stats row
+                  _buildStatsRow(context, chantierAsync.value ?? [], offresAsync.value ?? []),
+                  const SizedBox(height: 22),
+
+                  // Quick actions
+                  const Text(
+                    'SERVICES & ACTIONS',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF143D2B), letterSpacing: 0.6),
+                  ),
+                  const SizedBox(height: 12),
+                  _buildQuickActions(context),
+                  const SizedBox(height: 22),
+
+                  // New offres banner
+                  _buildOffresBanner(context, offresAsync.value?.length ?? 0),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -189,10 +264,18 @@ class _DashboardHomeTab extends ConsumerWidget {
       children: [
         Row(
           children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: AppColors.primary.withOpacity(0.12),
-              child: const Icon(Icons.business_rounded, size: 26, color: AppColors.primary),
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
+              ),
+              child: const CircleAvatar(
+                radius: 22,
+                backgroundColor: Color(0xFF143D2B),
+                child: Icon(Icons.business_rounded, size: 22, color: Color(0xFF86EFAC)),
+              ),
             ),
             const SizedBox(width: 12),
             Column(
@@ -200,12 +283,12 @@ class _DashboardHomeTab extends ConsumerWidget {
               children: [
                 Text(
                   entreprise?.raisonSociale ?? 'Espace Entreprise',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimaryLight),
+                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Color(0xFF143D2B)),
                   overflow: TextOverflow.ellipsis,
                 ),
                 const Text(
-                  'Tableau de bord',
-                  style: TextStyle(fontSize: 12, color: AppColors.grey500, fontWeight: FontWeight.w500),
+                  'Tableau de bord Pro',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -218,9 +301,12 @@ class _DashboardHomeTab extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.08), blurRadius: 8)],
+                border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
+                boxShadow: [
+                  BoxShadow(color: const Color(0xFF143D2B).withValues(alpha: 0.05), blurRadius: 6),
+                ],
               ),
-              child: const Icon(Icons.notifications_none_rounded, size: 20, color: AppColors.textPrimaryLight),
+              child: const Icon(Icons.notifications_none_rounded, size: 20, color: Color(0xFF143D2B)),
             ),
             const SizedBox(width: 8),
             GestureDetector(
@@ -230,8 +316,12 @@ class _DashboardHomeTab extends ConsumerWidget {
               },
               child: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: const BoxDecoration(color: AppColors.errorLight, shape: BoxShape.circle),
-                child: const Icon(Icons.logout_rounded, size: 20, color: AppColors.error),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFEE2E2),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFFCA5A5), width: 1.2),
+                ),
+                child: const Icon(Icons.logout_rounded, size: 18, color: Color(0xFFDC2626)),
               ),
             ),
           ],
@@ -244,44 +334,52 @@ class _DashboardHomeTab extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.errorLight,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.error.withOpacity(0.3)),
+        color: const Color(0xFFFFFBEB),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFFDE68A), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
-            children: [
-              Icon(Icons.warning_amber_rounded, color: AppColors.error),
+          Row(
+            children: const [
+              Icon(Icons.verified_user_outlined, color: Color(0xFFD97706), size: 22),
               SizedBox(width: 8),
               Text(
-                'Entreprise non certifiée',
+                'Obtenir le badge 100% QUALITÉ',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.error,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF92400E),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           const Text(
-            'Pour obtenir plus de clients et rassurer sur votre expertise, veuillez soumettre vos documents de certification (RCCM, Carte contribuable, etc.).',
-            style: TextStyle(fontSize: 13, color: AppColors.textSecondaryLight),
+            'Faites certifier vos documents pour débloquer plus de chantiers et rassurer vos clients.',
+            style: TextStyle(fontSize: 12, color: Color(0xFFB45309), height: 1.3),
           ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: () => context.push('/entreprise_certification', extra: entrepriseId),
-              icon: const Icon(Icons.verified_rounded),
-              label: const Text('Faire certifier mon entreprise'),
+              icon: const Icon(Icons.verified_rounded, size: 18),
+              label: const Text('Soumettre mes documents', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 13)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.error,
+                backgroundColor: const Color(0xFF143D2B),
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(14),
                 ),
               ),
             ),
@@ -300,7 +398,7 @@ class _DashboardHomeTab extends ConsumerWidget {
           label: 'En cours', 
           value: '$enCours', 
           icon: Icons.construction_rounded, 
-          color: AppColors.secondary,
+          color: const Color(0xFF10B981),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MesChantierScreen(initialFilter: 'en_cours'))),
         )),
         const SizedBox(width: 10),
@@ -308,15 +406,15 @@ class _DashboardHomeTab extends ConsumerWidget {
           label: 'Terminés', 
           value: '$termines', 
           icon: Icons.check_circle_rounded, 
-          color: AppColors.success,
+          color: const Color(0xFF143D2B),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MesChantierScreen(initialFilter: 'termine'))),
         )),
         const SizedBox(width: 10),
         Expanded(child: _StatCard(
-          label: 'Nouvelles offres', 
+          label: 'Offres', 
           value: '${offres.length}', 
           icon: Icons.assignment_rounded, 
-          color: AppColors.warning,
+          color: const Color(0xFFD97706),
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OffresScreen())),
         )),
       ],
@@ -325,7 +423,7 @@ class _DashboardHomeTab extends ConsumerWidget {
 
   Widget _buildQuickActions(BuildContext context) {
     final actions = [
-      {'name': 'Mes\nChantiers', 'icon': Icons.construction_rounded, 'screen': const MesChantierScreen()},
+      {'name': 'Chantiers', 'icon': Icons.construction_rounded, 'screen': const MesChantierScreen()},
       {'name': 'Devis', 'icon': Icons.request_quote_rounded, 'screen': const DevisScreen()},
       {'name': 'Équipe', 'icon': Icons.group_rounded, 'screen': const EquipeScreen()},
       {'name': 'Rapports', 'icon': Icons.bar_chart_rounded, 'screen': const RapportsScreen()},
@@ -340,19 +438,36 @@ class _DashboardHomeTab extends ConsumerWidget {
           child: Column(
             children: [
               Container(
-                width: 64, height: 64,
+                width: 68,
+                height: 68,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.06), blurRadius: 10)],
+                  border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
                 ),
-                child: Icon(act['icon'] as IconData, color: AppColors.primary, size: 28),
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(act['icon'] as IconData, color: const Color(0xFF143D2B), size: 24),
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 act['name'] as String,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimaryLight),
+                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF143D2B)),
               ),
             ],
           ).animate().fadeIn(delay: Duration(milliseconds: 50 * entry.key)).slideY(begin: 0.1),
@@ -368,12 +483,19 @@ class _DashboardHomeTab extends ConsumerWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [AppColors.primary, AppColors.primaryLight],
+            colors: [Color(0xFF143D2B), Color(0xFF1E5C41)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))],
+          border: Border.all(color: const Color(0xFF86EFAC).withValues(alpha: 0.3), width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF143D2B).withValues(alpha: 0.3),
+              blurRadius: 16,
+              offset: const Offset(0, 8),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -383,32 +505,38 @@ class _DashboardHomeTab extends ConsumerWidget {
                 children: [
                   if (count > 0)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: AppColors.secondary,
-                        borderRadius: BorderRadius.circular(8),
+                        color: const Color(0xFF10B981),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Text('$count nouveau${count > 1 ? 'x' : ''}',
-                          style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                      child: Text(
+                        '$count NOUVELLE${count > 1 ? 'S' : ''}',
+                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                      ),
                     ),
                   const SizedBox(height: 8),
-                  const Text('Appels d\'offres\n& Annonces',
-                      style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900, height: 1.2)),
+                  const Text(
+                    'Appels d\'offres\n& Annonces',
+                    style: TextStyle(color: Colors.white, fontSize: 19, fontWeight: FontWeight.w900, height: 1.2),
+                  ),
                   const SizedBox(height: 6),
-                  const Text('Découvrez les projets disponibles',
-                      style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const Text(
+                    'Découvrez les nouveaux projets de construction',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
                   const SizedBox(height: 12),
-                  const Row(
-                    children: [
-                      Text('Voir les annonces', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                  Row(
+                    children: const [
+                      Text('Explorer les opportunités', style: TextStyle(color: Color(0xFF86EFAC), fontSize: 13, fontWeight: FontWeight.w800)),
                       SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.secondary),
+                      Icon(Icons.arrow_forward_rounded, size: 16, color: Color(0xFF86EFAC)),
                     ],
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.assignment_rounded, size: 60, color: Colors.white24),
+            const Icon(Icons.assignment_rounded, size: 64, color: Colors.white24),
           ],
         ),
       ).animate().fadeIn(delay: 200.ms),
@@ -433,8 +561,11 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.05), blurRadius: 8)],
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
+          boxShadow: [
+            BoxShadow(color: const Color(0xFF143D2B).withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -442,7 +573,13 @@ class _StatCard extends StatelessWidget {
             Icon(icon, color: color, size: 22),
             const SizedBox(height: 6),
             Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: color)),
-            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.grey500)),
+            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600)),
+          ],
+        ),
+      ),
+    );
+  }
+}tyle(fontSize: 11, color: AppColors.grey500)),
           ],
         ),
       ),

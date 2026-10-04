@@ -159,27 +159,41 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     final isEntreprise = role == 'entreprise';
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF8F5),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF143D2B),
+        foregroundColor: Colors.white,
+        elevation: 0,
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: theme.colorScheme.primaryContainer,
-              child: Text(widget.otherUserName[0].toUpperCase()),
+            Container(
+              padding: const EdgeInsets.all(2),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+              ),
+              child: CircleAvatar(
+                radius: 17,
+                backgroundColor: const Color(0xFF143D2B),
+                child: Text(
+                  widget.otherUserName[0].toUpperCase(),
+                  style: const TextStyle(fontWeight: FontWeight.w900, color: Color(0xFF86EFAC), fontSize: 14),
+                ),
+              ),
             ),
-            AppSpacing.hSm,
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     widget.otherUserName,
-                    style: const TextStyle(fontSize: 16),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.white),
                   ),
                   if (isTyping)
                     const Text(
                           'En train d\'écrire...',
-                          style: TextStyle(fontSize: 12, color: AppColors.success),
+                          style: TextStyle(fontSize: 11, color: Color(0xFF86EFAC), fontWeight: FontWeight.w600),
                         )
                         .animate(onPlay: (controller) => controller.repeat())
                         .fade(duration: 1.seconds)
@@ -208,11 +222,13 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                             final pData =
                                 pSnapshot.data!.data() as Map<String, dynamic>;
                             return Text(
-                              'Projet: ${pData['titre']} • ${pData['budgetPrevisionnel']} FCFA',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: theme.colorScheme.onSurfaceVariant,
+                              'Projet : ${pData['titre']}',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w500,
                               ),
+                              overflow: TextOverflow.ellipsis,
                             );
                           },
                         );
@@ -223,74 +239,115 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
             ),
             if (isEntreprise)
               IconButton(
-                icon: const Icon(Icons.request_quote),
+                icon: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF10B981),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(Icons.request_quote_rounded, color: Colors.white, size: 18),
+                ),
                 tooltip: 'Proposer un devis',
                 onPressed: _showQuoteDialog,
               ),
           ],
         ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: messagesAsync.when(
-              data: (messages) {
-                WidgetsBinding.instance.addPostFrameCallback(
-                  (_) => _scrollToBottom(),
-                );
-                return ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final message = messages[index];
-                    if (message.expediteurId == 'system') {
-                      return Center(
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.textSecondaryLight,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            message.contenu,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                        ),
-                      );
-                    }
-                    return ChatBubble(
-                      message: message,
-                      isMe: message.expediteurId == user?.uid,
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (err, stack) => Center(child: Text('Erreur: $err')),
-            ),
-          ),
-          if (_uploadProgress != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: LinearProgressIndicator(value: _uploadProgress),
-                  ),
-                  const SizedBox(width: 16),
-                  Text('${(_uploadProgress! * 100).toInt()}%'),
-                ],
+          // Background ambient glow
+          Positioned(
+            top: 20,
+            left: -60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
-          _buildInputBar(theme),
+          ),
+          Column(
+            children: [
+              Expanded(
+                child: messagesAsync.when(
+                  data: (messages) {
+                    WidgetsBinding.instance.addPostFrameCallback(
+                      (_) => _scrollToBottom(),
+                    );
+                    return ListView.builder(
+                      controller: _scrollController,
+                      padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: 8),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        if (message.expediteurId == 'system') {
+                          return Center(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: const Color(0xFFC8E6C9), width: 1),
+                              ),
+                              child: Text(
+                                message.contenu,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF143D2B),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        return ChatBubble(
+                          message: message,
+                          isMe: message.expediteurId == user?.uid,
+                        );
+                      },
+                    );
+                  },
+                  loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF143D2B))),
+                  error: (err, stack) => Center(child: Text('Erreur: $err')),
+                ),
+              ),
+              if (_uploadProgress != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: LinearProgressIndicator(
+                            value: _uploadProgress,
+                            backgroundColor: const Color(0xFFE8F5E9),
+                            valueColor: const AlwaysStoppedAnimation(Color(0xFF10B981)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Text(
+                        '${(_uploadProgress! * 100).toInt()}%',
+                        style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF143D2B), fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              _buildInputBar(theme),
+            ],
+          ),
         ],
       ),
     );
@@ -298,14 +355,17 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
 
   Widget _buildInputBar(ThemeData theme) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: Colors.white,
+        border: const Border(
+          top: BorderSide(color: Color(0xFFC8E6C9), width: 1.2),
+        ),
         boxShadow: [
           BoxShadow(
-            color: AppColors.textPrimaryLight.withValues(alpha: 0.05),
-            offset: const Offset(0, -1),
-            blurRadius: 4,
+            color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+            offset: const Offset(0, -2),
+            blurRadius: 10,
           ),
         ],
       ),
@@ -313,7 +373,14 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
         child: Row(
           children: [
             PopupMenuButton<String>(
-              icon: const Icon(Icons.attach_file),
+              icon: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE8F5E9),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.attach_file_rounded, color: Color(0xFF143D2B), size: 20),
+              ),
               onSelected: (val) {
                 _simulateUpload(val);
               },
@@ -321,46 +388,53 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                 const PopupMenuItem(
                   value: 'image',
                   child: ListTile(
-                    leading: Icon(Icons.image),
-                    title: Text('Image'),
+                    leading: Icon(Icons.image_rounded, color: Color(0xFF10B981)),
+                    title: Text('Image du chantier'),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
                 const PopupMenuItem(
                   value: 'pdf',
                   child: ListTile(
-                    leading: Icon(Icons.picture_as_pdf),
-                    title: Text('Document PDF'),
+                    leading: Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFDC2626)),
+                    title: Text('Document / Devis PDF'),
                     contentPadding: EdgeInsets.zero,
                   ),
                 ),
               ],
             ),
+            const SizedBox(width: 8),
             Expanded(
-              child: TextField(
-                controller: _messageController,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendMessage(),
-                decoration: InputDecoration(
-                  hintText: 'Taper un message...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFAF8F5),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: const Color(0xFFC8E6C9), width: 1),
+                ),
+                child: TextField(
+                  controller: _messageController,
+                  textInputAction: TextInputAction.send,
+                  onSubmitted: (_) => _sendMessage(),
+                  decoration: const InputDecoration(
+                    hintText: 'Taper votre message...',
+                    hintStyle: TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                   ),
                 ),
               ),
             ),
-            AppSpacing.hSm,
-            CircleAvatar(
-              backgroundColor: theme.colorScheme.primary,
+            const SizedBox(width: 8),
+            Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFF143D2B),
+                shape: BoxShape.circle,
+              ),
               child: IconButton(
-                icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                icon: const Icon(Icons.send_rounded, color: Color(0xFF86EFAC), size: 18),
                 onPressed: _sendMessage,
               ),
             ),

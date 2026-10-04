@@ -50,67 +50,96 @@ class _MesChantierScreenState extends ConsumerState<MesChantierScreen> {
     final projetsAsync = ref.watch(mesChantierStreamProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: const Color(0xFFFAF8F5),
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: const Color(0xFF143D2B),
         foregroundColor: Colors.white,
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Mes Chantiers', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Mes Chantiers', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
         elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      body: Stack(
         children: [
-          // Filter chips
-          Container(
-            color: AppColors.primary,
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Row(
-                children: _filters.map((f) {
-                  final selected = _selectedFilter == f;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(_labelFor(f)),
-                      selected: selected,
-                      onSelected: (_) => setState(() => _selectedFilter = f),
-                      backgroundColor: Colors.white,
-                      selectedColor: AppColors.secondary,
-                      labelStyle: TextStyle(
-                        color: selected ? Colors.white : AppColors.primary,
-                        fontWeight: selected ? FontWeight.bold : FontWeight.w600,
-                      ),
-                      checkmarkColor: Colors.white,
-                      side: BorderSide.none,
-                    ),
-                  );
-                }).toList(),
+          // Background glow
+          Positioned(
+            top: 20,
+            right: -60,
+            child: Container(
+              width: 200,
+              height: 200,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.0),
+                  ],
+                ),
               ),
             ),
           ),
-          // List
-          Expanded(
-            child: projetsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => _buildError(e.toString()),
-              data: (projets) {
-                final filtered = _selectedFilter == 'Tous'
-                    ? projets
-                    : projets.where((p) => p.statut == _selectedFilter).toList();
-                if (filtered.isEmpty) return _buildEmpty();
-                return ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: filtered.length,
-                  itemBuilder: (ctx, i) =>
-                      _ProjectCard(project: filtered[i], colorFor: _colorFor)
-                          .animate()
-                          .fadeIn(delay: Duration(milliseconds: 60 * i))
-                          .slideY(begin: 0.1),
-                );
-              },
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Filter chips
+              Container(
+                color: const Color(0xFF143D2B),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                  child: Row(
+                    children: _filters.map((f) {
+                      final selected = _selectedFilter == f;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: FilterChip(
+                          label: Text(_labelFor(f)),
+                          selected: selected,
+                          onSelected: (_) => setState(() => _selectedFilter = f),
+                          backgroundColor: Colors.white,
+                          selectedColor: const Color(0xFF10B981),
+                          labelStyle: TextStyle(
+                            color: selected ? Colors.white : const Color(0xFF143D2B),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                          ),
+                          checkmarkColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: BorderSide(
+                              color: selected ? const Color(0xFF10B981) : const Color(0xFFC8E6C9),
+                              width: 1.2,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              // List
+              Expanded(
+                child: projetsAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF143D2B))),
+                  error: (e, _) => _buildError(e.toString()),
+                  data: (projets) {
+                    final filtered = _selectedFilter == 'Tous'
+                        ? projets
+                        : projets.where((p) => p.statut == _selectedFilter).toList();
+                    if (filtered.isEmpty) return _buildEmpty();
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: filtered.length,
+                      itemBuilder: (ctx, i) =>
+                          _ProjectCard(project: filtered[i], colorFor: _colorFor)
+                              .animate()
+                              .fadeIn(delay: Duration(milliseconds: 60 * i))
+                              .slideY(begin: 0.1),
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -121,13 +150,25 @@ class _MesChantierScreenState extends ConsumerState<MesChantierScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.construction_rounded, size: 72, color: AppColors.primary.withOpacity(0.3)),
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Color(0xFFE8F5E9),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.construction_rounded, size: 54, color: Color(0xFF143D2B)),
+            ),
             const SizedBox(height: 16),
-            const Text('Aucun chantier trouvé',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimaryLight)),
+            const Text(
+              'Aucun chantier trouvé',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF143D2B)),
+            ),
             const SizedBox(height: 8),
-            Text('Acceptez des projets depuis les appels d\'offres',
-                style: TextStyle(color: AppColors.grey500), textAlign: TextAlign.center),
+            const Text(
+              'Acceptez des projets depuis les appels d\'offres pour débuter.',
+              style: TextStyle(color: AppColors.textSecondaryLight, fontSize: 13),
+              textAlign: TextAlign.center,
+            ),
           ],
         ),
       );
@@ -136,7 +177,7 @@ class _MesChantierScreenState extends ConsumerState<MesChantierScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const Icon(Icons.error_outline_rounded, size: 48, color: AppColors.error),
             const SizedBox(height: 12),
             Text('Erreur: $e', textAlign: TextAlign.center),
           ],
@@ -167,11 +208,12 @@ class _ProjectCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.06),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
+              color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -194,19 +236,30 @@ class _ProjectCard extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(project.titre,
-                            style: const TextStyle(
-                                fontSize: 17, fontWeight: FontWeight.w800, color: AppColors.textPrimaryLight)),
+                        child: Text(
+                          project.titre,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            color: Color(0xFF143D2B),
+                          ),
+                        ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: statusColor.withOpacity(0.12),
+                          color: const Color(0xFFE8F5E9),
                           borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFC8E6C9), width: 1),
                         ),
                         child: Text(
-                          project.statut.replaceAll('_', ' '),
-                          style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
+                          project.statut.replaceAll('_', ' ').toUpperCase(),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                       ),
                     ],
@@ -214,21 +267,25 @@ class _ProjectCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_rounded, size: 14, color: AppColors.grey500),
+                      const Icon(Icons.location_on_rounded, size: 14, color: Color(0xFF10B981)),
                       const SizedBox(width: 4),
-                      Text('$quartier, $ville',
-                          style: TextStyle(fontSize: 13, color: AppColors.grey500)),
+                      Text(
+                        '$quartier, $ville',
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
-                      const Icon(Icons.account_balance_wallet_rounded, size: 14, color: AppColors.primary),
+                      const Icon(Icons.account_balance_wallet_rounded, size: 14, color: Color(0xFF143D2B)),
                       const SizedBox(width: 4),
-                      Text('${project.budgetPrevisionnel.toStringAsFixed(0)} FCFA',
-                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                      Text(
+                        '${project.budgetPrevisionnel.toStringAsFixed(0)} FCFA',
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Color(0xFF143D2B)),
+                      ),
                       const Spacer(),
-                      const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.grey400),
+                      const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: Color(0xFF10B981)),
                     ],
                   ),
                 ],
@@ -242,7 +299,9 @@ class _ProjectCard extends StatelessWidget {
 
   Widget _placeholder() => Container(
         height: 150,
-        color: AppColors.primary.withOpacity(0.08),
-        child: const Center(child: Icon(Icons.construction_rounded, size: 48, color: AppColors.primary)),
+        color: const Color(0xFF143D2B),
+        child: const Center(
+          child: Icon(Icons.home_work_rounded, size: 48, color: Color(0xFF86EFAC)),
+        ),
       );
 }

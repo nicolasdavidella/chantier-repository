@@ -138,101 +138,172 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
     final isSearching = project.statut == 'en_recherche_entreprise' || project.statut == 'publie';
 
     return Scaffold(
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              expandedHeight: 200.0,
-              floating: false,
-              pinned: true,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.pop(),
+      backgroundColor: const Color(0xFFFAF8F5),
+      body: Stack(
+        children: [
+          // Background ambient glows
+          Positioned(
+            top: 100,
+            right: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.0),
+                  ],
+                ),
               ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.psychology, color: Colors.purpleAccent),
-                  tooltip: 'Insights IA',
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => IaInsightsScreen(projectId: project.id),
+            ),
+          ),
+          NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                SliverAppBar(
+                  expandedHeight: 220.0,
+                  floating: false,
+                  pinned: true,
+                  backgroundColor: const Color(0xFF143D2B),
+                  foregroundColor: Colors.white,
+                  leading: IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.3),
+                        shape: BoxShape.circle,
                       ),
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
-                  tooltip: 'Exporter',
-                  onPressed: _showExportOptions,
-                ),
-              ],
-              flexibleSpace: FlexibleSpaceBar(
-                title: Text(project.titre, style: const TextStyle(shadows: [Shadow(color: Colors.black54, blurRadius: 4)])),
-                background: Hero(
-                  tag: 'project_image_${project.id}',
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (project.listePlans.isNotEmpty)
-                        Image.network(project.listePlans.first, fit: BoxFit.cover)
-                      else
-                        Container(color: theme.colorScheme.primaryContainer, child: const Icon(Icons.home_work, size: 64)),
-                      const DecoratedBox(
+                      child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                    ),
+                    onPressed: () => context.pop(),
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: Container(
+                        padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black87],
-                          ),
+                          color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
                         ),
+                        child: const Icon(Icons.auto_awesome, color: Color(0xFF86EFAC), size: 20),
                       ),
-                    ],
+                      tooltip: 'Insights NICO IA',
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => IaInsightsScreen(projectId: project.id),
+                          ),
+                        );
+                      },
+                    ),
+                    IconButton(
+                      icon: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.picture_as_pdf, color: Colors.white, size: 20),
+                      ),
+                      tooltip: 'Exporter',
+                      onPressed: _showExportOptions,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  flexibleSpace: FlexibleSpaceBar(
+                    title: Text(
+                      project.titre,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 17,
+                        color: Colors.white,
+                        shadows: [Shadow(color: Colors.black87, blurRadius: 6)],
+                      ),
+                    ),
+                    background: Hero(
+                      tag: 'project_image_${project.id}',
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          if (project.listePlans.isNotEmpty)
+                            Image.network(project.listePlans.first, fit: BoxFit.cover)
+                          else
+                            Container(
+                              color: const Color(0xFF143D2B),
+                              child: const Center(
+                                child: Icon(Icons.home_work_rounded, size: 64, color: Color(0xFF86EFAC)),
+                              ),
+                            ),
+                          const DecoratedBox(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.black38, Colors.transparent, Colors.black87],
+                                stops: [0.0, 0.4, 1.0],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            SliverPersistentHeader(
-              delegate: _SliverAppBarDelegate(
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  labelColor: theme.colorScheme.primary,
-                  unselectedLabelColor: AppColors.textSecondaryLight,
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  indicatorWeight: 3,
-                  tabs: isSearching 
-                    ? const [
-                        Tab(text: 'Entreprises', icon: Icon(Icons.business_center)),
-                        Tab(text: 'Documents', icon: Icon(Icons.folder)),
-                      ]
-                    : const [
-                        Tab(text: 'Avancement', icon: Icon(Icons.timeline)),
-                        Tab(text: 'Dépenses', icon: Icon(Icons.account_balance_wallet)),
-                        Tab(text: 'Alertes IA', icon: Icon(Icons.warning_amber_rounded)),
-                        Tab(text: 'Documents', icon: Icon(Icons.folder)),
-                      ],
+                SliverPersistentHeader(
+                  delegate: _SliverAppBarDelegate(
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFFAF8F5),
+                        border: Border(
+                          bottom: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+                        ),
+                      ),
+                      child: TabBar(
+                        controller: _tabController,
+                        isScrollable: true,
+                        labelColor: const Color(0xFF143D2B),
+                        unselectedLabelColor: AppColors.textSecondaryLight,
+                        indicatorColor: const Color(0xFF10B981),
+                        indicatorWeight: 3,
+                        labelStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                        tabs: isSearching 
+                          ? const [
+                              Tab(text: 'Entreprises', icon: Icon(Icons.business_center_rounded, size: 20)),
+                              Tab(text: 'Documents', icon: Icon(Icons.folder_rounded, size: 20)),
+                            ]
+                          : const [
+                              Tab(text: 'Avancement', icon: Icon(Icons.timeline_rounded, size: 20)),
+                              Tab(text: 'Dépenses', icon: Icon(Icons.account_balance_wallet_rounded, size: 20)),
+                              Tab(text: 'Alertes NICO IA', icon: Icon(Icons.warning_amber_rounded, size: 20)),
+                              Tab(text: 'Documents', icon: Icon(Icons.folder_rounded, size: 20)),
+                            ],
+                      ),
+                    ),
+                  ),
+                  pinned: true,
                 ),
-              ),
-              pinned: true,
+              ];
+            },
+            body: TabBarView(
+              controller: _tabController,
+              children: isSearching
+                ? [
+                    EntreprisesInteresseesTab(project: project),
+                    DocumentsTab(projectId: project.id),
+                  ]
+                : [
+                    AvancementTab(projectId: project.id),
+                    DepensesTab(projectId: project.id, budgetTotal: project.budgetPrevisionnel),
+                    AlertesTab(projectId: project.id),
+                    DocumentsTab(projectId: project.id),
+                  ],
             ),
-          ];
-        },
-        body: TabBarView(
-          controller: _tabController,
-          children: isSearching
-            ? [
-                EntreprisesInteresseesTab(project: project),
-                DocumentsTab(projectId: project.id),
-              ]
-            : [
-                AvancementTab(projectId: project.id),
-                DepensesTab(projectId: project.id, budgetTotal: project.budgetPrevisionnel),
-                AlertesTab(projectId: project.id),
-                DocumentsTab(projectId: project.id),
-              ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -241,19 +312,16 @@ class _ProjectDetailScreenState extends ConsumerState<ProjectDetailScreen> with 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this._tabBar);
 
-  final TabBar _tabBar;
+  final Widget _tabBar;
 
   @override
-  double get minExtent => _tabBar.preferredSize.height;
+  double get minExtent => 64.0;
   @override
-  double get maxExtent => _tabBar.preferredSize.height;
+  double get maxExtent => 64.0;
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: _tabBar,
-    );
+    return _tabBar;
   }
 
   @override
