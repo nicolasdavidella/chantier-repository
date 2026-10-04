@@ -262,38 +262,44 @@ class _DashboardHomeTab extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
-              ),
-              child: const CircleAvatar(
-                radius: 22,
-                backgroundColor: Color(0xFF143D2B),
-                child: Icon(Icons.business_rounded, size: 22, color: Color(0xFF86EFAC)),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  entreprise?.raisonSociale ?? 'Espace Entreprise',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Color(0xFF143D2B)),
-                  overflow: TextOverflow.ellipsis,
+        Expanded(
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0xFFC8E6C9), width: 1.5),
                 ),
-                const Text(
-                  'Tableau de bord Pro',
-                  style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
+                child: const CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Color(0xFF143D2B),
+                  child: Icon(Icons.business_rounded, size: 22, color: Color(0xFF86EFAC)),
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entreprise?.raisonSociale ?? 'Espace Entreprise',
+                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w900, color: Color(0xFF143D2B)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text(
+                      'Tableau de bord Pro',
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
+        const SizedBox(width: 8),
         Row(
           children: [
             Container(
