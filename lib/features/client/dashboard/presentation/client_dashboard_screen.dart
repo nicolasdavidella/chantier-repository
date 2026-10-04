@@ -12,6 +12,7 @@ import '../../../../data/repositories/entreprise_repository.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/settings_provider.dart';
+import '../../../../core/widgets/app_circular_loader.dart';
 import 'widgets/app_settings_modal.dart';
 import 'widgets/quick_services_modal.dart';
 
@@ -337,40 +338,44 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
               childAspectRatio: 0.95,
               children: [
                 _FeatureCard(
-                  title: isFrench ? 'Assistant IA' : 'AI Assistant',
+                  title: isFrench ? 'NICO IA' : 'NICO AI',
                   category: isFrench ? 'Générer plan 3D' : 'Generate 3D plan',
                   icon: Icons.architecture_rounded,
                   isDark: true,
-                  onTap: () {
-                    context.push('/client/ia_chat');
-                  },
+                  onTap: () => _openModule(
+                    () => context.push('/client/ia_chat'),
+                    name: isFrench ? 'NICO IA' : 'NICO AI',
+                  ),
                 ),
                 _FeatureCard(
                   title: isFrench ? 'Mes Projets' : 'My Projects',
                   category: isFrench ? 'Suivi de chantier' : 'Project tracking',
                   icon: Icons.track_changes_rounded,
                   isDark: false,
-                  onTap: () {
-                    widget.onTabChange?.call(1);
-                  },
+                  onTap: () => _openModule(
+                    () => widget.onTabChange?.call(1),
+                    name: isFrench ? 'Mes Projets' : 'My Projects',
+                  ),
                 ),
                 _FeatureCard(
                   title: isFrench ? 'Recherche' : 'Search',
                   category: isFrench ? 'Trouver un pro' : 'Find a contractor',
                   icon: Icons.search_rounded,
                   isDark: false,
-                  onTap: () {
-                    widget.onTabChange?.call(2);
-                  },
+                  onTap: () => _openModule(
+                    () => widget.onTabChange?.call(2),
+                    name: isFrench ? 'Recherche' : 'Search',
+                  ),
                 ),
                 _FeatureCard(
                   title: isFrench ? 'Réclamations' : 'Claims',
                   category: isFrench ? 'Support client' : 'Customer support',
                   icon: Icons.report_problem_rounded,
                   isDark: false,
-                  onTap: () {
-                    context.push('/client/reclamation');
-                  },
+                  onTap: () => _openModule(
+                    () => context.push('/client/reclamation'),
+                    name: isFrench ? 'Réclamations' : 'Claims',
+                  ),
                 ),
               ],
             ).animate().fadeIn(delay: 500.ms),
@@ -378,6 +383,19 @@ class _ClientHomeTabState extends ConsumerState<ClientHomeTab> {
         ),
       ),
     );
+  }
+
+  void _openModule(VoidCallback action, {String? name}) {
+    showAppLoadingDialog(
+      context,
+      message: name != null ? 'Ouverture de $name...' : 'Chargement...',
+    );
+    Future.delayed(const Duration(milliseconds: 380), () {
+      if (mounted) {
+        hideAppLoadingDialog(context);
+        action();
+      }
+    });
   }
 }
 

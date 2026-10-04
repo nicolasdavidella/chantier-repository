@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:ui';
 import '../../providers/auth_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:chantier_track/core/widgets/app_circular_loader.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -17,7 +16,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(milliseconds: 1600), () {
       if (mounted) {
         _dispatch();
       }
@@ -32,7 +31,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         
         int retries = 3;
         while (profileState == null && retries > 0) {
-          await Future.delayed(const Duration(milliseconds: 1500));
+          await Future.delayed(const Duration(milliseconds: 1000));
           ref.invalidate(currentUserProfileProvider);
           profileState = await ref.read(currentUserProfileProvider.future);
           retries--;
@@ -65,9 +64,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     } catch (e) {
       debugPrint('Erreur lors du routing Splash: $e');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur de connexion à la base de données.')),
-        );
         context.go('/login');
       }
     }
@@ -76,95 +72,127 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFFAF8F5),
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background Architecture Image (keeping intact as requested)
-          Image.network(
-            'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1080&auto=format&fit=crop',
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) => Container(
-              color: AppColors.secondary,
-            ),
-          ),
-          // Gradient Overlay
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withOpacity(0.5),
-                ],
+          // Subtils halos d'ambiance vert forêt & émeraude
+          Positioned(
+            top: -50,
+            left: -50,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFE8F5E9).withValues(alpha: 0.8),
+                    Colors.transparent,
+                  ],
+                ),
               ),
             ),
           ),
-          // Glassmorphic Content Container with Spinning Logo
+          Positioned(
+            bottom: -60,
+            right: -60,
+            child: Container(
+              width: 320,
+              height: 320,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    const Color(0xFFDCFCE7).withValues(alpha: 0.7),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Contenu central avec Logo rotatif circulaire
           Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                child: Container(
-                  width: MediaQuery.of(context).size.width * 0.85,
-                  padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.85),
-                    borderRadius: BorderRadius.circular(32),
-                    border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+            child: Container(
+              width: MediaQuery.of(context).size.width * 0.84,
+              padding: const EdgeInsets.symmetric(vertical: 44, horizontal: 28),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(
+                  color: const Color(0xFFC8E6C9),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1B4D3E).withValues(alpha: 0.1),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
                   ),
-                  child: Column(
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Logo Officiel ChantierTrack avec rotation circulaire fluide
+                  const AppCircularLoader(
+                    size: 96,
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  const Text(
+                    'CHANTIER TRACK',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF1B4D3E),
+                      letterSpacing: 1.5,
+                    ),
+                  ).animate().slideY(begin: 0.3, end: 0, duration: 500.ms, curve: Curves.easeOutCubic).fadeIn(),
+
+                  const SizedBox(height: 6),
+
+                  const Text(
+                    'Gérez • Suivez • Construisez',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      color: Color(0xFF2E7D32),
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
+                    ),
+                  ).animate(delay: 150.ms).fadeIn(duration: 400.ms),
+
+                  const SizedBox(height: 20),
+
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
+                        width: 7,
+                        height: 7,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF10B981),
                           shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 10,
-                              spreadRadius: 2,
-                            )
-                          ]
                         ),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          width: 120,
-                          height: 120,
-                          errorBuilder: (context, error, stackTrace) => const Icon(
-                            Icons.apartment_rounded,
-                            size: 80,
-                            color: AppColors.primary,
+                      ).animate(onPlay: (c) => c.repeat(reverse: true)).scale(
+                            begin: const Offset(0.7, 0.7),
+                            end: const Offset(1.3, 1.3),
+                            duration: 800.ms,
                           ),
-                        ),
-                      ).animate(onPlay: (controller) => controller.repeat())
-                       .rotate(duration: 2000.ms, curve: Curves.linear),
-                      const SizedBox(height: 24),
+                      const SizedBox(width: 8),
                       const Text(
-                        'CHANTIER TRACK',
+                        'Chargement de l\'espace...',
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: AppColors.textPrimaryLight,
-                          letterSpacing: 1.5,
-                        ),
-                      ).animate().slideY(begin: 0.5, end: 0, duration: 600.ms, curve: Curves.easeOutCubic).fadeIn(),
-                      const SizedBox(height: 8),
-                      const Text(
-                        'Chargement en cours...',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondaryLight,
+                          fontSize: 13,
+                          color: Color(0xFF64748B),
                           fontWeight: FontWeight.w500,
                         ),
-                      ).animate(delay: 200.ms).fadeIn(duration: 500.ms),
-                      const SizedBox(height: 32),
+                      ),
                     ],
-                  ),
-                ),
+                  ).animate(delay: 250.ms).fadeIn(duration: 400.ms),
+                ],
               ),
             ),
           ),

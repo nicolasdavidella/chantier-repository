@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
+import 'package:chantier_track/core/widgets/app_circular_loader.dart';
 import 'app_settings_modal.dart';
 
 /// Modal bottom sheet pour les 4 petits carrés (Menu des Services & Accès Rapide)
@@ -29,6 +30,20 @@ class QuickServicesModal extends StatelessWidget {
     required this.isFrench,
     required this.onSelectTab,
   });
+
+  void _openService(BuildContext context, VoidCallback action, {String? label}) {
+    Navigator.pop(context);
+    showAppLoadingDialog(
+      context,
+      message: label != null ? 'Accès à $label...' : 'Chargement...',
+    );
+    Future.delayed(const Duration(milliseconds: 380), () {
+      if (context.mounted) {
+        hideAppLoadingDialog(context);
+        action();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -119,55 +134,61 @@ class QuickServicesModal extends StatelessWidget {
                 icon: Icons.architecture_rounded,
                 label: isFrench ? 'NICO IA' : 'NICO AI',
                 color: const Color(0xFF1B4D3E),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/client/ia_chat');
-                },
+                onTap: () => _openService(
+                  context,
+                  () => context.push('/client/ia_chat'),
+                  label: isFrench ? 'NICO IA' : 'NICO AI',
+                ),
               ),
               _QuickServiceItem(
                 icon: Icons.assignment_rounded,
                 label: isFrench ? 'Mes Projets' : 'My Projects',
                 color: const Color(0xFF10B981),
-                onTap: () {
-                  Navigator.pop(context);
-                  onSelectTab(1);
-                },
+                onTap: () => _openService(
+                  context,
+                  () => onSelectTab(1),
+                  label: isFrench ? 'Mes Projets' : 'My Projects',
+                ),
               ),
               _QuickServiceItem(
                 icon: Icons.search_rounded,
                 label: isFrench ? 'Trouver un Pro' : 'Find a Pro',
                 color: const Color(0xFFF59E0B),
-                onTap: () {
-                  Navigator.pop(context);
-                  onSelectTab(2);
-                },
+                onTap: () => _openService(
+                  context,
+                  () => onSelectTab(2),
+                  label: isFrench ? 'Trouver un Pro' : 'Find a Pro',
+                ),
               ),
               _QuickServiceItem(
                 icon: Icons.chat_bubble_outline_rounded,
                 label: isFrench ? 'Discussions' : 'Chat',
                 color: const Color(0xFF3B82F6),
-                onTap: () {
-                  Navigator.pop(context);
-                  onSelectTab(3);
-                },
+                onTap: () => _openService(
+                  context,
+                  () => onSelectTab(3),
+                  label: isFrench ? 'Discussions' : 'Chat',
+                ),
               ),
               _QuickServiceItem(
                 icon: Icons.report_problem_rounded,
                 label: isFrench ? 'Réclamations' : 'Claims',
                 color: const Color(0xFFEF4444),
-                onTap: () {
-                  Navigator.pop(context);
-                  context.push('/client/reclamation');
-                },
+                onTap: () => _openService(
+                  context,
+                  () => context.push('/client/reclamation'),
+                  label: isFrench ? 'Réclamations' : 'Claims',
+                ),
               ),
               _QuickServiceItem(
                 icon: Icons.person_outline_rounded,
                 label: isFrench ? 'Mon Profil' : 'My Profile',
                 color: const Color(0xFF8B5CF6),
-                onTap: () {
-                  Navigator.pop(context);
-                  onSelectTab(4);
-                },
+                onTap: () => _openService(
+                  context,
+                  () => onSelectTab(4),
+                  label: isFrench ? 'Mon Profil' : 'My Profile',
+                ),
               ),
               _QuickServiceItem(
                 icon: Icons.settings_rounded,
