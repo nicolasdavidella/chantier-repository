@@ -269,9 +269,13 @@ class _ProjectCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.location_on_rounded, size: 14, color: Color(0xFF10B981)),
                       const SizedBox(width: 4),
-                      Text(
-                        '$quartier, $ville',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
+                      Expanded(
+                        child: Text(
+                          '$quartier, $ville',
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondaryLight, fontWeight: FontWeight.w600),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     ],
                   ),

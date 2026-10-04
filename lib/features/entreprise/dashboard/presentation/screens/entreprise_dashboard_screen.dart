@@ -198,7 +198,7 @@ class _DashboardHomeTab extends ConsumerWidget {
                   _buildHeader(context, ref, entrepriseAsync.value),
                   const SizedBox(height: 16),
 
-                  // Tagline Pill
+                  // Tagline Pill (Responsive)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
@@ -211,13 +211,17 @@ class _DashboardHomeTab extends ConsumerWidget {
                       children: const [
                         Icon(Icons.workspace_premium_rounded, size: 16, color: Color(0xFF10B981)),
                         SizedBox(width: 6),
-                        Text(
-                          'Building Excellence, One Project At A Time',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF143D2B),
-                            letterSpacing: 0.3,
+                        Flexible(
+                          child: Text(
+                            'Building Excellence',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF143D2B),
+                              letterSpacing: 0.3,
+                            ),
                           ),
                         ),
                       ],
@@ -358,12 +362,16 @@ class _DashboardHomeTab extends ConsumerWidget {
             children: const [
               Icon(Icons.verified_user_outlined, color: Color(0xFFD97706), size: 22),
               SizedBox(width: 8),
-              Text(
-                'Obtenir le badge 100% QUALITÉ',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF92400E),
+              Expanded(
+                child: Text(
+                  'Obtenir le badge 100% QUALITÉ',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF92400E),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -436,47 +444,56 @@ class _DashboardHomeTab extends ConsumerWidget {
     ];
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: actions.asMap().entries.map((entry) {
         final act = entry.value;
-        return GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => act['screen'] as Widget)),
-          child: Column(
-            children: [
-              Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF143D2B).withValues(alpha: 0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
+        return Expanded(
+          child: Padding(
+            padding: EdgeInsets.only(
+              left: entry.key == 0 ? 0 : 4,
+              right: entry.key == actions.length - 1 ? 0 : 4,
+            ),
+            child: GestureDetector(
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => act['screen'] as Widget)),
+              child: Column(
+                children: [
+                  Container(
+                    height: 64,
+                    width: double.infinity,
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    child: Icon(act['icon'] as IconData, color: const Color(0xFF143D2B), size: 24),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFE8F5E9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(act['icon'] as IconData, color: const Color(0xFF143D2B), size: 22),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                act['name'] as String,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF143D2B)),
-              ),
-            ],
-          ).animate().fadeIn(delay: Duration(milliseconds: 50 * entry.key)).slideY(begin: 0.1),
+                  const SizedBox(height: 8),
+                  Text(
+                    act['name'] as String,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Color(0xFF143D2B)),
+                  ),
+                ],
+              ).animate().fadeIn(delay: Duration(milliseconds: 50 * entry.key)).slideY(begin: 0.1),
+            ),
+          ),
         );
       }).toList(),
     );

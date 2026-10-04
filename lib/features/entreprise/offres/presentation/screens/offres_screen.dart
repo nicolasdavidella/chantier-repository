@@ -116,9 +116,13 @@ class OffresScreen extends ConsumerWidget {
               children: [
                 const FaIcon(FontAwesomeIcons.locationDot, size: 14, color: AppColors.textSecondaryLight),
                 const SizedBox(width: 8),
-                Text(
-                  '${projet.localisation['ville'] ?? ''}, ${projet.localisation['quartier'] ?? ''}',
-                  style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
+                Expanded(
+                  child: Text(
+                    '${projet.localisation['ville'] ?? ''}, ${projet.localisation['quartier'] ?? ''}',
+                    style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.grey600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ],
             ),
