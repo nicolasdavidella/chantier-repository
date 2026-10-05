@@ -8,6 +8,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../data/models/project_model.dart';
+import '../../../../data/repositories/marketplace_repository.dart';
 import '../../../../core/services/meshy_service.dart';
 import '../../../../core/services/storage_service.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -498,44 +499,27 @@ class IaProjectNotifier extends StateNotifier<IaProjectState> {
 
     try {
       final db = FirebaseFirestore.instance;
-      await db.collection('projects').doc(projectId).update({
-        'statut':
-            'en_recherche_entreprise', // Changé de plan_valide à en_recherche_entreprise pour démarrer la diffusion
-        'planChoisi': jsonEncode(planJson),
-      });
+      final docSnap = await db.collection('projects').doc(projectId).get();
+      if (!docSnap.exists) return;
 
-      // Diffusion directe aux entreprises
-      try {
-        final entreprisesSnap = await db.collection('entreprises').get();
-        final batch = db.batch();
+      final projectData = docSnap.data()!;
+      projectData['id'] = projectId;
+      final project = ProjectModel.fromJson(projectData);
 
-        for (final entDoc in entreprisesSnap.docs) {
-          final entData = entDoc.data();
-          final entrepriseUserId = entData['userId'] as String?;
-          if (entrepriseUserId == null || entrepriseUserId.isEmpty) continue;
+      final publishedProject = project.copyWith(
+        statut: 'en_recherche_entreprise',
+        planChoisi: planJson is String ? planJson : (planJson != null ? jsonEncode(planJson) : null),
+        creationSource: 'ia_assistant',
+        isMarketplacePublished: true,
+        datePublicationMarketplace: DateTime.now(),
+      );
 
-          final diffusionId = '${projectId}_$entrepriseUserId';
-          batch.set(
-            db.collection('diffusions_projet').doc(diffusionId),
-            {
-              'projectId': projectId,
-              'clientId': user.uid,
-              'entrepriseId': entrepriseUserId,
-              'statut': 'envoye',
-              'dateEnvoi': FieldValue.serverTimestamp(),
-            },
-            SetOptions(merge: true),
-          );
-        }
-        await batch.commit();
-        debugPrint(
-          '✅ Plan validé et diffusé à ${entreprisesSnap.docs.length} entreprise(s)',
-        );
-      } catch (e) {
-        debugPrint('⚠️ Erreur diffusion IA: $e');
-      }
+      final marketplaceRepo = MarketplaceRepository(firestore: db);
+      await marketplaceRepo.publishProjectToMarketplace(publishedProject);
+
+      debugPrint('✅ Plan IA validé et diffusé à toutes les entreprises sur la Marketplace !');
     } catch (e) {
-      debugPrint("Erreur validation plan: $e");
+      debugPrint("❌ Erreur validation plan: $e");
     }
   }
 

@@ -146,6 +146,101 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     );
   }
 
+  Widget _buildProjectContextBanner(String? projectId) {
+    if (projectId == null || projectId.isEmpty) return const SizedBox.shrink();
+
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance.collection('projects').doc(projectId).get(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) return const SizedBox.shrink();
+        final pData = snapshot.data!.data() as Map<String, dynamic>;
+        final titre = pData['titre'] as String? ?? 'Projet';
+        final desc = pData['description'] as String? ?? '';
+        final localisation = pData['localisation'] as Map<String, dynamic>? ?? {};
+        final ville = localisation['ville'] as String? ?? '';
+        final budget = pData['budgetPrevisionnel'] as num? ?? 0;
+
+        return Container(
+          margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFC8E6C9), width: 1.2),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF143D2B).withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.construction_rounded, size: 16, color: Color(0xFF143D2B)),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      titre,
+                      style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 13, color: Color(0xFF143D2B)),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (budget > 0) ...[
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF3C7),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        '${budget.toStringAsFixed(0)} FCFA',
+                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 11, color: Color(0xFFD97706)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+              if (ville.isNotEmpty || desc.isNotEmpty) ...[
+                const SizedBox(height: 6),
+                if (ville.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 2),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.location_on_outlined, size: 12, color: Color(0xFF64748B)),
+                        const SizedBox(width: 4),
+                        Text(ville, style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w600)),
+                      ],
+                    ),
+                  ),
+                if (desc.isNotEmpty)
+                  Text(
+                    'Besoins : $desc',
+                    style: const TextStyle(fontSize: 11.5, color: Color(0xFF334155), height: 1.3),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final messagesAsync = ref.watch(
@@ -276,6 +371,19 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
           ),
           Column(
             children: [
+              FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('conversations')
+                    .doc(widget.conversationId)
+                    .get(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData || !snapshot.data!.exists) return const SizedBox.shrink();
+                  final pId = snapshot.data!.data() != null
+                      ? (snapshot.data!.data() as Map<String, dynamic>)['projectId'] as String?
+                      : null;
+                  return _buildProjectContextBanner(pId);
+                },
+              ),
               Expanded(
                 child: messagesAsync.when(
                   data: (messages) {

@@ -21,16 +21,75 @@ class ConversationModel {
     required this.unreadCount,
   });
 
-  factory ConversationModel.fromJson(Map<String, dynamic> json) {
+  factory ConversationModel.fromJson(Map<String, dynamic> json, {String? docId}) {
+    // participantsIds fallback to 'participants'
+    List<String> participants = [];
+    if (json['participantsIds'] is List) {
+      participants = (json['participantsIds'] as List).map((e) => e.toString()).toList();
+    } else if (json['participants'] is List) {
+      participants = (json['participants'] as List).map((e) => e.toString()).toList();
+    }
+
+    // participantNames
+    Map<String, String> names = {};
+    if (json['participantNames'] is Map) {
+      (json['participantNames'] as Map).forEach((k, v) {
+        if (k != null && v != null) {
+          names[k.toString()] = v.toString();
+        }
+      });
+    }
+
+    // participantAvatars
+    Map<String, String?> avatars = {};
+    if (json['participantAvatars'] is Map) {
+      (json['participantAvatars'] as Map).forEach((k, v) {
+        if (k != null) {
+          avatars[k.toString()] = v?.toString();
+        }
+      });
+    }
+
+    // unreadCount fallback to 'nonLus'
+    Map<String, int> unread = {};
+    if (json['unreadCount'] is Map) {
+      (json['unreadCount'] as Map).forEach((k, v) {
+        if (k != null && v != null) {
+          unread[k.toString()] = int.tryParse(v.toString()) ?? 0;
+        }
+      });
+    } else if (json['nonLus'] is Map) {
+      (json['nonLus'] as Map).forEach((k, v) {
+        if (k != null && v != null) {
+          unread[k.toString()] = int.tryParse(v.toString()) ?? 0;
+        }
+      });
+    }
+
+    // lastMessage fallback to 'dernierMessage'
+    final lastMsg = json['lastMessage']?.toString() ??
+        json['dernierMessage']?.toString() ??
+        '';
+
+    // lastMessageTime fallback to 'dateDernierMessage'
+    DateTime parseDate(dynamic val) {
+      if (val is Timestamp) return val.toDate();
+      if (val is String) return DateTime.tryParse(val) ?? DateTime.now();
+      if (val is int) return DateTime.fromMillisecondsSinceEpoch(val);
+      return DateTime.now();
+    }
+
+    final msgTime = parseDate(json['lastMessageTime'] ?? json['dateDernierMessage']);
+
     return ConversationModel(
-      id: json['id'] as String,
-      participantsIds: List<String>.from(json['participantsIds']),
-      participantNames: Map<String, String>.from(json['participantNames']),
-      participantAvatars: Map<String, String?>.from(json['participantAvatars'] ?? {}),
+      id: json['id'] as String? ?? docId ?? '',
+      participantsIds: participants,
+      participantNames: names,
+      participantAvatars: avatars,
       projectId: json['projectId'] as String?,
-      lastMessage: json['lastMessage'] as String? ?? '',
-      lastMessageTime: (json['lastMessageTime'] as Timestamp).toDate(),
-      unreadCount: Map<String, int>.from(json['unreadCount'] ?? {}),
+      lastMessage: lastMsg,
+      lastMessageTime: msgTime,
+      unreadCount: unread,
     );
   }
 

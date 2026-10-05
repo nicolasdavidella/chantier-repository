@@ -592,12 +592,10 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                           title: isFrench ? 'Votre idée prend forme...' : 'Your idea is taking shape...',
                         ),
 
-                      // Modèle 3D Meshy interactif
+                      // Modèle 3D Meshy interactif ou carte de validation du projet
                       if (!state.isGenerating3D &&
-                          (msg.isPlans ||
-                              (state.generatedPlans != null &&
-                                  state.generatedPlans!.isNotEmpty &&
-                                  index == messages.length - 1)))
+                          state.projectId != null &&
+                          index == messages.length - 1)
                         _buildAura3DCard(state, isFrench),
 
                       // Choix et options envoyés par NICO IA (chips interactifs en nuances vertes)
@@ -666,13 +664,11 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
   }
 
   // ─────────────────────────────────────────────
-  // Carte du Modèle 3D Meshy & Validation
+  // Carte de validation et maquette 3D
   // ─────────────────────────────────────────────
   Widget _buildAura3DCard(IaProjectState state, bool isFrench) {
-    if (state.generatedPlans == null || state.generatedPlans!.isEmpty) {
-      return const SizedBox.shrink();
-    }
-    final glbUrl = state.generatedPlans!.first as String;
+    final has3D = state.generatedPlans != null && state.generatedPlans!.isNotEmpty;
+    final glbUrl = has3D ? state.generatedPlans!.first as String : null;
 
     return Container(
       margin: const EdgeInsets.only(top: 14),
@@ -693,7 +689,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
       ),
       child: Column(
         children: [
-          // En-tête de la maquette 3D
+          // En-tête
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -702,11 +698,11 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                 Expanded(
                   child: Row(
                     children: [
-                      const Icon(Icons.view_in_ar_rounded, color: Color(0xFF2E7D32), size: 20),
+                      Icon(has3D ? Icons.view_in_ar_rounded : Icons.assignment_turned_in_rounded, color: const Color(0xFF2E7D32), size: 20),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          '$_selectedType 3D - ChantierTrack',
+                          has3D ? '$_selectedType 3D - ChantierTrack' : 'Dossier Projet Prêt',
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             color: Color(0xFF1B4D3E),
@@ -729,7 +725,7 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                     ),
                   ),
                   child: Text(
-                    isFrench ? 'Modèle 3D Prêt' : '3D Ready',
+                    has3D ? (isFrench ? 'Modèle 3D Prêt' : '3D Ready') : (isFrench ? 'Prêt à diffuser' : 'Ready to publish'),
                     style: const TextStyle(
                       color: Color(0xFF15803D),
                       fontSize: 11,
@@ -741,21 +737,47 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
             ),
           ),
 
-          // Visionneuse 3D interactive
-          SizedBox(
-            height: 290,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(14),
-              child: ModelViewer(
-                src: glbUrl,
-                alt: 'Modèle 3D ChantierTrack',
-                ar: true,
-                autoRotate: true,
-                cameraControls: true,
-                backgroundColor: const Color(0xFFF8FAF7),
+          // Visionneuse 3D interactive si disponible
+          if (has3D && glbUrl != null)
+            SizedBox(
+              height: 290,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: ModelViewer(
+                  src: glbUrl,
+                  alt: 'Modèle 3D ChantierTrack',
+                  ar: true,
+                  autoRotate: true,
+                  cameraControls: true,
+                  backgroundColor: const Color(0xFFF8FAF7),
+                ),
+              ),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.campaign_rounded, color: Color(0xFF143D2B), size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      isFrench
+                          ? "Votre projet est prêt à être envoyé aux entreprises partenaires qualifiées."
+                          : "Your project is ready to be sent to qualified contractor partners.",
+                      style: const TextStyle(fontSize: 13, color: Color(0xFF334155), height: 1.4),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
 
           // Bouton de validation du projet
           Padding(
@@ -766,24 +788,26 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
               child: ElevatedButton.icon(
                 icon: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
                 label: Text(
-                  isFrench ? 'Valider et Trouver des Entreprises' : 'Validate & Find Contractors',
+                  isFrench ? 'Valider et Diffuser aux Entreprises' : 'Validate & Publish to Contractors',
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white, fontSize: 13.5),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B4D3E),
+                  backgroundColor: const Color(0xFF143D2B),
                   elevation: 2,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                onPressed: () {
-                  ref.read(iaProjectProvider.notifier).validerPlan({});
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: const Color(0xFF1B4D3E),
-                      content: Text(isFrench
-                          ? 'Projet validé ! Recherche d\'entreprises partenaires en cours...'
-                          : 'Project validated! Finding partner contractors...'),
-                    ),
-                  );
+                onPressed: () async {
+                  await ref.read(iaProjectProvider.notifier).validerPlan({});
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        backgroundColor: const Color(0xFF143D2B),
+                        content: Text(isFrench
+                            ? '✅ Projet validé et diffusé avec succès ! Les entreprises peuvent désormais postuler.'
+                            : 'Project validated and published to contractor marketplace!'),
+                      ),
+                    );
+                  }
                 },
               ),
             ),

@@ -31,6 +31,37 @@ class OffreDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Badge IA ou Standard
+            if (projet.creationSource == 'ia_assistant') ...[
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFECFDF5), Color(0xFFD1FAE5)],
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFA7F3D0)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Projet IA",
+                      style: TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF065F46), fontSize: 13),
+                    ),
+                    if (projet.planChoisi != null) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        "Variante retenue : ${projet.planChoisi}",
+                        style: const TextStyle(color: Color(0xFF047857), fontSize: 12),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+
             Text(
               projet.titre,
               style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
@@ -101,14 +132,12 @@ class OffreDetailScreen extends ConsumerWidget {
                   leading: const FaIcon(FontAwesomeIcons.filePdf, color: AppColors.error),
                   title: Text('Document attaché', style: theme.textTheme.bodyMedium),
                   trailing: const Icon(Icons.download),
-                  onTap: () {
-                    // TODO: Implémenter le téléchargement ou l'aperçu
-                  },
+                  onTap: () {},
                 )
               ),
             ],
             
-            const SizedBox(height: 100), // Espace pour la bottom bar
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -130,42 +159,133 @@ class OffreDetailScreen extends ConsumerWidget {
                     side: BorderSide(color: theme.colorScheme.error),
                     foregroundColor: theme.colorScheme.error,
                   ),
-                  child: const Text('Rejeter'),
+                  child: const Text('Décliner'),
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
-                  onPressed: candidatureState.isLoading ? null : () async {
-                    try {
-                      await ref.read(candidatureControllerProvider.notifier).accepterProjet(diffusion.diffusionId, projet);
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Candidature envoyée avec succès !')),
-                        );
-                        context.pop();
-                      }
-                    } catch (e) {
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Erreur: $e')),
-                        );
-                      }
-                    }
-                  },
+                  onPressed: candidatureState.isLoading ? null : () => _showAcceptModal(context, ref, projet),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
+                    backgroundColor: const Color(0xFF143D2B),
+                    foregroundColor: Colors.white,
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: candidatureState.isLoading 
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Je peux réaliser ce projet', style: TextStyle(fontWeight: FontWeight.bold)),
+                    : const Text('Je suis capable de réaliser', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showAcceptModal(BuildContext context, WidgetRef ref, dynamic projet) {
+    final noteController = TextEditingController();
+    final quoteController = TextEditingController(text: projet.budgetPrevisionnel > 0 ? projet.budgetPrevisionnel.toStringAsFixed(0) : '');
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 24,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 24),
+                SizedBox(width: 8),
+                Text(
+                  "Valider votre capacité",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Color(0xFF143D2B)),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              "Indiquez au client vos disponibilités ou un devis indicatif pour ce chantier :",
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+            ),
+            const SizedBox(height: 18),
+            TextField(
+              controller: quoteController,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: "Devis / Budget estimé (FCFA)",
+                hintText: "Ex: 45000000",
+                prefixIcon: const Icon(Icons.account_balance_wallet_outlined),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: noteController,
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: "Message technique pour le client (optionnel)",
+                hintText: "Ex: Disponibilité immédiate de nos équipes, expérience sur des projets similaires...",
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF143D2B),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  final parsedQuote = double.tryParse(quoteController.text.trim());
+                  final message = noteController.text.trim();
+
+                  try {
+                    await ref.read(candidatureControllerProvider.notifier).accepterProjet(
+                      diffusion.diffusionId,
+                      projet,
+                      commentaire: message.isNotEmpty ? message : null,
+                      devisEstime: parsedQuote,
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          backgroundColor: Color(0xFF143D2B),
+                          content: Text("Capacité confirmée ! Le client a été notifié instantanément."),
+                        ),
+                      );
+                      context.pop();
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(backgroundColor: Colors.redAccent, content: Text("Erreur: $e")),
+                      );
+                    }
+                  }
+                },
+                child: const Text("Confirmer & Envoyer au Client", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+              ),
+            ),
+          ],
         ),
       ),
     );

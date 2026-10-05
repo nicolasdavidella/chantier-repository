@@ -91,7 +91,7 @@ class AdminDashboardScreen extends ConsumerWidget {
                         FittedBox(
                           fit: BoxFit.scaleDown,
                           alignment: Alignment.centerLeft,
-                          child: Text('Bienvenue, Administrateur 👋', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
+                          child: Text('Bienvenue, Administrateur', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onPrimary, fontWeight: FontWeight.bold)),
                         ),
                         AppSpacing.vSm,
                         Text('Voici un résumé de l\'activité sur la plateforme Chantier Track aujourd\'hui.', style: TextStyle(color: theme.colorScheme.onPrimary.withValues(alpha: 0.8), fontSize: 16)),

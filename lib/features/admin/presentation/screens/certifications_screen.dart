@@ -279,28 +279,47 @@ class _ExamineDemandeDialogState extends State<_ExamineDemandeDialog> {
           .doc(widget.demande.entrepriseId);
 
       if (status == 'certifiee') {
-        // Aussi certifier l'utilisateur (client) lié à cette entreprise
         final entSnap = await entrepriseRef.get();
-        if (entSnap.exists && entSnap.data()?['userId'] != null) {
-          final userId = entSnap.data()!['userId'];
-          final userRef = FirebaseFirestore.instance.collection('users').doc(userId);
-          batch.set(userRef, {
+        if (entSnap.exists) {
+          final userId = entSnap.data()?['userId'];
+          if (userId != null) {
+            batch.set(FirebaseFirestore.instance.collection('users').doc(userId), {
+              'isVerified': true,
+              'certifie': true,
+              'role': 'entreprise',
+            }, SetOptions(merge: true));
+          }
+          batch.set(entrepriseRef, {
+            'certifie': true,
+            'isVerified': true,
+            'statutVerification': 'approuve',
+            'verificationStatus': 'APPROVED',
+            'verificationDate': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        } else {
+          final byUserIdSnap = await FirebaseFirestore.instance
+              .collection('entreprises')
+              .where('userId', isEqualTo: widget.demande.entrepriseId)
+              .get();
+          for (var doc in byUserIdSnap.docs) {
+            batch.set(doc.reference, {
+              'certifie': true,
+              'isVerified': true,
+              'statutVerification': 'approuve',
+              'verificationStatus': 'APPROVED',
+              'verificationDate': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+          }
+          batch.set(FirebaseFirestore.instance.collection('users').doc(widget.demande.entrepriseId), {
             'isVerified': true,
             'certifie': true,
-            'role': 'entreprise', // s'assurer qu'il a le bon rôle
+            'role': 'entreprise',
           }, SetOptions(merge: true));
         }
 
         batch.set(demandeRef, {
           'statut': 'certifiee',
           'dateDecision': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true));
-        
-        batch.set(entrepriseRef, {
-          'certifie': true,
-          'isVerified': true,
-          'statutVerification': 'approuve',
-          'verificationStatus': 'APPROVED',
         }, SetOptions(merge: true));
 
         // Ajouter dans le journal d'activité

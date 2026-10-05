@@ -405,14 +405,20 @@ exports.repondreProjet = onCall(async (request) => {
         });
 
         if (reponse === 'accepte') {
+            // Ajouter aux entreprises postulantes du projet
+            transaction.update(projetRef, {
+                entreprisesPostulantes: FieldValue.arrayUnion(entrepriseId)
+            });
+
             // Notifier le client
             const clientId = projetDoc.data().clientId;
             const notifRef = db.collection("notifications").doc();
             transaction.set(notifRef, {
                 userId: clientId,
                 titre: "Une entreprise est intéressée !",
-                message: "Une entreprise peut réaliser votre projet. Cliquez pour voir son profil.",
+                message: "Une entreprise a confirmé pouvoir réaliser votre projet. Consultez ses détails sur la Marketplace !",
                 isRead: false,
+                type: 'entreprise_reponse_capable',
                 createdAt: FieldValue.serverTimestamp(),
                 data: { projectId: projectId, entrepriseId: entrepriseId }
             });

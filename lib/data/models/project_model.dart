@@ -21,6 +21,11 @@ class ProjectModel {
   final List<String> listeDocuments;
   final List<String> entreprisesPostulantes;
   final String? planChoisi;
+  final String creationSource; // 'ia_assistant' | 'manuel'
+  final String? plan3DUrl;
+  final String? devisEstimeUrl;
+  final bool isMarketplacePublished;
+  final DateTime? datePublicationMarketplace;
 
   ProjectModel({
     required this.id,
@@ -38,25 +43,52 @@ class ProjectModel {
     required this.listeDocuments,
     this.entreprisesPostulantes = const [],
     this.planChoisi,
+    this.creationSource = 'manuel',
+    this.plan3DUrl,
+    this.devisEstimeUrl,
+    this.isMarketplacePublished = true,
+    this.datePublicationMarketplace,
   });
+
+  static DateTime _parseDate(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is Timestamp) return value.toDate();
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    if (value is int) return DateTime.fromMillisecondsSinceEpoch(value);
+    return DateTime.now();
+  }
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
       id: json['id'] as String? ?? '',
       clientId: json['clientId'] as String? ?? '',
       entrepriseId: json['entrepriseId'] as String?,
-      titre: json['titre'] as String? ?? 'Projet sans titre',
+      titre: json['titre'] as String? ?? 'Projet de construction',
       description: json['description'] as String? ?? '',
-      localisation: json['localisation'] != null ? Map<String, dynamic>.from(json['localisation']) : {},
-      budgetPrevisionnel: (json['budgetPrevisionnel'] as num?)?.toDouble() ?? 0.0,
-      budgetActuel: (json['budgetActuel'] as num?)?.toDouble() ?? 0.0,
-      dateDebut: json['dateDebut'] != null ? (json['dateDebut'] as Timestamp).toDate() : DateTime.now(),
-      dateFinPrevue: json['dateFinPrevue'] != null ? (json['dateFinPrevue'] as Timestamp).toDate() : DateTime.now(),
+      localisation: json['localisation'] is Map
+          ? Map<String, dynamic>.from(json['localisation'] as Map)
+          : (json['ville'] != null ? {'ville': json['ville'], 'quartier': json['quartier'] ?? ''} : {}),
+      budgetPrevisionnel: (json['budgetPrevisionnel'] is num)
+          ? (json['budgetPrevisionnel'] as num).toDouble()
+          : (double.tryParse(json['budgetPrevisionnel']?.toString() ?? '') ?? 0.0),
+      budgetActuel: (json['budgetActuel'] is num)
+          ? (json['budgetActuel'] as num).toDouble()
+          : (double.tryParse(json['budgetActuel']?.toString() ?? '') ?? 0.0),
+      dateDebut: _parseDate(json['dateDebut']),
+      dateFinPrevue: _parseDate(json['dateFinPrevue']),
       statut: json['statut'] as String? ?? 'brouillon',
-      listePlans: List<String>.from(json['listePlans'] ?? []),
-      listeDocuments: List<String>.from(json['listeDocuments'] ?? []),
-      entreprisesPostulantes: List<String>.from(json['entreprisesPostulantes'] ?? []),
+      listePlans: json['listePlans'] is List ? List<String>.from(json['listePlans']) : [],
+      listeDocuments: json['listeDocuments'] is List ? List<String>.from(json['listeDocuments']) : [],
+      entreprisesPostulantes: json['entreprisesPostulantes'] is List ? List<String>.from(json['entreprisesPostulantes']) : [],
       planChoisi: json['planChoisi'] as String?,
+      creationSource: json['creationSource'] as String? ?? (json['planChoisi'] != null ? 'ia_assistant' : 'manuel'),
+      plan3DUrl: json['plan3DUrl'] as String?,
+      devisEstimeUrl: json['devisEstimeUrl'] as String?,
+      isMarketplacePublished: json['isMarketplacePublished'] as bool? ?? (json['statut'] == 'en_recherche_entreprise'),
+      datePublicationMarketplace: json['datePublicationMarketplace'] != null
+          ? _parseDate(json['datePublicationMarketplace'])
+          : null,
     );
   }
 
@@ -77,6 +109,13 @@ class ProjectModel {
       'listeDocuments': listeDocuments,
       'entreprisesPostulantes': entreprisesPostulantes,
       'planChoisi': planChoisi,
+      'creationSource': creationSource,
+      'plan3DUrl': plan3DUrl,
+      'devisEstimeUrl': devisEstimeUrl,
+      'isMarketplacePublished': isMarketplacePublished,
+      'datePublicationMarketplace': datePublicationMarketplace != null
+          ? Timestamp.fromDate(datePublicationMarketplace!)
+          : null,
     };
   }
 
@@ -96,6 +135,11 @@ class ProjectModel {
     List<String>? listeDocuments,
     List<String>? entreprisesPostulantes,
     String? planChoisi,
+    String? creationSource,
+    String? plan3DUrl,
+    String? devisEstimeUrl,
+    bool? isMarketplacePublished,
+    DateTime? datePublicationMarketplace,
   }) {
     return ProjectModel(
       id: id ?? this.id,
@@ -113,6 +157,11 @@ class ProjectModel {
       listeDocuments: listeDocuments ?? this.listeDocuments,
       entreprisesPostulantes: entreprisesPostulantes ?? this.entreprisesPostulantes,
       planChoisi: planChoisi ?? this.planChoisi,
+      creationSource: creationSource ?? this.creationSource,
+      plan3DUrl: plan3DUrl ?? this.plan3DUrl,
+      devisEstimeUrl: devisEstimeUrl ?? this.devisEstimeUrl,
+      isMarketplacePublished: isMarketplacePublished ?? this.isMarketplacePublished,
+      datePublicationMarketplace: datePublicationMarketplace ?? this.datePublicationMarketplace,
     );
   }
 }

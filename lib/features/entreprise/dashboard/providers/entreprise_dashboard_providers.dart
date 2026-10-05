@@ -19,11 +19,19 @@ final currentEntrepriseStreamProvider = StreamProvider.autoDispose<EntrepriseMod
       .where('userId', isEqualTo: user.uid)
       .limit(1)
       .snapshots()
-      .map((snap) {
-    if (snap.docs.isEmpty) return null;
-    final data = snap.docs.first.data();
-    data['id'] = snap.docs.first.id;
-    return EntrepriseModel.fromJson(data);
+      .asyncMap((snap) async {
+    if (snap.docs.isNotEmpty) {
+      final data = snap.docs.first.data();
+      data['id'] = snap.docs.first.id;
+      return EntrepriseModel.fromJson(data);
+    }
+    final directDoc = await FirebaseFirestore.instance.collection('entreprises').doc(user.uid).get();
+    if (directDoc.exists && directDoc.data() != null) {
+      final data = directDoc.data()!;
+      data['id'] = directDoc.id;
+      return EntrepriseModel.fromJson(data);
+    }
+    return null;
   });
 });
 

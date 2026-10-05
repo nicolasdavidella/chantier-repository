@@ -36,6 +36,7 @@ import '../../features/entreprise/devis/presentation/screens/devis_screen.dart';
 import '../../features/admin/presentation/screens/admin_shell_screen.dart';
 import '../../features/admin/presentation/screens/admin_login_screen.dart';
 import '../../features/chat/presentation/screens/conversations_list_screen.dart';
+import '../../features/chat/presentation/screens/chat_detail_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -249,6 +250,22 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/chat',
         name: 'chat',
         pageBuilder: (context, state) => _buildPageWithTransition(const ConversationsListScreen(), state),
+        routes: [
+          GoRoute(
+            path: 'detail',
+            name: 'chat_detail',
+            pageBuilder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>? ?? {};
+              return _buildPageWithTransition(
+                ChatDetailScreen(
+                  conversationId: extra['conversationId'] as String? ?? '',
+                  otherUserName: extra['otherUserName'] as String? ?? 'Discussion',
+                ),
+                state,
+              );
+            },
+          ),
+        ],
       ),
     ],
   );

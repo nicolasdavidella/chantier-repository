@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/services/anthropic_service.dart';
 import '../../../../features/ia_assistant/providers/ia_providers.dart'; // Pour ChatMessage
 import '../../../../data/models/project_model.dart';
+import '../../../../data/repositories/marketplace_repository.dart';
 import '../../../auth/providers/auth_provider.dart';
 
 class AiProjectCreationState {
@@ -97,14 +98,14 @@ class AiProjectCreationController extends StateNotifier<AiProjectCreationState> 
 
       final projectId = FirebaseFirestore.instance.collection('projects').doc().id;
       final budget = (state.proposedPlansJson!['budget'] as num).toDouble();
-      final description = state.proposedPlansJson!['descriptionComplete'] ?? 'Projet généré par l\\'Assistant';
+      final description = state.proposedPlansJson!['descriptionComplete'] ?? "Projet généré par l'Assistant";
 
       final newProject = ProjectModel(
         id: projectId,
         clientId: authUser.uid,
         titre: 'Projet: $planNom',
         description: description,
-        localisation: {'ville': 'À définir', 'quartier': 'À définir'}, // TODO: Demander à l'IA ou plus tard
+        localisation: {'ville': 'À définir', 'quartier': 'À définir'},
         budgetPrevisionnel: budget,
         budgetActuel: 0,
         dateDebut: DateTime.now(),
@@ -113,43 +114,15 @@ class AiProjectCreationController extends StateNotifier<AiProjectCreationState> 
         listePlans: [],
         listeDocuments: [],
         planChoisi: planNom,
+        creationSource: 'ia_assistant',
+        isMarketplacePublished: true,
+        datePublicationMarketplace: DateTime.now(),
       );
 
-      await FirebaseFirestore.instance.collection('projects').doc(newProject.id).set(newProject.toJson());
-      
-      // Diffusion directe aux entreprises (sans Cloud Function pour éviter les problèmes d'émulateur)
-      try {
-        final db = FirebaseFirestore.instance;
-        final entreprisesSnap = await db.collection('entreprises').get();
-        final batch = db.batch();
-
-        for (final entDoc in entreprisesSnap.docs) {
-          final entData = entDoc.data();
-          // On utilise le userId (Firebase Auth UID) pour que le dashboard puisse le retrouver
-          final entrepriseUserId = entData['userId'] as String?;
-          if (entrepriseUserId == null || entrepriseUserId.isEmpty) continue;
-
-          final diffusionId = '${newProject.id}_$entrepriseUserId';
-          batch.set(
-            db.collection('diffusions_projet').doc(diffusionId),
-            {
-              'projectId': newProject.id,
-              'clientId': authUser.uid,
-              'entrepriseId': entrepriseUserId,
-              'statut': 'envoye',
-              'dateEnvoi': FieldValue.serverTimestamp(),
-            },
-            SetOptions(merge: true),
-          );
-        }
-        await batch.commit();
-        debugPrint('✅ Projet diffusé à ${entreprisesSnap.docs.length} entreprise(s)');
-      } catch (e) {
-        debugPrint('⚠️ Erreur diffusion: $e');
-      }
-      
+      final marketplaceRepo = ref.read(marketplaceRepositoryProvider);
+      await marketplaceRepo.publishProjectToMarketplace(newProject);
     } catch (e) {
-      print("Erreur création projet: $e");
+      debugPrint("Erreur création projet: $e");
       rethrow;
     }
   }

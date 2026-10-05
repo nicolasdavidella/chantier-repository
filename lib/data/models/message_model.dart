@@ -23,17 +23,24 @@ class MessageModel {
     this.metadata,
   });
 
-  factory MessageModel.fromJson(Map<String, dynamic> json) {
+  factory MessageModel.fromJson(Map<String, dynamic> json, {String? docId}) {
+    DateTime parseDate(dynamic val) {
+      if (val is Timestamp) return val.toDate();
+      if (val is String) return DateTime.tryParse(val) ?? DateTime.now();
+      if (val is int) return DateTime.fromMillisecondsSinceEpoch(val);
+      return DateTime.now();
+    }
+
     return MessageModel(
-      id: json['id'] as String,
-      conversationId: json['conversationId'] as String,
-      expediteurId: json['expediteurId'] as String,
-      contenu: json['contenu'] as String,
-      dateEnvoi: (json['dateEnvoi'] as Timestamp).toDate(),
-      type: json['type'] as String,
-      status: json['status'] as String? ?? 'sent',
-      lu: json['lu'] as bool? ?? false,
-      metadata: json['metadata'] as Map<String, dynamic>?,
+      id: json['id'] as String? ?? docId ?? '',
+      conversationId: json['conversationId']?.toString() ?? '',
+      expediteurId: json['expediteurId']?.toString() ?? json['senderId']?.toString() ?? '',
+      contenu: json['contenu']?.toString() ?? json['texte']?.toString() ?? json['content']?.toString() ?? '',
+      dateEnvoi: parseDate(json['dateEnvoi'] ?? json['timestamp'] ?? json['createdAt']),
+      type: json['type']?.toString() ?? 'texte',
+      status: json['status']?.toString() ?? 'sent',
+      lu: json['lu'] == true || json['isRead'] == true,
+      metadata: json['metadata'] is Map ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
     );
   }
 

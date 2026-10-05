@@ -1,30 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../data/models/user_model.dart';
 import '../../../../data/models/entreprise_model.dart';
 import '../../../../data/models/avis_model.dart';
 import '../../../../data/models/certification_request_model.dart';
 
-// --- Mock Models ---
-
-class UserModel {
-  final String id;
-  final String nom;
-  final String email;
-  final String role; // 'client', 'entreprise', 'chef_chantier', 'admin'
-  final bool isActive;
-
-  UserModel({required this.id, required this.nom, required this.email, required this.role, this.isActive = true});
-
-  UserModel copyWith({String? role, bool? isActive}) {
-    return UserModel(
-      id: id,
-      nom: nom,
-      email: email,
-      role: role ?? this.role,
-      isActive: isActive ?? this.isActive,
-    );
-  }
-}
+// --- Activity and Moderation Models ---
 
 class ActivityLogModel {
   final String id;
@@ -81,7 +62,11 @@ final pendingEnterprisesStreamProvider = StreamProvider.autoDispose<List<Entrepr
       .collection('entreprises')
       .where('isVerified', isEqualTo: false)
       .snapshots()
-      .map((snapshot) => snapshot.docs.map((doc) => EntrepriseModel.fromJson(doc.data())).toList());
+      .map((snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return EntrepriseModel.fromJson(data);
+          }).toList());
 });
 
 final pendingCertificationsStreamProvider = StreamProvider.autoDispose<List<CertificationRequestModel>>((ref) {
@@ -101,32 +86,36 @@ final pendingCertificationsStreamProvider = StreamProvider.autoDispose<List<Cert
       });
 });
 
-class UsersManagementNotifier extends StateNotifier<List<UserModel>> {
-  UsersManagementNotifier() : super([]) {
-    _loadMockData();
+final usersStreamProvider = StreamProvider.autoDispose<List<UserModel>>((ref) {
+  return FirebaseFirestore.instance
+      .collection('users')
+      .snapshots()
+      .map((snapshot) {
+        final list = snapshot.docs.map((doc) {
+          final data = doc.data();
+          if (!data.containsKey('uid') || (data['uid'] as String?)?.isEmpty == true) {
+            data['uid'] = doc.id;
+          }
+          return UserModel.fromJson(data);
+        }).toList();
+        list.sort((a, b) => b.dateCreation.compareTo(a.dateCreation));
+        return list;
+      });
+});
+
+class AdminUserController {
+  static Future<void> changeRole(String uid, String newRole) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'role': newRole,
+    }, SetOptions(merge: true));
   }
 
-  void _loadMockData() {
-    state = [
-      UserModel(id: 'u1', nom: 'Jean Dupont', email: 'jean@example.com', role: 'client'),
-      UserModel(id: 'u2', nom: 'BatiPlus', email: 'contact@batiplus.cm', role: 'entreprise'),
-      UserModel(id: 'u3', nom: 'Admin Sup', email: 'admin@chantiertrack.cm', role: 'admin'),
-      UserModel(id: 'u4', nom: 'Paul Chantier', email: 'paul@chef.cm', role: 'chef_chantier', isActive: false),
-    ];
-  }
-
-  void changeRole(String id, String newRole) {
-    state = state.map((u) => u.id == id ? u.copyWith(role: newRole) : u).toList();
-  }
-
-  void toggleStatus(String id) {
-    state = state.map((u) => u.id == id ? u.copyWith(isActive: !u.isActive) : u).toList();
+  static Future<void> toggleStatus(String uid, bool currentActive) async {
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'isActive': !currentActive,
+    }, SetOptions(merge: true));
   }
 }
-
-final usersManagementProvider = StateNotifierProvider<UsersManagementNotifier, List<UserModel>>((ref) {
-  return UsersManagementNotifier();
-});
 
 class ModerationNotifier extends StateNotifier<List<FlaggedReviewModel>> {
   ModerationNotifier() : super([]) {

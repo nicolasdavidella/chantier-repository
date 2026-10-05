@@ -164,20 +164,47 @@ class _EntreprisesInteresseesTabState
   }
 
   Widget _buildEntrepriseCard(QueryDocumentSnapshot diffusionDoc) {
-    final entrepriseId = diffusionDoc['entrepriseId'];
+    final diffData = diffusionDoc.data() as Map<String, dynamic>;
+    final entrepriseId = diffData['entrepriseId'] as String? ?? '';
 
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('entreprises')
-          .doc(entrepriseId)
-          .get(),
+    return FutureBuilder<Map<String, dynamic>?>(
+      future: () async {
+        // 1. Chercher dans 'entreprises' par ID direct
+        final doc = await FirebaseFirestore.instance.collection('entreprises').doc(entrepriseId).get();
+        if (doc.exists && doc.data() != null) return doc.data()!;
+
+        // 2. Chercher dans 'entreprises' par userId
+        final q = await FirebaseFirestore.instance.collection('entreprises').where('userId', isEqualTo: entrepriseId).limit(1).get();
+        if (q.docs.isNotEmpty) return q.docs.first.data();
+
+        // 3. Chercher dans 'users'
+        final uDoc = await FirebaseFirestore.instance.collection('users').doc(entrepriseId).get();
+        if (uDoc.exists && uDoc.data() != null) {
+          final uData = uDoc.data()!;
+          return {
+            'raisonSociale': uData['raisonSociale'] ?? '${uData['prenom'] ?? ''} ${uData['nom'] ?? ''}'.trim(),
+            'noteMoyenne': 5.0,
+            'anneesExperience': 3,
+            'certifie': uData['isVerified'] ?? false,
+            'specialites': ['BTP', 'Construction'],
+          };
+        }
+
+        return {
+          'raisonSociale': diffData['nomEntreprise'] ?? 'Entreprise',
+          'noteMoyenne': 5.0,
+          'anneesExperience': 1,
+          'specialites': ['BTP'],
+        };
+      }(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const Card(child: ListTile(title: Text('Chargement...')));
         }
-        if (!snapshot.data!.exists) return const SizedBox.shrink();
-
-        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final data = snapshot.data!;
+        final nomEntreprise = (data['raisonSociale'] as String?)?.isNotEmpty == true
+            ? data['raisonSociale'] as String
+            : (diffData['nomEntreprise'] as String? ?? 'Entreprise');
 
         return Card(
           margin: const EdgeInsets.only(bottom: AppSpacing.md),
@@ -201,32 +228,39 @@ class _EntreprisesInteresseesTabState
                             children: [
                               Expanded(
                                 child: Text(
-                                  data['raisonSociale'] ?? 'Entreprise',
+                                  nomEntreprise,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,
                                   ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              if (data['certifie'] == true)
+                              if (data['certifie'] == true) ...[
+                                const SizedBox(width: 4),
                                 const Icon(
                                   Icons.verified,
                                   color: AppColors.primary,
                                   size: 20,
                                 ),
+                              ],
                             ],
                           ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: AppColors.warning,
-                                size: 16,
-                              ),
-                              Text(
-                                ' ${data['noteMoyenne'] ?? 'N/A'} • ${data['anneesExperience'] ?? 0} ans d\'expérience',
-                              ),
-                            ],
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const NeverScrollableScrollPhysics(),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: AppColors.warning,
+                                  size: 16,
+                                ),
+                                Text(
+                                  ' ${data['noteMoyenne'] ?? '5.0'} • ${data['anneesExperience'] ?? 1} ans d\'expérience',
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -241,34 +275,45 @@ class _EntreprisesInteresseesTabState
                 const SizedBox(height: AppSpacing.md),
                 Row(
                   children: [
-                    OutlinedButton(
-                      onPressed: () {
-                        // Voir le profil complet (navigation)
-                      },
-                      child: const Text('Voir le profil'),
-                    ),
-                    const Spacer(),
-                    ElevatedButton(
-                      onPressed: _isChoosing
-                          ? null
-                          : () => _confirmChoice(
-                              entrepriseId,
-                              data['raisonSociale'] ?? 'Cette entreprise',
-                            ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.white,
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // Voir le profil complet (navigation)
+                        },
+                        child: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text('Voir le profil'),
+                        ),
                       ),
-                      child: _isChoosing
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: ElevatedButton(
+                        onPressed: _isChoosing
+                            ? null
+                            : () => _confirmChoice(
+                                entrepriseId,
+                                nomEntreprise,
                               ),
-                            )
-                          : const Text('Choisir cette entreprise'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Colors.white,
+                        ),
+                        child: _isChoosing
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Text('Choisir cette entreprise'),
+                              ),
+                      ),
                     ),
                   ],
                 ),
@@ -281,26 +326,42 @@ class _EntreprisesInteresseesTabState
   }
 
   Widget _buildPendingTile(QueryDocumentSnapshot diffusionDoc) {
-    final entrepriseId = diffusionDoc['entrepriseId'];
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('entreprises')
-          .doc(entrepriseId)
-          .get(),
+    final diffData = diffusionDoc.data() as Map<String, dynamic>;
+    final entrepriseId = diffData['entrepriseId'] as String? ?? '';
+
+    return FutureBuilder<String>(
+      future: _getEntrepriseName(entrepriseId, diffData['nomEntreprise'] as String?),
       builder: (context, snapshot) {
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return const SizedBox.shrink();
-        }
-        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final name = snapshot.data ?? 'Entreprise sollicitée';
         return ListTile(
           leading: const Icon(Icons.hourglass_empty, color: AppColors.textSecondaryLight),
           title: Text(
-            data['raisonSociale'] ?? 'Entreprise',
+            name,
             style: const TextStyle(color: AppColors.textSecondaryLight),
           ),
         );
       },
     );
+  }
+
+  Future<String> _getEntrepriseName(String entrepriseId, String? fallback) async {
+    final doc = await FirebaseFirestore.instance.collection('entreprises').doc(entrepriseId).get();
+    if (doc.exists && doc.data() != null && doc.data()?['raisonSociale'] != null) {
+      return doc.data()!['raisonSociale'] as String;
+    }
+    final q = await FirebaseFirestore.instance.collection('entreprises').where('userId', isEqualTo: entrepriseId).limit(1).get();
+    if (q.docs.isNotEmpty && q.docs.first.data()['raisonSociale'] != null) {
+      return q.docs.first.data()['raisonSociale'] as String;
+    }
+    final uDoc = await FirebaseFirestore.instance.collection('users').doc(entrepriseId).get();
+    if (uDoc.exists && uDoc.data() != null) {
+      final uData = uDoc.data()!;
+      final r = uData['raisonSociale'] as String?;
+      if (r != null && r.trim().isNotEmpty) return r.trim();
+      final fullName = '${uData['prenom'] ?? ''} ${uData['nom'] ?? ''}'.trim();
+      if (fullName.isNotEmpty) return fullName;
+    }
+    return fallback ?? 'Entreprise';
   }
 
   void _confirmChoice(String entrepriseId, String nom) {
@@ -383,15 +444,14 @@ class _EntreprisesInteresseesTabState
         }
 
         // 3. Créer une conversation de messagerie
-        // Vérifier s'il existe déjà une conversation (optionnel, on va juste en créer une)
         final convRef = firestore.collection('conversations').doc();
         transaction.set(convRef, {
           'id': convRef.id,
           'projectId': projectId,
           'participantsIds': [clientId, entrepriseId],
           'participantNames': {
-            clientId: "Client", // Simplification
-            entrepriseId: "Entreprise", // Simplification
+            clientId: "Client",
+            entrepriseId: "Entreprise",
           },
           'participantAvatars': {},
           'lastMessage': "Conversation créée suite à l'attribution du projet",

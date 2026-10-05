@@ -15,6 +15,9 @@ class UserModel {
   final DateTime dateCreation;
   final Map<String, dynamic>? localisation;
 
+  final bool isActive;
+  final bool isVerified;
+
   UserModel({
     required this.uid,
     required this.nom,
@@ -25,6 +28,8 @@ class UserModel {
     this.photoUrl,
     required this.dateCreation,
     this.localisation,
+    this.isActive = true,
+    this.isVerified = false,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -38,6 +43,8 @@ class UserModel {
       photoUrl: json['photoUrl'] as String?,
       dateCreation: (json['dateCreation'] as Timestamp?)?.toDate() ?? DateTime.now(),
       localisation: json['localisation'] as Map<String, dynamic>?,
+      isActive: json['isActive'] as bool? ?? true,
+      isVerified: json['isVerified'] as bool? ?? false,
     );
   }
 
@@ -52,6 +59,8 @@ class UserModel {
       'photoUrl': photoUrl,
       'dateCreation': Timestamp.fromDate(dateCreation),
       'localisation': localisation,
+      'isActive': isActive,
+      'isVerified': isVerified,
     };
   }
 
@@ -65,6 +74,8 @@ class UserModel {
     String? photoUrl,
     DateTime? dateCreation,
     Map<String, dynamic>? localisation,
+    bool? isActive,
+    bool? isVerified,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -76,6 +87,8 @@ class UserModel {
       photoUrl: photoUrl ?? this.photoUrl,
       dateCreation: dateCreation ?? this.dateCreation,
       localisation: localisation ?? this.localisation,
+      isActive: isActive ?? this.isActive,
+      isVerified: isVerified ?? this.isVerified,
     );
   }
 }

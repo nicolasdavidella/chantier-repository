@@ -32,13 +32,20 @@ class EntrepriseDashboardRepository {
   Stream<List<ProjectModel>> watchOpenProjects() {
     return _db
         .collection('projects')
-        .where('statut', isEqualTo: 'en_recherche_entreprise')
         .snapshots()
-        .map((snap) => snap.docs.map((d) {
+        .map((snap) => snap.docs
+            .map((d) {
               final data = d.data();
               data['id'] = d.id;
               return ProjectModel.fromJson(data);
-            }).toList());
+            })
+            .where((p) =>
+                (p.statut == 'en_recherche_entreprise' ||
+                    p.statut == 'plan_valide' ||
+                    p.isMarketplacePublished == true) &&
+                p.statut != 'en_cours' &&
+                p.statut != 'termine')
+            .toList());
   }
 
   // ─── TÂCHES ──────────────────────────────────────

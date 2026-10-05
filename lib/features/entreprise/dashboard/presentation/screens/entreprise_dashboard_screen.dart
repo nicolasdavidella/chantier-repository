@@ -231,11 +231,11 @@ class _DashboardHomeTab extends ConsumerWidget {
                   ).animate().fadeIn().slideX(begin: -0.1),
                   const SizedBox(height: 16),
 
-                  // Certification Banner
-                  if (entrepriseAsync.value == null)
-                    const Text('Profil entreprise introuvable', style: TextStyle(color: Colors.red)),
-                  if (entrepriseAsync.value == null || !entrepriseAsync.value!.isVerified) ...[
-                    _buildCertificationBanner(context, entrepriseAsync.value?.id ?? ''),
+                  // Certification Banner - Only displayed if company is not certified
+                  if (entrepriseAsync.value != null &&
+                      !entrepriseAsync.value!.isVerified &&
+                      entrepriseAsync.value!.verificationStatus != 'APPROVED') ...[
+                    _buildCertificationBanner(context, entrepriseAsync.value!.id),
                     const SizedBox(height: 16),
                   ],
 

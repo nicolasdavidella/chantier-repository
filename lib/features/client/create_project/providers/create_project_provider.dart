@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../../data/models/project_model.dart';
+import '../../../../data/repositories/marketplace_repository.dart';
 import '../../../../core/services/storage_service.dart';
 
 class ProjectFormData {
@@ -151,13 +152,13 @@ class ProjectCreationController extends StateNotifier<AsyncValue<ProjectFormData
         statut: 'en_recherche_entreprise',
         listePlans: [],
         listeDocuments: uploadedDocsUrls,
+        creationSource: 'manuel',
+        isMarketplacePublished: true,
+        datePublicationMarketplace: DateTime.now(),
       );
 
-      final db = FirebaseFirestore.instance;
-      await db.collection('projects').doc(newProject.id).set(newProject.toJson());
-
-      // Diffusion is now handled by the Cloud Function 'publierProjetAuxEntreprises'
-      // which triggers on project creation.
+      final marketplaceRepo = ref.read(marketplaceRepositoryProvider);
+      await marketplaceRepo.publishProjectToMarketplace(newProject);
 
       // Reset state on success
       state = AsyncData(ProjectFormData());

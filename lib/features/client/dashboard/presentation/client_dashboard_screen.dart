@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../auth/providers/auth_provider.dart';
-import '../../search_entreprises/presentation/screens/search_entreprises_screen.dart';
-import '../../../profile/presentation/screens/profile_screen.dart';
 import 'tabs/client_projects_tab.dart';
+import 'tabs/client_marketplace_tab.dart';
 import '../../../chat/presentation/screens/conversations_list_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/settings_provider.dart';
 import '../../../../core/widgets/app_circular_loader.dart';
@@ -32,7 +32,7 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
         setState(() => _currentIndex = index);
       }),
       const ClientProjectsTab(),
-      const SearchEntreprisesScreen(),
+      const ClientMarketplaceTab(),
       const ConversationsListScreen(),
       const ProfileScreen(),
     ];
@@ -124,30 +124,30 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
     final language = ref.watch(languageProvider);
     final isFrench = language == 'fr';
 
-    return BottomAppBar(
-      color: Colors.white,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8.0,
-      elevation: 20,
-      shadowColor: const Color(0xFF143D2B).withValues(alpha: 0.12),
-      child: SizedBox(
-        height: 64,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                _navItem(0, Icons.home_rounded, isFrench ? "Accueil" : "Home"),
-                _navItem(1, Icons.assignment_rounded, isFrench ? "Projets" : "Projects"),
-              ],
-            ),
-            Row(
-              children: [
-                _navItem(3, Icons.chat_bubble_outline_rounded, isFrench ? "Chat" : "Chat"),
-                _navItem(4, Icons.person_outline_rounded, isFrench ? "Profil" : "Profile"),
-              ],
-            ),
-          ],
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF143D2B).withValues(alpha: 0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _navItem(0, Icons.home_rounded, isFrench ? "Accueil" : "Home"),
+              _navItem(1, Icons.assignment_rounded, isFrench ? "Projets" : "Projects"),
+              _navItem(2, Icons.storefront_rounded, isFrench ? "Marketplace" : "Marketplace"),
+              _navItem(3, Icons.chat_bubble_outline_rounded, isFrench ? "Chat" : "Chat"),
+              _navItem(4, Icons.person_outline_rounded, isFrench ? "Profil" : "Profile"),
+            ],
+          ),
         ),
       ),
     );
@@ -155,27 +155,31 @@ class _ClientDashboardScreenState extends ConsumerState<ClientDashboardScreen> {
 
   Widget _navItem(int index, IconData icon, String label) {
     final isSelected = _currentIndex == index;
-    return MaterialButton(
-      minWidth: 70,
-      onPressed: () => setState(() => _currentIndex = index),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            color: isSelected ? const Color(0xFF143D2B) : const Color(0xFF94A3B8),
-            size: 23,
-          ),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _currentIndex = index),
+        borderRadius: BorderRadius.circular(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
               color: isSelected ? const Color(0xFF143D2B) : const Color(0xFF94A3B8),
-              fontSize: 10.5,
-              fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+              size: 23,
             ),
-          ),
-        ],
+            const SizedBox(height: 3),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: isSelected ? const Color(0xFF143D2B) : const Color(0xFF94A3B8),
+                fontSize: 10.5,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -14,7 +14,9 @@ class ChatRepository {
         .where('participantsIds', arrayContains: userId)
         .snapshots()
         .map((snapshot) {
-      final conversations = snapshot.docs.map((doc) => ConversationModel.fromJson(doc.data())).toList();
+      final conversations = snapshot.docs
+          .map((doc) => ConversationModel.fromJson(doc.data(), docId: doc.id))
+          .toList();
       // Tri local car on ne peut pas utiliser arrayContains + orderBy sans index
       conversations.sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
       return conversations;
@@ -29,7 +31,9 @@ class ChatRepository {
         .orderBy('dateEnvoi', descending: false)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) => MessageModel.fromJson(doc.data())).toList();
+      return snapshot.docs
+          .map((doc) => MessageModel.fromJson(doc.data(), docId: doc.id))
+          .toList();
     });
   }
 
@@ -58,13 +62,10 @@ class ChatRepository {
     batch.set(messageRef, message.toJson());
     
     final convRef = _firestore.collection('conversations').doc(conversationId);
-    // On met à jour le dernier message et on incrémente l'unreadCount pour l'autre participant
-    // Comme on ne sait pas qui est l'autre sans le document, on utilise une transaction ou on lit la conv d'abord
     
-    // Plutôt que de faire une transaction lourde pour un message, on va lire la conversation
     final convDoc = await convRef.get();
-    if (convDoc.exists) {
-      final conv = ConversationModel.fromJson(convDoc.data()!);
+    if (convDoc.exists && convDoc.data() != null) {
+      final conv = ConversationModel.fromJson(convDoc.data()!, docId: convDoc.id);
       final unreadCount = Map<String, int>.from(conv.unreadCount);
       
       for (final id in conv.participantsIds) {
@@ -74,7 +75,7 @@ class ChatRepository {
       }
 
       batch.update(convRef, {
-        'lastMessage': type == 'image' ? '📷 Image' : content,
+        'lastMessage': type == 'image' ? '📷 Image' : (type == 'pdf' ? '📄 Document PDF' : content),
         'lastMessageTime': Timestamp.now(),
         'unreadCount': unreadCount,
       });
@@ -91,22 +92,44 @@ class ChatRepository {
     String? currentUserAvatar,
     String? targetUserAvatar,
     String? projectId,
+    String? initialContextMessage,
   }) async {
-    // Check if conversation already exists between these two users
-    final query = await _firestore
-        .collection('conversations')
-        .where('participantsIds', arrayContains: currentUserId)
-        .get();
+    // 1. Chercher si une conversation existe déjà entre ces deux utilisateurs
+    try {
+      final query = await _firestore
+          .collection('conversations')
+          .where('participantsIds', arrayContains: currentUserId)
+          .get();
 
-    for (final doc in query.docs) {
-      final conv = ConversationModel.fromJson(doc.data());
-      if (conv.participantsIds.contains(targetUserId)) {
-        return conv;
+      for (final doc in query.docs) {
+        if (!doc.exists || doc.data().isEmpty) continue;
+        final conv = ConversationModel.fromJson(doc.data(), docId: doc.id);
+        if (conv.participantsIds.contains(targetUserId)) {
+          // Mettre à jour les noms des participants si manquants ou génériques
+          final names = Map<String, String>.from(conv.participantNames);
+          bool needsUpdate = false;
+          if (currentUserName.isNotEmpty && names[currentUserId] != currentUserName) {
+            names[currentUserId] = currentUserName;
+            needsUpdate = true;
+          }
+          if (targetUserName.isNotEmpty && names[targetUserId] != targetUserName) {
+            names[targetUserId] = targetUserName;
+            needsUpdate = true;
+          }
+          if (needsUpdate) {
+            await _firestore.collection('conversations').doc(conv.id).update({'participantNames': names});
+          }
+          return conv.copyWith(participantNames: names);
+        }
       }
-    }
+    } catch (_) {}
 
-    // Create new conversation
+    // 2. Créer une nouvelle conversation avec message initial contenant les besoins
     final convRef = _firestore.collection('conversations').doc();
+    final firstMessage = (initialContextMessage != null && initialContextMessage.isNotEmpty)
+        ? initialContextMessage
+        : 'Nouvelle conversation';
+
     final newConv = ConversationModel(
       id: convRef.id,
       participantsIds: [currentUserId, targetUserId],
@@ -119,15 +142,34 @@ class ChatRepository {
         targetUserId: targetUserAvatar,
       },
       projectId: projectId,
-      lastMessage: 'Nouvelle conversation',
+      lastMessage: firstMessage,
       lastMessageTime: DateTime.now(),
       unreadCount: {
         currentUserId: 0,
-        targetUserId: 0,
+        targetUserId: initialContextMessage != null ? 1 : 0,
       },
     );
 
-    await convRef.set(newConv.toJson());
+    final batch = _firestore.batch();
+    batch.set(convRef, newConv.toJson());
+
+    // Si un message initial est spécifié, l'insérer dans la sous-collection messages
+    if (initialContextMessage != null && initialContextMessage.isNotEmpty) {
+      final messageRef = convRef.collection('messages').doc();
+      final msg = MessageModel(
+        id: messageRef.id,
+        conversationId: convRef.id,
+        expediteurId: currentUserId,
+        contenu: initialContextMessage,
+        dateEnvoi: DateTime.now(),
+        type: 'texte',
+        status: 'sent',
+        lu: false,
+      );
+      batch.set(messageRef, msg.toJson());
+    }
+
+    await batch.commit();
     return newConv;
   }
 
@@ -136,8 +178,8 @@ class ChatRepository {
     
     _firestore.runTransaction((transaction) async {
       final snapshot = await transaction.get(convRef);
-      if (snapshot.exists) {
-        final conv = ConversationModel.fromJson(snapshot.data()!);
+      if (snapshot.exists && snapshot.data() != null) {
+        final conv = ConversationModel.fromJson(snapshot.data()!, docId: snapshot.id);
         if ((conv.unreadCount[userId] ?? 0) > 0) {
           final updatedUnreadCount = Map<String, int>.from(conv.unreadCount);
           updatedUnreadCount[userId] = 0;
