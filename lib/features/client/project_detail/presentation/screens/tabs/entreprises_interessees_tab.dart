@@ -49,10 +49,10 @@ class _EntreprisesInteresseesTabState
             // Bouton IA Simulator
             Card(
               elevation: 0,
-              color: AppColors.primary.withOpacity(0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
-                side: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+                side: BorderSide(color: AppColors.primary.withValues(alpha: 0.2)),
               ),
               child: InkWell(
                 onTap: () => DevisIASimulator.show(context, widget.project),
@@ -64,7 +64,7 @@ class _EntreprisesInteresseesTabState
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(Icons.calculate_rounded, color: AppColors.primary),
@@ -106,7 +106,7 @@ class _EntreprisesInteresseesTabState
                       Icon(
                         Icons.business_center_outlined,
                         size: 64,
-                        color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+                        color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       Text(
@@ -384,7 +384,7 @@ class _EntreprisesInteresseesTabState
             ),
             onPressed: () {
               Navigator.pop(ctx);
-              _choisirEntreprise(entrepriseId);
+              _choisirEntreprise(entrepriseId, nom);
             },
             child: const Text('Confirmer'),
           ),
@@ -393,12 +393,22 @@ class _EntreprisesInteresseesTabState
     );
   }
 
-  Future<void> _choisirEntreprise(String entrepriseId) async {
+  Future<void> _choisirEntreprise(String entrepriseId, String entrepriseNom) async {
     setState(() => _isChoosing = true);
     try {
       final firestore = FirebaseFirestore.instance;
       final projectId = widget.project.id;
       final clientId = widget.project.clientId;
+
+      String clientNom = "Client";
+      try {
+        final userDoc = await firestore.collection('users').doc(clientId).get();
+        if (userDoc.exists && userDoc.data() != null) {
+          final u = userDoc.data()!;
+          final fullName = '${u['prenom'] ?? ''} ${u['nom'] ?? ''}'.trim();
+          if (fullName.isNotEmpty) clientNom = fullName;
+        }
+      } catch (_) {}
 
       await firestore.runTransaction((transaction) async {
         final projectRef = firestore.collection('projects').doc(projectId);
@@ -443,23 +453,37 @@ class _EntreprisesInteresseesTabState
           });
         }
 
-        // 3. Créer une conversation de messagerie
+        // 3. Créer une conversation de messagerie avec message initial
         final convRef = firestore.collection('conversations').doc();
+        final firstMsgRef = convRef.collection('messages').doc();
+        final initialContent = "Bonjour $entrepriseNom, nous sommes ravis de vous confier le projet \"${widget.project.titre}\". Nous pouvons échanger ici sur tous les détails et l'avancement du chantier.";
+
         transaction.set(convRef, {
           'id': convRef.id,
           'projectId': projectId,
           'participantsIds': [clientId, entrepriseId],
           'participantNames': {
-            clientId: "Client",
-            entrepriseId: "Entreprise",
+            clientId: clientNom,
+            entrepriseId: entrepriseNom,
           },
           'participantAvatars': {},
-          'lastMessage': "Conversation créée suite à l'attribution du projet",
+          'lastMessage': initialContent,
           'lastMessageTime': FieldValue.serverTimestamp(),
           'unreadCount': {
             clientId: 0,
-            entrepriseId: 0,
+            entrepriseId: 1,
           },
+        });
+
+        transaction.set(firstMsgRef, {
+          'id': firstMsgRef.id,
+          'conversationId': convRef.id,
+          'expediteurId': clientId,
+          'contenu': initialContent,
+          'dateEnvoi': FieldValue.serverTimestamp(),
+          'type': 'texte',
+          'status': 'sent',
+          'lu': false,
         });
       });
 

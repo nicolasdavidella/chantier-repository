@@ -191,63 +191,65 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
           ),
 
           // Badge central NICO IA
-          Flexible(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
-                border: Border.all(
-                  color: const Color(0xFF81C784).withValues(alpha: 0.4),
-                  width: 1.2,
+          Expanded(
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(
+                    color: const Color(0xFF81C784).withValues(alpha: 0.4),
+                    width: 1.2,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF1B4D3E).withValues(alpha: 0.08),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF1B4D3E).withValues(alpha: 0.08),
-                    blurRadius: 10,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.architecture_rounded, color: Color(0xFF2E7D32), size: 16),
-                  const SizedBox(width: 8),
-                  const Flexible(
-                    child: Text(
-                      'Studio 3D',
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Color(0xFF1B4D3E),
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        letterSpacing: 0.3,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.architecture_rounded, color: Color(0xFF2E7D32), size: 16),
+                    const SizedBox(width: 8),
+                    const Flexible(
+                      child: Text(
+                        'Studio 3D',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Color(0xFF1B4D3E),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                          letterSpacing: 0.3,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: const Color(0xFF81C784).withValues(alpha: 0.6),
-                        width: 0.8,
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: const Color(0xFF81C784).withValues(alpha: 0.6),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: const Text(
+                        '3D ARCHI',
+                        style: TextStyle(
+                          color: Color(0xFF2E7D32),
+                          fontSize: 9,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.5,
+                        ),
                       ),
                     ),
-                    child: const Text(
-                      '3D ARCHI',
-                      style: TextStyle(
-                        color: Color(0xFF2E7D32),
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -616,6 +618,9 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                                 },
                                 borderRadius: BorderRadius.circular(20),
                                 child: Container(
+                                  constraints: BoxConstraints(
+                                    maxWidth: MediaQuery.of(context).size.width * 0.75,
+                                  ),
                                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFFF0FDF4),
@@ -635,12 +640,14 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        opt,
-                                        style: const TextStyle(
-                                          color: Color(0xFF1B4D3E),
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w600,
+                                      Flexible(
+                                        child: Text(
+                                          opt,
+                                          style: const TextStyle(
+                                            color: Color(0xFF1B4D3E),
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 6),
@@ -956,41 +963,48 @@ class _IaProjectChatScreenState extends ConsumerState<IaProjectChatScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AuraOrb(size: 26),
+          const Padding(
+            padding: EdgeInsets.only(top: 2),
+            child: AuraOrb(size: 26),
+          ),
           const SizedBox(width: 10),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: const Color(0xFFC8E6C9),
-                width: 1,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF1B4D3E).withValues(alpha: 0.05),
-                  blurRadius: 8,
+          Flexible(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFFC8E6C9),
+                  width: 1,
                 ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Color(0xFF2E7D32),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF1B4D3E).withValues(alpha: 0.05),
+                    blurRadius: 8,
                   ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  isFrench ? 'Modélisation 3D et calcul du devis en cours...' : 'Generating 3D model & estimate...',
-                  style: const TextStyle(color: Color(0xFF1B4D3E), fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-              ],
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF2E7D32),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Flexible(
+                    child: Text(
+                      isFrench ? 'Modélisation 3D et calcul du devis en cours...' : 'Generating 3D model & estimate...',
+                      style: const TextStyle(color: Color(0xFF1B4D3E), fontSize: 13, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

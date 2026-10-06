@@ -16,16 +16,19 @@ class EntrepriseDashboardRepository {
 
   // ─── PROJETS ─────────────────────────────────────
   /// Tous les projets d'une entreprise (tous statuts)
-  Stream<List<ProjectModel>> watchAllEntrepriseProjects(String entrepriseId) {
-    return _db
-        .collection('projects')
-        .where('entrepriseId', isEqualTo: entrepriseId)
-        .snapshots()
-        .map((snap) => snap.docs.map((d) {
-              final data = d.data();
-              data['id'] = d.id;
-              return ProjectModel.fromJson(data);
-            }).toList());
+  Stream<List<ProjectModel>> watchAllEntrepriseProjects(String entrepriseId, [String? userId]) {
+    return _db.collection('projects').snapshots().map((snap) {
+      return snap.docs
+          .map((d) {
+            final data = d.data();
+            data['id'] = d.id;
+            return ProjectModel.fromJson(data);
+          })
+          .where((p) =>
+              p.entrepriseId == entrepriseId ||
+              (userId != null && p.entrepriseId == userId))
+          .toList();
+    });
   }
 
   /// Projets ouverts (en recherche d'entreprise = appels d'offres)
@@ -80,17 +83,103 @@ class EntrepriseDashboardRepository {
   }
 
   // ─── DEVIS ───────────────────────────────────────
-  Stream<List<DevisModel>> watchEntrepriseDevis(String entrepriseId) {
+  Stream<List<DevisModel>> watchEntrepriseDevis(String entrepriseId, [String? userId]) {
+    final activeId = (userId != null && userId.isNotEmpty) ? userId : entrepriseId;
+    if (activeId.isNotEmpty) {
+      _syncQuotesFromConversations(activeId);
+    }
+
     return _db
         .collection('devis')
-        .where('entrepriseId', isEqualTo: entrepriseId)
-        .orderBy('dateEnvoi', descending: true)
         .snapshots()
-        .map((snap) => snap.docs.map((d) {
-              final data = d.data();
-              data['id'] = d.id;
-              return DevisModel.fromJson(data);
-            }).toList());
+        .map((snap) {
+          final list = snap.docs.map((d) {
+            final data = d.data();
+            data['id'] = d.id;
+            return DevisModel.fromJson(data);
+          }).where((d) {
+            if (entrepriseId.isEmpty && (userId == null || userId.isEmpty)) {
+              return true;
+            }
+            // Real devis belonging to user or created by/for user
+            final matchesEntreprise = entrepriseId.isNotEmpty && d.entrepriseId == entrepriseId;
+            final matchesUser = userId != null && userId.isNotEmpty && d.entrepriseId == userId;
+            final matchesClient = (userId != null && userId.isNotEmpty && d.clientId == userId) ||
+                (entrepriseId.isNotEmpty && d.clientId == entrepriseId);
+            final isLocalOrMe = d.entrepriseId == 'me' || d.entrepriseId.isEmpty;
+            final isTargetClient = (d.clientName?.toLowerCase().contains('nicolas') ?? false) ||
+                (d.clientName?.toLowerCase().contains('ella') ?? false);
+
+            return matchesEntreprise || matchesUser || matchesClient || isLocalOrMe || isTargetClient;
+          }).toList();
+          list.sort((a, b) => b.dateEnvoi.compareTo(a.dateEnvoi));
+          return list;
+        });
+  }
+
+  void _syncQuotesFromConversations(String currentUserId) async {
+    try {
+      final convsSnap = await _db
+          .collection('conversations')
+          .where('participantsIds', arrayContains: currentUserId)
+          .get();
+
+      for (final convDoc in convsSnap.docs) {
+        final convData = convDoc.data();
+        final projectId = convData['projectId']?.toString() ?? '';
+        final participantNames = (convData['participantNames'] as Map<String, dynamic>?) ?? {};
+        final participants = (convData['participantsIds'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+        final otherId = participants.firstWhere((p) => p != currentUserId, orElse: () => '');
+        final clientName = participantNames[otherId]?.toString() ?? 'Client';
+
+        final msgsSnap = await convDoc.reference
+            .collection('messages')
+            .where('type', isEqualTo: 'quote')
+            .get();
+
+        for (final mDoc in msgsSnap.docs) {
+          final mData = mDoc.data();
+          final metadata = (mData['metadata'] as Map<String, dynamic>?) ?? {};
+          final devisId = metadata['devisId']?.toString() ?? mDoc.id;
+          final expediteurId = mData['expediteurId']?.toString() ?? currentUserId;
+
+          final amountNum = metadata['quoteAmount'] ?? 0;
+          final amount = (amountNum is num)
+              ? amountNum.toDouble()
+              : (double.tryParse(amountNum.toString()) ?? 0.0);
+          final delay = metadata['quoteDelay']?.toString() ?? mData['contenu']?.toString() ?? '';
+          final desc = metadata['quoteDescription']?.toString() ?? mData['contenu']?.toString() ?? 'Proposition de devis';
+          final statusRaw = metadata['quoteStatus']?.toString() ?? 'pending';
+          final statut = statusRaw == 'accepted' ? 'accepte' : (statusRaw == 'rejected' ? 'refuse' : 'en_attente');
+          final pTitle = metadata['projectTitle']?.toString() ?? 'Devis pour $clientName';
+
+          DateTime parseMsgDate(dynamic d) {
+            if (d is Timestamp) return d.toDate();
+            if (d is String) return DateTime.tryParse(d) ?? DateTime.now();
+            return DateTime.now();
+          }
+
+          final devisRef = _db.collection('devis').doc(devisId);
+          final existing = await devisRef.get();
+          if (!existing.exists) {
+            final devisModel = DevisModel(
+              id: devisId,
+              projectId: projectId,
+              entrepriseId: expediteurId,
+              montant: amount,
+              delaiEstime: delay,
+              description: desc,
+              dateEnvoi: parseMsgDate(mData['dateEnvoi']),
+              statut: statut,
+              projectTitle: pTitle,
+              clientName: clientName,
+              clientId: otherId,
+            );
+            await devisRef.set(devisModel.toJson());
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> createDevis(DevisModel devis) async {

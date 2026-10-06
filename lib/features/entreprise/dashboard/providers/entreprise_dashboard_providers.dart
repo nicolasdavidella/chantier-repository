@@ -1,5 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import '../../../../data/models/project_model.dart';
 import '../../../../data/models/tache_model.dart';
 import '../../../../data/models/devis_model.dart';
@@ -38,10 +41,15 @@ final currentEntrepriseStreamProvider = StreamProvider.autoDispose<EntrepriseMod
 // ─── Mes Chantiers (tous statuts) ──────────────────
 final mesChantierStreamProvider = StreamProvider.autoDispose<List<ProjectModel>>((ref) {
   final entreprise = ref.watch(currentEntrepriseStreamProvider).value;
-  if (entreprise == null) return const Stream.empty();
+  final user = ref.watch(authStateProvider).value;
+  if (entreprise == null && user == null) return const Stream.empty();
+  
+  final entId = entreprise?.id ?? user?.uid ?? '';
+  final uId = user?.uid ?? entreprise?.userId;
+  
   return ref
       .watch(entrepriseDashboardRepositoryProvider)
-      .watchAllEntrepriseProjects(entreprise.id);
+      .watchAllEntrepriseProjects(entId, uId);
 });
 
 // ─── Appels d'offres ouverts ────────────────────────
@@ -60,10 +68,17 @@ final tachesProjectStreamProvider =
 // ─── Devis de l'entreprise ──────────────────────────
 final mesDevisStreamProvider = StreamProvider.autoDispose<List<DevisModel>>((ref) {
   final entreprise = ref.watch(currentEntrepriseStreamProvider).value;
-  if (entreprise == null) return const Stream.empty();
+  final authUser = FirebaseAuth.instance.currentUser;
+  final user = ref.watch(authStateProvider).value;
+
+  final entId = entreprise?.id ?? '';
+  final uId = authUser?.uid ?? user?.uid ?? '';
+
+  if (entId.isEmpty && uId.isEmpty) return const Stream.empty();
+
   return ref
       .watch(entrepriseDashboardRepositoryProvider)
-      .watchEntrepriseDevis(entreprise.id);
+      .watchEntrepriseDevis(entId, uId);
 });
 
 // ─── Rapports d'un projet ───────────────────────────
@@ -115,44 +130,127 @@ class DevisController extends StateNotifier<AsyncValue<void>> {
   final Ref ref;
   DevisController(this.ref) : super(const AsyncData(null));
 
-  Future<void> submitDevis(DevisModel devis) async {
+  Future<String?> submitDevis(
+    DevisModel devis, {
+    String? targetClientId,
+    String? projectTitle,
+  }) async {
     state = const AsyncLoading();
+    String? resultConversationId;
+
     try {
-      await ref.read(entrepriseDashboardRepositoryProvider).createDevis(devis);
+      final authUser = FirebaseAuth.instance.currentUser;
+      final user = ref.read(authStateProvider).value;
+      final currentUserId = authUser?.uid ?? user?.uid ?? devis.entrepriseId;
+
+      // 1. Sauvegarder le devis dans Firestore avec son propre ID
+      final devisDocRef = FirebaseFirestore.instance.collection('devis').doc();
+      final devisWithId = devis.copyWith(id: devisDocRef.id);
       
-      // Send a chat message with the devis
       try {
-        final projectDoc = await FirebaseFirestore.instance.collection('projects').doc(devis.projectId).get();
-        if (projectDoc.exists) {
-          final clientId = projectDoc.data()?['clientId'] as String?;
-          if (clientId != null) {
-            final chatRepo = ref.read(chatRepositoryProvider);
-            final conv = await chatRepo.getOrCreateConversation(
-              currentUserId: devis.entrepriseId,
-              targetUserId: clientId,
-              currentUserName: 'Entreprise',
-              targetUserName: 'Client',
-              projectId: devis.projectId,
-            );
-            
-            await chatRepo.sendMessage(
-              conv.id,
-              'Délai : ${devis.delaiEstime}\n${devis.description}',
-              devis.entrepriseId,
-              type: 'quote',
-              metadata: {
-                'quoteAmount': devis.montant,
-                'quoteStatus': 'pending',
-                'devisId': devis.id,
-              },
-            );
+        await devisDocRef.set(devisWithId.toJson());
+      } catch (e) {
+        debugPrint('Note: enregistrement devis collection racine: $e');
+      }
+
+      // Également dans la sous-collection du projet pour redondance
+      try {
+        await FirebaseFirestore.instance
+            .collection('projects')
+            .doc(devis.projectId)
+            .collection('devis')
+            .doc(devisDocRef.id)
+            .set(devisWithId.toJson());
+      } catch (e) {
+        debugPrint('Note: enregistrement devis sous-collection projet: $e');
+      }
+
+      // 2. Mettre à jour le projet
+      try {
+        await FirebaseFirestore.instance.collection('projects').doc(devis.projectId).update({
+          'devisEnvoyeParEntreprise': devis.entrepriseId,
+          'statut': 'devis_recu',
+        });
+      } catch (e) {
+        debugPrint('Note: mise à jour projet: $e');
+      }
+
+      // 3. Envoyer le devis dans la discussion du client
+      try {
+        String? clientId = targetClientId;
+        String pTitre = projectTitle ?? 'Chantier';
+
+        if (clientId == null || clientId.isEmpty) {
+          final projectDoc = await FirebaseFirestore.instance.collection('projects').doc(devis.projectId).get();
+          if (projectDoc.exists && projectDoc.data() != null) {
+            final pData = projectDoc.data()!;
+            clientId = pData['clientId'] as String? ??
+                pData['clientUserId'] as String? ??
+                pData['userId'] as String?;
+            final t = pData['titre'] as String?;
+            if (t != null && t.isNotEmpty) pTitre = t;
           }
         }
+
+        if (clientId != null && clientId.isNotEmpty) {
+          // Nom du client
+          String clientName = 'Client';
+          try {
+            final userDoc = await FirebaseFirestore.instance.collection('users').doc(clientId).get();
+            if (userDoc.exists && userDoc.data() != null) {
+              final u = userDoc.data()!;
+              final fullName = '${u['prenom'] ?? ''} ${u['nom'] ?? ''}'.trim();
+              if (fullName.isNotEmpty) clientName = fullName;
+            }
+          } catch (_) {}
+
+          // Nom de l'entreprise
+          final entreprise = ref.read(currentEntrepriseStreamProvider).value;
+          final entrepriseName = entreprise?.raisonSociale ?? 'Entreprise';
+
+          final chatRepo = ref.read(chatRepositoryProvider);
+          final conv = await chatRepo.getOrCreateConversation(
+            currentUserId: currentUserId,
+            targetUserId: clientId,
+            currentUserName: entrepriseName,
+            targetUserName: clientName,
+            projectId: devis.projectId,
+          );
+          resultConversationId = conv.id;
+
+          final devisMontantFormate = NumberFormat.currency(
+            locale: 'fr_FR',
+            symbol: 'FCFA',
+            decimalDigits: 0,
+          ).format(devis.montant);
+
+          final messageContent = "📄 Proposition de Devis pour \"$pTitre\"\n\n"
+              "💰 Montant : $devisMontantFormate\n"
+              "⏱️ Délai estimé : ${devis.delaiEstime}\n"
+              "📋 Détails des travaux :\n${devis.description}";
+
+          await chatRepo.sendMessage(
+            conv.id,
+            messageContent,
+            currentUserId,
+            type: 'quote',
+            metadata: {
+              'quoteAmount': devis.montant,
+              'quoteStatus': 'pending',
+              'quoteDelay': devis.delaiEstime,
+              'quoteDescription': devis.description,
+              'devisId': devisDocRef.id,
+              'projectId': devis.projectId,
+              'projectTitle': pTitre,
+            },
+          );
+        }
       } catch (e) {
-        print('Error sending quote message: $e');
+        debugPrint('Erreur lors de l\'envoi du message devis au client: $e');
       }
-      
+
       state = const AsyncData(null);
+      return resultConversationId;
     } catch (e, st) {
       state = AsyncError(e, st);
       rethrow;

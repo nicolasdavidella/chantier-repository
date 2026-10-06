@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../providers/chat_providers.dart';
 import '../widgets/chat_bubble.dart';
 import 'package:chantier_track/core/theme/app_colors.dart';
+import '../../../../data/models/devis_model.dart';
+import '../../../entreprise/devis/providers/devis_provider.dart';
 
 
 class ChatDetailScreen extends ConsumerStatefulWidget {
@@ -29,7 +31,6 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   final ScrollController _scrollController = ScrollController();
 
   double? _uploadProgress;
-  String _uploadStatus = '';
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -41,43 +42,52 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
     }
   }
 
-  void _sendMessage({
+  Future<void> _sendMessage({
     String type = 'texte',
     String? url,
     Map<String, dynamic>? metadata,
     String? text,
-  }) {
+  }) async {
     final messageText = text ?? _messageController.text.trim();
     if (messageText.isEmpty && url == null) return;
 
     final user = ref.read(authStateProvider).value;
-    if (user == null) return;
+    final currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid;
+    if (currentUserId == null) return;
 
-    ref
-        .read(chatRepositoryProvider)
-        .sendMessage(
-          widget.conversationId,
-          url ?? messageText,
-          user.uid,
-          type: type,
-          metadata: metadata,
-        );
-
+    final contentToSend = url ?? messageText;
     _messageController.clear();
-    Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+
+    try {
+      await ref
+          .read(chatRepositoryProvider)
+          .sendMessage(
+            widget.conversationId,
+            contentToSend,
+            currentUserId,
+            type: type,
+            metadata: metadata,
+          );
+      Future.delayed(const Duration(milliseconds: 100), _scrollToBottom);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Erreur d'envoi du message: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _simulateUpload(String type) async {
     // Dans une vraie app, on utiliserait ImagePicker / FilePicker
     setState(() {
       _uploadProgress = 0;
-      _uploadStatus = 'Préparation du fichier...';
     });
 
-    final fileName = 'file_${DateTime.now().millisecondsSinceEpoch}.$type';
-    final refStorage = FirebaseStorage.instance.ref().child(
-      'conversations/${widget.conversationId}/$fileName',
-    );
+    // Simulate upload progress
 
     // Simulate upload progress
     for (int i = 1; i <= 10; i++) {
@@ -100,27 +110,38 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
   void _showQuoteDialog() {
     final amountController = TextEditingController();
     final delayController = TextEditingController();
+    final descController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Proposer un devis'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Montant (FCFA)'),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextField(
-              controller: delayController,
-              decoration: const InputDecoration(
-                labelText: 'Délai estimé (ex: 2 semaines)',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Montant (FCFA) *'),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                controller: delayController,
+                decoration: const InputDecoration(
+                  labelText: 'Délai estimé (ex: 2 semaines) *',
+                ),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              TextField(
+                controller: descController,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Description / Travaux (optionnel)',
+                ),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -128,16 +149,100 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
             child: const Text('Annuler'),
           ),
           ElevatedButton(
-            onPressed: () {
-              final amount = int.tryParse(amountController.text.trim());
-              if (amount != null) {
-                Navigator.pop(ctx);
-                _sendMessage(
-                  type: 'quote',
-                  text: 'Délai : ${delayController.text.trim()}',
-                  metadata: {'quoteAmount': amount, 'quoteStatus': 'pending'},
-                );
+            onPressed: () async {
+              final amount = int.tryParse(amountController.text.trim().replaceAll(' ', ''));
+              if (amount == null || amount <= 0) return;
+
+              final delayText = delayController.text.trim();
+              final descriptionText = descController.text.trim();
+
+              Navigator.pop(ctx);
+
+              final user = ref.read(authStateProvider).value;
+              final currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+
+              String? projectId;
+              String? projectTitle;
+              String? otherUserId;
+
+              try {
+                final convDoc = await FirebaseFirestore.instance
+                    .collection('conversations')
+                    .doc(widget.conversationId)
+                    .get();
+
+                if (convDoc.exists && convDoc.data() != null) {
+                  final data = convDoc.data()!;
+                  projectId = data['projectId']?.toString();
+                  final participants = (data['participantsIds'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+                  otherUserId = participants.firstWhere((p) => p != currentUserId, orElse: () => '');
+                }
+
+                if (projectId != null && projectId.isNotEmpty) {
+                  final pDoc = await FirebaseFirestore.instance.collection('projects').doc(projectId).get();
+                  if (pDoc.exists && pDoc.data() != null) {
+                    projectTitle = pDoc.data()!['titre']?.toString();
+                  }
+                }
+              } catch (_) {}
+
+              final titleToUse = projectTitle ?? (projectId != null && projectId.isNotEmpty ? 'Projet $projectId' : 'Devis pour ${widget.otherUserName}');
+
+              // Enregistrer dans Firestore collection devis
+              final devisDoc = FirebaseFirestore.instance.collection('devis').doc();
+              final devisModel = DevisModel(
+                id: devisDoc.id,
+                projectId: projectId ?? '',
+                entrepriseId: currentUserId,
+                montant: amount.toDouble(),
+                delaiEstime: delayText.isNotEmpty ? delayText : 'Non précisé',
+                description: descriptionText.isNotEmpty ? descriptionText : 'Proposition de devis pour ${widget.otherUserName}',
+                dateEnvoi: DateTime.now(),
+                statut: 'en_attente',
+                projectTitle: titleToUse,
+                clientName: widget.otherUserName,
+                clientId: otherUserId,
+              );
+
+              try {
+                await devisDoc.set(devisModel.toJson());
+                if (projectId != null && projectId.isNotEmpty) {
+                  await FirebaseFirestore.instance
+                      .collection('projects')
+                      .doc(projectId)
+                      .collection('devis')
+                      .doc(devisDoc.id)
+                      .set(devisModel.toJson());
+                  await FirebaseFirestore.instance
+                      .collection('projects')
+                      .doc(projectId)
+                      .update({
+                    'devisEnvoyeParEntreprise': currentUserId,
+                    'statut': 'devis_recu',
+                  });
+                }
+              } catch (e) {
+                debugPrint('Erreur sauvegarde devis Firestore: $e');
               }
+
+              try {
+                ref.read(devisProvider.notifier).submitDevis(devisModel);
+              } catch (_) {}
+
+              _sendMessage(
+                type: 'quote',
+                text: 'Délai : ${delayText.isNotEmpty ? delayText : 'Non précisé'}',
+                metadata: {
+                  'quoteAmount': amount,
+                  'quoteStatus': 'pending',
+                  'quoteDelay': delayText,
+                  'quoteDescription': descriptionText,
+                  'devisId': devisDoc.id,
+                  'projectId': projectId,
+                  'projectTitle': titleToUse,
+                  'clientName': widget.otherUserName,
+                },
+              );
             },
             child: const Text('Envoyer'),
           ),
@@ -153,12 +258,14 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
       future: FirebaseFirestore.instance.collection('projects').doc(projectId).get(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || !snapshot.data!.exists) return const SizedBox.shrink();
-        final pData = snapshot.data!.data() as Map<String, dynamic>;
-        final titre = pData['titre'] as String? ?? 'Projet';
-        final desc = pData['description'] as String? ?? '';
-        final localisation = pData['localisation'] as Map<String, dynamic>? ?? {};
-        final ville = localisation['ville'] as String? ?? '';
-        final budget = pData['budgetPrevisionnel'] as num? ?? 0;
+        final rawData = snapshot.data!.data();
+        if (rawData is! Map) return const SizedBox.shrink();
+        final pData = rawData;
+        final titre = pData['titre']?.toString() ?? 'Projet';
+        final desc = pData['description']?.toString() ?? '';
+        final localisation = pData['localisation'] is Map ? (pData['localisation'] as Map) : {};
+        final ville = localisation['ville']?.toString() ?? '';
+        final budget = (pData['budgetPrevisionnel'] is num) ? (pData['budgetPrevisionnel'] as num) : 0;
 
         return Container(
           margin: const EdgeInsets.fromLTRB(12, 10, 12, 4),
@@ -301,10 +408,11 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                         if (!snapshot.hasData || !snapshot.data!.exists) {
                           return const SizedBox.shrink();
                         }
-                        final projectId = snapshot.data!.data() != null
-                            ? (snapshot.data!.data() as Map)['projectId']
+                        final rawConv = snapshot.data!.data();
+                        final projectId = rawConv is Map
+                            ? rawConv['projectId']?.toString()
                             : null;
-                        if (projectId == null) return const SizedBox.shrink();
+                        if (projectId == null || projectId.isEmpty) return const SizedBox.shrink();
 
                         return FutureBuilder<DocumentSnapshot>(
                           future: FirebaseFirestore.instance
@@ -315,10 +423,12 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                             if (!pSnapshot.hasData || !pSnapshot.data!.exists) {
                               return const SizedBox.shrink();
                             }
-                            final pData =
-                                pSnapshot.data!.data() as Map<String, dynamic>;
+                            final rawP = pSnapshot.data!.data();
+                            if (rawP is! Map) return const SizedBox.shrink();
+                            final pData = rawP;
+                            final titre = pData['titre']?.toString() ?? 'Projet';
                             return Text(
-                              'Projet : ${pData['titre']}',
+                              'Projet : $titre',
                               style: const TextStyle(
                                 fontSize: 11,
                                 color: Colors.white70,
@@ -378,8 +488,9 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                     .get(),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData || !snapshot.data!.exists) return const SizedBox.shrink();
-                  final pId = snapshot.data!.data() != null
-                      ? (snapshot.data!.data() as Map<String, dynamic>)['projectId'] as String?
+                  final rawData = snapshot.data!.data();
+                  final pId = rawData is Map
+                      ? rawData['projectId']?.toString()
                       : null;
                   return _buildProjectContextBanner(pId);
                 },
@@ -387,9 +498,41 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
               Expanded(
                 child: messagesAsync.when(
                   data: (messages) {
+                    if (messages.isEmpty) {
+                      return Center(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFE8F5E9),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.chat_bubble_outline_rounded, size: 36, color: Color(0xFF143D2B)),
+                              ),
+                              const SizedBox(height: 14),
+                              Text(
+                                'Discussion avec ${widget.otherUserName}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF143D2B)),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                'Envoyez un message pour échanger en direct.',
+                                style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
                     WidgetsBinding.instance.addPostFrameCallback(
                       (_) => _scrollToBottom(),
                     );
+                    final currentUid = user?.uid ?? FirebaseAuth.instance.currentUser?.uid;
                     return ListView.builder(
                       controller: _scrollController,
                       padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: 8),
@@ -422,13 +565,44 @@ class _ChatDetailScreenState extends ConsumerState<ChatDetailScreen> {
                         }
                         return ChatBubble(
                           message: message,
-                          isMe: message.expediteurId == user?.uid,
+                          isMe: message.expediteurId == currentUid,
                         );
                       },
                     );
                   },
                   loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF143D2B))),
-                  error: (err, stack) => Center(child: Text('Erreur: $err')),
+                  error: (err, stack) {
+                    debugPrint('Error in messagesStream: $err');
+                    return Center(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFE8F5E9),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.forum_outlined, size: 36, color: Color(0xFF143D2B)),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              'Discussion avec ${widget.otherUserName}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF143D2B)),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Envoyez un message ci-dessous pour démarrer l\'échange.',
+                              style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
               if (_uploadProgress != null)

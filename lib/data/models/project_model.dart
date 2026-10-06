@@ -62,7 +62,7 @@ class ProjectModel {
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
     return ProjectModel(
       id: json['id'] as String? ?? '',
-      clientId: json['clientId'] as String? ?? '',
+      clientId: (json['clientId'] ?? json['clientUserId'] ?? json['userId'] ?? json['proprietaireId'])?.toString() ?? '',
       entrepriseId: json['entrepriseId'] as String?,
       titre: json['titre'] as String? ?? 'Projet de construction',
       description: json['description'] as String? ?? '',

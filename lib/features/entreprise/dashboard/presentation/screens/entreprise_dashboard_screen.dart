@@ -215,7 +215,7 @@ class _DashboardHomeTab extends ConsumerWidget {
                         SizedBox(width: 6),
                         Flexible(
                           child: Text(
-                            'Building Excellence',
+                            'Espace Professionnel',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -366,7 +366,7 @@ class _DashboardHomeTab extends ConsumerWidget {
               SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Obtenir le badge 100% QUALITÉ',
+                  'Obtenir le badge Entreprise Vérifiée',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w900,

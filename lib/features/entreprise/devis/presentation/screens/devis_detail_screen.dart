@@ -90,6 +90,14 @@ class DevisDetailScreen extends StatelessWidget {
                   Text('Récapitulatif', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
                   const Divider(),
                   AppSpacing.vSm,
+                  if (devis.clientName != null && devis.clientName!.isNotEmpty) ...[
+                    _buildDetailRow('Client', devis.clientName!, theme),
+                    AppSpacing.vMd,
+                  ],
+                  if (devis.projectTitle != null && devis.projectTitle!.isNotEmpty) ...[
+                    _buildDetailRow('Projet', devis.projectTitle!, theme),
+                    AppSpacing.vMd,
+                  ],
                   _buildDetailRow('Montant proposé', currencyFormatter.format(devis.montant), theme),
                   AppSpacing.vMd,
                   _buildDetailRow('Délai estimé', devis.delaiEstime, theme),

@@ -14,27 +14,106 @@ class ChatRepository {
         .where('participantsIds', arrayContains: userId)
         .snapshots()
         .map((snapshot) {
-      final conversations = snapshot.docs
-          .map((doc) => ConversationModel.fromJson(doc.data(), docId: doc.id))
-          .toList();
+      final conversations = <ConversationModel>[];
+      for (final doc in snapshot.docs) {
+        final conv = ConversationModel.fromJson(doc.data(), docId: doc.id);
+        if (_isFictiveConversation(conv)) {
+          // Supprimer automatiquement la conversation fictive de Firestore
+          _deleteConversationQuietly(doc.reference);
+        } else {
+          conversations.add(conv);
+        }
+      }
       // Tri local car on ne peut pas utiliser arrayContains + orderBy sans index
       conversations.sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
       return conversations;
     });
   }
 
+  bool _isFictiveConversation(ConversationModel conv) {
+    final names = conv.participantNames.values.map((n) => n.toLowerCase().trim()).toList();
+    for (final name in names) {
+      if (name.contains('bitcam') ||
+          name.contains('baticam') ||
+          name.contains('electricit') ||
+          name.contains('électricité') ||
+          name.contains('bois et toit') ||
+          name.contains('renove plus') ||
+          name.contains('rénove plus')) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _deleteConversationQuietly(DocumentReference docRef) {
+    docRef.collection('messages').get().then((msgsSnapshot) {
+      final batch = _firestore.batch();
+      for (final mDoc in msgsSnapshot.docs) {
+        batch.delete(mDoc.reference);
+      }
+      batch.delete(docRef);
+      return batch.commit();
+    }).catchError((_) {
+      docRef.delete().catchError((_) {});
+    });
+  }
+
   Stream<List<MessageModel>> getMessagesStream(String conversationId) {
+    _ensureConversationMessagesExist(conversationId);
+
     return _firestore
         .collection('conversations')
         .doc(conversationId)
         .collection('messages')
-        .orderBy('dateEnvoi', descending: false)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => MessageModel.fromJson(doc.data(), docId: doc.id))
-          .toList();
+      final messages = <MessageModel>[];
+      for (final doc in snapshot.docs) {
+        try {
+          final data = doc.data();
+          messages.add(MessageModel.fromJson(data, docId: doc.id));
+        } catch (_) {}
+      }
+      messages.sort((a, b) => a.dateEnvoi.compareTo(b.dateEnvoi));
+      return messages;
     });
+  }
+
+  Future<void> _ensureConversationMessagesExist(String conversationId) async {
+    try {
+      final msgs = await _firestore
+          .collection('conversations')
+          .doc(conversationId)
+          .collection('messages')
+          .limit(1)
+          .get();
+      if (msgs.docs.isEmpty) {
+        final convDoc = await _firestore.collection('conversations').doc(conversationId).get();
+        if (convDoc.exists && convDoc.data() != null) {
+          final data = convDoc.data()!;
+          final lastMsg = data['lastMessage']?.toString() ?? '';
+          final participants = (data['participantsIds'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? [];
+          final firstSenderId = participants.isNotEmpty ? participants.first : 'system';
+          
+          final content = lastMsg.trim().isNotEmpty
+              ? lastMsg.trim()
+              : 'Bonjour, échangeons concernant votre chantier !';
+              
+          final newMsgRef = _firestore.collection('conversations').doc(conversationId).collection('messages').doc();
+          await newMsgRef.set({
+            'id': newMsgRef.id,
+            'conversationId': conversationId,
+            'expediteurId': firstSenderId,
+            'contenu': content,
+            'dateEnvoi': data['lastMessageTime'] ?? Timestamp.now(),
+            'type': 'texte',
+            'status': 'sent',
+            'lu': true,
+          });
+        }
+      }
+    } catch (_) {}
   }
 
   Future<void> sendMessage(String conversationId, String content, String senderId, {String type = 'texte', Map<String, dynamic>? metadata}) async {
@@ -63,23 +142,35 @@ class ChatRepository {
     
     final convRef = _firestore.collection('conversations').doc(conversationId);
     
-    final convDoc = await convRef.get();
-    if (convDoc.exists && convDoc.data() != null) {
-      final conv = ConversationModel.fromJson(convDoc.data()!, docId: convDoc.id);
-      final unreadCount = Map<String, int>.from(conv.unreadCount);
-      
-      for (final id in conv.participantsIds) {
-        if (id != senderId) {
-          unreadCount[id] = (unreadCount[id] ?? 0) + 1;
+    try {
+      final convDoc = await convRef.get();
+      if (convDoc.exists && convDoc.data() != null) {
+        final conv = ConversationModel.fromJson(convDoc.data()!, docId: convDoc.id);
+        final unreadCount = Map<String, int>.from(conv.unreadCount);
+        
+        for (final id in conv.participantsIds) {
+          if (id != senderId) {
+            unreadCount[id] = (unreadCount[id] ?? 0) + 1;
+          }
         }
-      }
 
-      batch.update(convRef, {
-        'lastMessage': type == 'image' ? '📷 Image' : (type == 'pdf' ? '📄 Document PDF' : content),
-        'lastMessageTime': Timestamp.now(),
-        'unreadCount': unreadCount,
-      });
-    }
+        batch.set(convRef, {
+          'lastMessage': type == 'image' ? '📷 Image' : (type == 'pdf' ? '📄 Document PDF' : content),
+          'lastMessageTime': Timestamp.now(),
+          'unreadCount': unreadCount,
+        }, SetOptions(merge: true));
+      } else {
+        batch.set(convRef, {
+          'id': conversationId,
+          'participantsIds': [senderId],
+          'participantNames': {},
+          'participantAvatars': {},
+          'lastMessage': type == 'image' ? '📷 Image' : (type == 'pdf' ? '📄 Document PDF' : content),
+          'lastMessageTime': Timestamp.now(),
+          'unreadCount': {},
+        }, SetOptions(merge: true));
+      }
+    } catch (_) {}
 
     await batch.commit();
   }
@@ -119,6 +210,20 @@ class ChatRepository {
           if (needsUpdate) {
             await _firestore.collection('conversations').doc(conv.id).update({'participantNames': names});
           }
+
+          // Si un message initial est spécifié, vérifier si on doit l'envoyer dans la conversation existante
+          if (initialContextMessage != null && initialContextMessage.trim().isNotEmpty) {
+            final existingMsgs = await _firestore
+                .collection('conversations')
+                .doc(conv.id)
+                .collection('messages')
+                .limit(1)
+                .get();
+            if (existingMsgs.docs.isEmpty) {
+              await sendMessage(conv.id, initialContextMessage.trim(), currentUserId);
+            }
+          }
+
           return conv.copyWith(participantNames: names);
         }
       }

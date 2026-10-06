@@ -31,8 +31,15 @@ class MessageModel {
       return DateTime.now();
     }
 
+    Map<String, dynamic>? parsedMetadata;
+    try {
+      if (json['metadata'] is Map) {
+        parsedMetadata = Map<String, dynamic>.from(json['metadata'] as Map);
+      }
+    } catch (_) {}
+
     return MessageModel(
-      id: json['id'] as String? ?? docId ?? '',
+      id: json['id']?.toString() ?? docId ?? '',
       conversationId: json['conversationId']?.toString() ?? '',
       expediteurId: json['expediteurId']?.toString() ?? json['senderId']?.toString() ?? '',
       contenu: json['contenu']?.toString() ?? json['texte']?.toString() ?? json['content']?.toString() ?? '',
@@ -40,7 +47,7 @@ class MessageModel {
       type: json['type']?.toString() ?? 'texte',
       status: json['status']?.toString() ?? 'sent',
       lu: json['lu'] == true || json['isRead'] == true,
-      metadata: json['metadata'] is Map ? Map<String, dynamic>.from(json['metadata'] as Map) : null,
+      metadata: parsedMetadata,
     );
   }
 

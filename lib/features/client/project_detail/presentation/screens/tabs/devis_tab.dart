@@ -15,7 +15,8 @@ class DevisTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final devisList = ref.watch(projectDevisProvider(project.id));
+    final devisAsync = ref.watch(projectDevisProvider(project.id));
+    final devisList = devisAsync.value ?? [];
     final theme = Theme.of(context);
 
     if (devisList.isEmpty && project.entreprisesPostulantes.isEmpty) {

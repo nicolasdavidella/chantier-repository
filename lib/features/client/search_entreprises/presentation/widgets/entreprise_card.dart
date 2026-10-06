@@ -95,7 +95,7 @@ class EntrepriseCard extends ConsumerWidget {
                             Icon(Icons.verified_rounded, size: 14, color: Colors.white),
                             SizedBox(width: 4),
                             Text(
-                              '100% QUALITÉ',
+                              'VÉRIFIÉ',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 10,

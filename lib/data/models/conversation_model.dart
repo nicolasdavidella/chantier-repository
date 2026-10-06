@@ -82,11 +82,11 @@ class ConversationModel {
     final msgTime = parseDate(json['lastMessageTime'] ?? json['dateDernierMessage']);
 
     return ConversationModel(
-      id: json['id'] as String? ?? docId ?? '',
+      id: json['id']?.toString() ?? docId ?? '',
       participantsIds: participants,
       participantNames: names,
       participantAvatars: avatars,
-      projectId: json['projectId'] as String?,
+      projectId: json['projectId']?.toString(),
       lastMessage: lastMsg,
       lastMessageTime: msgTime,
       unreadCount: unread,

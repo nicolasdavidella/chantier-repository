@@ -14,6 +14,9 @@ class DevisModel {
   final DateTime dateEnvoi;
   final String statut; // en_attente, accepte, refuse
   final String? fichierPdfUrl;
+  final String? projectTitle;
+  final String? clientName;
+  final String? clientId;
 
   DevisModel({
     required this.id,
@@ -25,19 +28,34 @@ class DevisModel {
     required this.dateEnvoi,
     required this.statut,
     this.fichierPdfUrl,
+    this.projectTitle,
+    this.clientName,
+    this.clientId,
   });
 
   factory DevisModel.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic val) {
+      if (val is Timestamp) return val.toDate();
+      if (val is String) return DateTime.tryParse(val) ?? DateTime.now();
+      if (val is int) return DateTime.fromMillisecondsSinceEpoch(val);
+      return DateTime.now();
+    }
+
     return DevisModel(
-      id: json['id'] as String,
-      projectId: json['projectId'] as String,
-      entrepriseId: json['entrepriseId'] as String,
-      montant: (json['montant'] as num).toDouble(),
-      delaiEstime: json['delaiEstime'] as String,
-      description: json['description'] as String,
-      dateEnvoi: (json['dateEnvoi'] as Timestamp).toDate(),
-      statut: json['statut'] as String,
-      fichierPdfUrl: json['fichierPdfUrl'] as String?,
+      id: json['id']?.toString() ?? '',
+      projectId: json['projectId']?.toString() ?? '',
+      entrepriseId: json['entrepriseId']?.toString() ?? '',
+      montant: (json['montant'] is num)
+          ? (json['montant'] as num).toDouble()
+          : (double.tryParse(json['montant']?.toString() ?? '') ?? 0.0),
+      delaiEstime: json['delaiEstime']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      dateEnvoi: parseDate(json['dateEnvoi']),
+      statut: json['statut']?.toString() ?? 'en_attente',
+      fichierPdfUrl: json['fichierPdfUrl']?.toString(),
+      projectTitle: json['projectTitle']?.toString() ?? json['titreProjet']?.toString(),
+      clientName: json['clientName']?.toString() ?? json['nomClient']?.toString(),
+      clientId: json['clientId']?.toString(),
     );
   }
 
@@ -52,6 +70,9 @@ class DevisModel {
       'dateEnvoi': Timestamp.fromDate(dateEnvoi),
       'statut': statut,
       'fichierPdfUrl': fichierPdfUrl,
+      if (projectTitle != null) 'projectTitle': projectTitle,
+      if (clientName != null) 'clientName': clientName,
+      if (clientId != null) 'clientId': clientId,
     };
   }
 
@@ -65,6 +86,9 @@ class DevisModel {
     DateTime? dateEnvoi,
     String? statut,
     String? fichierPdfUrl,
+    String? projectTitle,
+    String? clientName,
+    String? clientId,
   }) {
     return DevisModel(
       id: id ?? this.id,
@@ -76,6 +100,9 @@ class DevisModel {
       dateEnvoi: dateEnvoi ?? this.dateEnvoi,
       statut: statut ?? this.statut,
       fichierPdfUrl: fichierPdfUrl ?? this.fichierPdfUrl,
+      projectTitle: projectTitle ?? this.projectTitle,
+      clientName: clientName ?? this.clientName,
+      clientId: clientId ?? this.clientId,
     );
   }
 }

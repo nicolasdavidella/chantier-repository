@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/chat_providers.dart';
 import '../../../auth/providers/auth_provider.dart';
@@ -51,7 +52,26 @@ class ConversationsListScreen extends ConsumerWidget {
           ),
           conversationsAsync.when(
             data: (conversations) {
-              if (conversations.isEmpty) {
+              final user = ref.read(authStateProvider).value;
+              final currentUserId = user?.uid ?? FirebaseAuth.instance.currentUser?.uid ?? '';
+
+              final validConversations = conversations.where((conv) {
+                final names = conv.participantNames.values.map((n) => n.toLowerCase().trim()).toList();
+                for (final name in names) {
+                  if (name.contains('bitcam') ||
+                      name.contains('baticam') ||
+                      name.contains('electricit') ||
+                      name.contains('électricité') ||
+                      name.contains('bois et toit') ||
+                      name.contains('renove plus') ||
+                      name.contains('rénove plus')) {
+                    return false;
+                  }
+                }
+                return true;
+              }).toList();
+
+              if (validConversations.isEmpty) {
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -78,17 +98,26 @@ class ConversationsListScreen extends ConsumerWidget {
                   ),
                 );
               }
-              final user = ref.read(authStateProvider).value;
-              final currentUserId = user?.uid ?? '';
 
               return ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                itemCount: conversations.length,
+                itemCount: validConversations.length,
                 separatorBuilder: (context, index) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
-                  final conv = conversations[index];
+                  final conv = validConversations[index];
                   final otherUserId = conv.participantsIds.firstWhere((id) => id != currentUserId, orElse: () => '');
-                  final otherUserName = conv.participantNames[otherUserId] ?? 'Inconnu';
+                  String otherUserName = conv.participantNames[otherUserId] ?? '';
+                  if (otherUserName.isEmpty) {
+                    for (final entry in conv.participantNames.entries) {
+                      if (entry.key != currentUserId && entry.value.trim().isNotEmpty) {
+                        otherUserName = entry.value.trim();
+                        break;
+                      }
+                    }
+                  }
+                  if (otherUserName.isEmpty) {
+                    otherUserName = 'Interlocuteur';
+                  }
                   final otherUserAvatar = conv.participantAvatars[otherUserId];
                   final unreadCount = conv.unreadCount[currentUserId] ?? 0;
 

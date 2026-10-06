@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../../data/models/devis_model.dart';
 
 // --- MODELS ---
@@ -181,27 +182,15 @@ final projectDocumentsProvider = Provider.family<List<ProjectDocumentModel>, Str
   ];
 });
 
-final projectDevisProvider = Provider.family<List<DevisModel>, String>((ref, projectId) {
-  return [
-    DevisModel(
-      id: 'dev1',
-      projectId: projectId,
-      entrepriseId: 'ent1',
-      montant: 25000000,
-      delaiEstime: '6 mois',
-      description: 'Devis complet incluant gros oeuvre, plomberie et électricité. Matériaux premium.',
-      dateEnvoi: DateTime.now().subtract(const Duration(days: 3)),
-      statut: 'en_attente',
-    ),
-    DevisModel(
-      id: 'dev2',
-      projectId: projectId,
-      entrepriseId: 'ent2',
-      montant: 21000000,
-      delaiEstime: '8 mois',
-      description: 'Proposition économique avec matériaux standards. Focus sur la structure.',
-      dateEnvoi: DateTime.now().subtract(const Duration(days: 1)),
-      statut: 'en_attente',
-    ),
-  ];
+final projectDevisProvider = StreamProvider.family<List<DevisModel>, String>((ref, projectId) {
+  if (projectId.isEmpty) return const Stream.empty();
+  return FirebaseFirestore.instance
+      .collection('devis')
+      .where('projectId', isEqualTo: projectId)
+      .snapshots()
+      .map((snap) => snap.docs.map((d) {
+            final data = d.data();
+            data['id'] = d.id;
+            return DevisModel.fromJson(data);
+          }).toList());
 });

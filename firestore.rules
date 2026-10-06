@@ -47,11 +47,9 @@ service cloud.firestore {
 
     // ------------------------------------------------------------------------------
     // USERS (Utilisateurs)
-    // ------------------------------------------------------------------------------
     match /users/{userId} {
-      // Un utilisateur peut lire et modifier son propre profil.
-      // Un admin peut lire tous les profils et modifier certains champs (ex: désactivation).
-      allow read: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
+      // Tout utilisateur connecté peut lire les profils (pour les échanges, chat, devis)
+      allow read: if isAuthenticated();
       allow update: if isAuthenticated() && (request.auth.uid == userId || isAdmin());
       // Seul l'utilisateur (à l'inscription) peut créer son profil
       allow create: if isAuthenticated() && request.auth.uid == userId;
@@ -261,6 +259,16 @@ service cloud.firestore {
       match /depenses/{depenseId} {
         allow read, write: if isAuthenticated();
       }
+      match /devis/{devisId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // ------------------------------------------------------------------------------
+    // DEVIS (Chiffrages et propositions commerciales)
+    // ------------------------------------------------------------------------------
+    match /devis/{devisId} {
+      allow read, write: if isAuthenticated();
     }
     
     // ------------------------------------------------------------------------------
@@ -309,6 +317,25 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (isAdmin() || request.auth.uid == resource.data.clientUserId);
       allow delete: if isAdmin();
+    }
+
+    // ------------------------------------------------------------------------------
+    // CONVERSATIONS & MESSAGES (MESSAGERIE & ECHANGES)
+    // ------------------------------------------------------------------------------
+    match /conversations/{conversationId} {
+      allow read, write: if isAuthenticated();
+
+      match /messages/{messageId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /{path=**}/messages/{messageId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /{path=**}/devis/{devisId} {
+      allow read, write: if isAuthenticated();
     }
   }
 }

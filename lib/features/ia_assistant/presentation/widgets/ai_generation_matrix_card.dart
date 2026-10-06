@@ -90,13 +90,15 @@ class _AiGenerationMatrixCardState extends State<AiGenerationMatrixCard>
                     duration: 900.ms,
                   ),
               const SizedBox(width: 8),
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  color: Color(0xFF1B4D3E),
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
+              Expanded(
+                child: Text(
+                  widget.title,
+                  style: const TextStyle(
+                    color: Color(0xFF1B4D3E),
+                    fontSize: 14.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.2,
+                  ),
                 ),
               ),
             ],
